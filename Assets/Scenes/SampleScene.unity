@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 51599186}
   m_Layer: 0
   m_Name: checker (13)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -156,9 +156,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 51599187}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &51599187
 LineRenderer:
   serializedVersion: 2
@@ -376,13 +380,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51599185}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: 3.1}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &103199111
 GameObject:
   m_ObjectHideFlags: 0
@@ -400,7 +404,7 @@ GameObject:
   - component: {fileID: 103199112}
   m_Layer: 0
   m_Name: checker (4)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -420,9 +424,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 103199113}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &103199113
 LineRenderer:
   serializedVersion: 2
@@ -640,13 +648,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 103199111}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: 2.2}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &106597130
 GameObject:
   m_ObjectHideFlags: 0
@@ -664,7 +672,7 @@ GameObject:
   - component: {fileID: 106597131}
   m_Layer: 0
   m_Name: checker (8)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -684,9 +692,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 106597132}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &106597132
 LineRenderer:
   serializedVersion: 2
@@ -904,13 +916,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 106597130}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: 0.42}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &287453842
 GameObject:
   m_ObjectHideFlags: 0
@@ -928,7 +940,7 @@ GameObject:
   - component: {fileID: 287453843}
   m_Layer: 0
   m_Name: checker (15)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -948,9 +960,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 287453844}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &287453844
 LineRenderer:
   serializedVersion: 2
@@ -1168,13 +1184,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 287453842}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: 1.29}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &637603862
 GameObject:
   m_ObjectHideFlags: 0
@@ -1267,6 +1283,7 @@ GameObject:
   - component: {fileID: 833514288}
   - component: {fileID: 833514287}
   - component: {fileID: 833514291}
+  - component: {fileID: 833514292}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1408,6 +1425,26 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!114 &833514292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833514286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d81064610124437284986bbe9a621153, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  offset: {x: 0, y: 10, z: -5}
+  rotationAngle: 45
+  minX: -10
+  maxX: 10
+  minZ: -10
+  maxZ: 10
+  fixedY: 15
 --- !u!1 &836283606
 GameObject:
   m_ObjectHideFlags: 0
@@ -1561,7 +1598,7 @@ GameObject:
   - component: {fileID: 857256559}
   m_Layer: 0
   m_Name: checker (3)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1581,9 +1618,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 857256560}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &857256560
 LineRenderer:
   serializedVersion: 2
@@ -1801,13 +1842,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 857256558}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: 3.1}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &875033491
 GameObject:
   m_ObjectHideFlags: 0
@@ -1825,7 +1866,7 @@ GameObject:
   - component: {fileID: 875033492}
   m_Layer: 0
   m_Name: checker (10)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1845,9 +1886,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 875033493}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &875033493
 LineRenderer:
   serializedVersion: 2
@@ -2065,13 +2110,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 875033491}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: -1.37}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &1115463497
 GameObject:
   m_ObjectHideFlags: 0
@@ -2089,7 +2134,7 @@ GameObject:
   - component: {fileID: 1115463498}
   m_Layer: 0
   m_Name: checker (9)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2109,9 +2154,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 1115463499}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &1115463499
 LineRenderer:
   serializedVersion: 2
@@ -2329,13 +2378,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1115463497}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: -0.46}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &1243778140
 GameObject:
   m_ObjectHideFlags: 0
@@ -2474,7 +2523,7 @@ GameObject:
   - component: {fileID: 1780953106}
   m_Layer: 0
   m_Name: checker (1)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2494,9 +2543,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 1780953107}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &1780953107
 LineRenderer:
   serializedVersion: 2
@@ -2714,13 +2767,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1780953105}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: -0.46}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &1785442267
 GameObject:
   m_ObjectHideFlags: 0
@@ -2738,7 +2791,7 @@ GameObject:
   - component: {fileID: 1785442273}
   m_Layer: 0
   m_Name: checker
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2826,13 +2879,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1785442267}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: 0.42}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!54 &1785442272
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2875,9 +2928,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 1785442274}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &1785442274
 LineRenderer:
   serializedVersion: 2
@@ -3002,7 +3059,7 @@ GameObject:
   - component: {fileID: 1796603619}
   m_Layer: 0
   m_Name: checker (11)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3022,9 +3079,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 1796603620}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &1796603620
 LineRenderer:
   serializedVersion: 2
@@ -3242,13 +3303,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796603618}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.16, y: 0, z: -2.21}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &1829743415
 GameObject:
   m_ObjectHideFlags: 0
@@ -3266,7 +3327,7 @@ GameObject:
   - component: {fileID: 1829743416}
   m_Layer: 0
   m_Name: checker (5)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3286,9 +3347,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 1829743417}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &1829743417
 LineRenderer:
   serializedVersion: 2
@@ -3506,13 +3571,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1829743415}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: 1.29}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &1915061518
 GameObject:
   m_ObjectHideFlags: 0
@@ -3530,7 +3595,7 @@ GameObject:
   - component: {fileID: 1915061519}
   m_Layer: 0
   m_Name: checker (6)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3550,9 +3615,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 1915061520}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &1915061520
 LineRenderer:
   serializedVersion: 2
@@ -3770,11 +3839,58 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1915061518}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: -2.21}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+--- !u!1 &2061559888
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2061559889}
+  m_Layer: 0
+  m_Name: Checkers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2061559889
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2061559888}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1785442271}
+  - {fileID: 106597137}
+  - {fileID: 1780953112}
+  - {fileID: 1115463504}
+  - {fileID: 2061593200}
+  - {fileID: 875033498}
+  - {fileID: 1915061525}
+  - {fileID: 1796603625}
+  - {fileID: 2127630240}
+  - {fileID: 2129069180}
+  - {fileID: 857256565}
+  - {fileID: 51599192}
+  - {fileID: 103199118}
+  - {fileID: 2133680021}
+  - {fileID: 1829743422}
+  - {fileID: 287453849}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2061593193
@@ -3794,7 +3910,7 @@ GameObject:
   - component: {fileID: 2061593194}
   m_Layer: 0
   m_Name: checker (2)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3814,9 +3930,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 2061593195}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &2061593195
 LineRenderer:
   serializedVersion: 2
@@ -4034,13 +4154,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2061593193}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: -1.37}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &2127630233
 GameObject:
   m_ObjectHideFlags: 0
@@ -4058,7 +4178,7 @@ GameObject:
   - component: {fileID: 2127630234}
   m_Layer: 0
   m_Name: checker (7)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4078,9 +4198,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 2127630235}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &2127630235
 LineRenderer:
   serializedVersion: 2
@@ -4298,13 +4422,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2127630233}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 3.19, y: 0, z: -3.11}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &2129069173
 GameObject:
   m_ObjectHideFlags: 0
@@ -4322,7 +4446,7 @@ GameObject:
   - component: {fileID: 2129069174}
   m_Layer: 0
   m_Name: checker (12)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4342,9 +4466,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 2129069175}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &2129069175
 LineRenderer:
   serializedVersion: 2
@@ -4562,13 +4690,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129069173}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: -3.11}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &2133680014
 GameObject:
   m_ObjectHideFlags: 0
@@ -4586,7 +4714,7 @@ GameObject:
   - component: {fileID: 2133680015}
   m_Layer: 0
   m_Name: checker (14)
-  m_TagString: Untagged
+  m_TagString: Checker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4606,9 +4734,13 @@ MonoBehaviour:
   minForce: 5
   maxForce: 300
   maxDragDistance: 2
-  lineLengthMultiplier: 1
+  lineRenderer: {fileID: 2133680016}
+  lineLengthMultiplier: 0.01
   maxLineLength: 3
+  lineAnimationEase: 6
   boardHeight: 0.5
+  lastForceDirection: {x: 0, y: 0, z: 0}
+  lastAppliedForce: 0
 --- !u!120 &2133680016
 LineRenderer:
   serializedVersion: 2
@@ -4826,34 +4958,77 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2133680014}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -3.1600003, y: 0, z: 2.2}
-  m_LocalScale: {x: 0.7, y: 0.1, z: 0.7}
+  m_LocalScale: {x: 0.6999999, y: 0.1, z: 0.6999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2061559889}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1001 &4035028184148742746
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7019046049983235460, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7041608612790952227, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+      propertyPath: m_Name
+      value: CheckersCatcher
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 833514290}
   - {fileID: 1243778143}
-  - {fileID: 1785442271}
-  - {fileID: 106597137}
-  - {fileID: 1780953112}
-  - {fileID: 1115463504}
-  - {fileID: 2061593200}
-  - {fileID: 875033498}
-  - {fileID: 1915061525}
-  - {fileID: 1796603625}
-  - {fileID: 2127630240}
-  - {fileID: 2129069180}
-  - {fileID: 857256565}
-  - {fileID: 51599192}
-  - {fileID: 103199118}
-  - {fileID: 2133680021}
-  - {fileID: 1829743422}
-  - {fileID: 287453849}
   - {fileID: 836283607}
   - {fileID: 637603865}
+  - {fileID: 2061559889}
+  - {fileID: 4035028184148742746}
