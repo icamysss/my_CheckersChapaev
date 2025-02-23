@@ -1,124 +1,91 @@
-using UnityEngine;
+using System;
 using DG.Tweening;
+using Sirenix.OdinInspector;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour
 {
-    [Header("Base Settings")]
-    [SerializeField] private float transitionDuration = 0.5f;
-    [SerializeField] private Ease transitionEase = Ease.OutQuad;
+    [BoxGroup("Overview Settings")]
+    [SerializeField] private Vector3 overviewPosition;
+    [BoxGroup("Overview Settings")]
+    [SerializeField] private Quaternion overviewRotation;
+
+    [BoxGroup("Tracking Settings")]
+    [SerializeField, Tooltip("Время перемещения к выбранной шашке")] 
+    private float moveDuration = 1f;
     
-    [Header("Overview Settings")]
-    [SerializeField] private Vector3 overviewPosition = new Vector3(0, 15, -10);
-    [SerializeField] private Vector3 overviewRotation = new Vector3(45, 0, 0);
-    [SerializeField] private float overviewFOV = 60f;
-
-    [Header("Focus Settings")]
-    [SerializeField] private Vector3 focusOffset = new Vector3(0, 3, -4);
-    [SerializeField] private float focusFOV = 50f;
-    [SerializeField] private float lookAheadDistance = 2f;
-
-    private Camera _cam;
-    private Checker _currentTarget;
-    private Vector3 _lastDirection;
-
-    private void Awake()
+    [BoxGroup("Tracking Settings")]
+    [SerializeField, Tooltip("Время перемещения к стартовому обзору")] 
+    private float backDuration = 0.5f;
+   
+    [BoxGroup("Tracking Settings")]
+    [SerializeField, Tooltip("Ограничения камеры по доске")] 
+    private Сonstraints сonstraints ;
+    
+    [BoxGroup("Debug")]
+    [ShowInInspector, ReadOnly] private Checker currentTarget;  // текущая цель
+    
+    private Tweener moveTween;
+    private Tweener lookTween;
+    private Tweener rotateTween;
+    
+    
+    private void Start()
     {
-        _cam = GetComponent<Camera>();
-        ResetToOverview();
+        SetOverviewAsStartPosition();
     }
 
-    /// <summary>
-    /// Устанавливает текущую цель для камеры
-    /// </summary>
-    public void SetTarget(Checker target)
+    public void SetTarget(Checker checker)
     {
-        if (target != null)
+        currentTarget = checker;
+        KillActiveTweens();
+
+        if (currentTarget == null)
         {
-            _currentTarget = target;
-            MoveToTarget();
+            ReturnToOverview(backDuration);
         }
         else
         {
-            _currentTarget = null;
-            ResetCamera();
+            MoveToTarget(currentTarget.transform);
         }
-      
     }
 
-    /// <summary>
-    /// Сбрасывает камеру в обзорный режим
-    /// </summary>
-    private void ResetCamera()
+    private void SetOverviewAsStartPosition()
     {
-        _currentTarget = null;
-        ReturnToOverview();
+        overviewPosition = transform.position;
+        overviewRotation = transform.rotation;
     }
 
-    private void Update()
+    private void KillActiveTweens()
     {
-        if (!_currentTarget) return;
-
-        UpdateCameraPosition();
-        UpdateCameraRotation();
+        moveTween?.Kill();
+        lookTween?.Kill();
+        rotateTween?.Kill();
     }
 
-    private void MoveToTarget()
+    private void ReturnToOverview(float time)
     {
-        var targetTransform = _currentTarget.transform;
-        var targetPosition = targetTransform.position + focusOffset;
-
-        transform.DOKill();
-        DOTween.Sequence()
-            .Append(transform.DOMove(targetPosition, transitionDuration))
-            .Join(_cam.DOFieldOfView(focusFOV, transitionDuration))
-            .SetEase(transitionEase);
+        moveTween = transform.DOMove(overviewPosition, time);
+        rotateTween = transform.DORotateQuaternion(overviewRotation, time);
     }
 
-    private void UpdateCameraPosition()
+    private void MoveToTarget(Transform target)
     {
-        // Плавное сопровождение цели
-        Vector3 targetPosition = _currentTarget.transform.position + focusOffset;
-        transform.position = Vector3.Lerp(
-            transform.position, 
-            targetPosition, 
-            Time.deltaTime * 5f
-        );
+        var targetPosition = currentTarget.transform.position;
+        // targetPosition.x  = Mathf.Clamp(targetPosition.x , сonstraints.minx, сonstraints.maxX);
+        // targetPosition.z  = Mathf.Clamp(targetPosition.z , сonstraints.minZ, сonstraints.minZ);
+        // перемещение камеры на шашку
+        moveTween = transform.DOMove(targetPosition, moveDuration);
+        // поворот камере к центру
+        if (targetPosition == overviewPosition) return; // если шашка в центре
+        var targetRotation = Quaternion.LookRotation(overviewPosition - target.position);
+        lookTween = transform.DORotateQuaternion(targetRotation, moveDuration);
     }
+}
 
-    private void UpdateCameraRotation()
-    {
-        // Определяем направление с учетом ForceDirection
-        Vector3 forceDirection = _currentTarget.ForceDirection;
-        if (forceDirection.magnitude > 0.1f)
-        {
-            _lastDirection = forceDirection.normalized;
-        }
-
-        Vector3 lookPoint = _currentTarget.transform.position + 
-                          _lastDirection * lookAheadDistance;
-
-        Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation, 
-            targetRotation, 
-            Time.deltaTime * 5f
-        );
-    }
-
-    private void ReturnToOverview()
-    {
-        transform.DOKill();
-        DOTween.Sequence()
-            .Append(transform.DOMove(overviewPosition, transitionDuration))
-            .Join(transform.DORotate(overviewRotation, transitionDuration))
-            .Join(_cam.DOFieldOfView(overviewFOV, transitionDuration))
-            .SetEase(transitionEase);
-    }
-
-    private void ResetToOverview()
-    {
-        transform.position = overviewPosition;
-        transform.eulerAngles = overviewRotation;
-        _cam.fieldOfView = overviewFOV;
-    }
+[Serializable]
+public class Сonstraints
+{
+    public float maxX, minx, maxZ, minZ;
 }

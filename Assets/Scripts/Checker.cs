@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening; 
@@ -29,8 +30,8 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     [SerializeField, ReadOnly] private float lastAppliedForce;
     #endregion
    
-    public Vector3 ForceDirection { get; private set; }
-    
+    [HideInInspector] public Vector3 ForceDirection { get; private set; }
+
     #region Private Variables
     private Rigidbody _rb;
     private Camera _mainCamera;
@@ -38,7 +39,7 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     private bool _isSelected;
     private float _currentForce;
     private Tween _lineAnimationTween;
-    private CameraController _cameraController;
+    private CameraController cameraController;
     #endregion
 
     #region Unity Lifecycle
@@ -74,7 +75,10 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     {
         if (!_isSelected) return;
         
-        CalculateForce(eventData.position);
+        var LastDirection = ForceDirection;
+        ForceDirection = CalculateForce(eventData.position);
+        
+        if (ForceDirection == LastDirection) return;
         UpdateLineVisuals();
     }
 
@@ -88,21 +92,16 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     #endregion
 
     #region Force Logic
-    private void CalculateForce(Vector2 screenPosition)
+    private Vector3 CalculateForce(Vector2 screenPosition)
     {
-        Vector3 currentWorldPos = GetBoardIntersectionPoint(screenPosition);
-        Vector3 dragVector = currentWorldPos - _dragStartWorldPos;
+        var currentWorldPos = GetBoardIntersectionPoint(screenPosition);
+        var dragVector = currentWorldPos - _dragStartWorldPos;
         
         _currentForce = Mathf.Lerp(minForce, maxForce, 
             Mathf.Clamp01(dragVector.magnitude / maxDragDistance));
 
         ForceDirection = -dragVector.normalized;
-    }
-
-    [Button("Apply Test Force"), BoxGroup("Debug")]
-    private void ApplyTestForce()
-    {
-        ApplyForce(ForceDirection * _currentForce);
+        return ForceDirection;
     }
     #endregion
 
@@ -169,9 +168,9 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
         _mainCamera = Camera.main;
         
         if (!lineRenderer)   lineRenderer = GetComponent<LineRenderer>();
-        
-        _cameraController = _mainCamera.GetComponent<CameraController>();
-        if (!_cameraController) throw new MissingComponentException("Missing CameraController");
+
+        cameraController = FindFirstObjectByType<CameraController>();
+        if (!cameraController) throw new MissingComponentException("Missing CameraController");
     }
 
     private void SetupLineRenderer()
