@@ -9,7 +9,8 @@ public class CheckerCatcher : MonoBehaviour
             var selectedChecker = GameManager.Instance.SelectedChecker;
             var catchedChecker = other.gameObject.GetComponent<Checker>();
             
-            if (selectedChecker != null && selectedChecker == catchedChecker) GameManager.Instance.DeselectChecker();
+            if (selectedChecker != null && selectedChecker == catchedChecker) 
+                GameManager.Instance.SelectedChecker = null;
             other.gameObject.SetActive(false);
         }
     }

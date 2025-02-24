@@ -30,8 +30,15 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     [SerializeField, ReadOnly] private float lastAppliedForce;
     #endregion
    
-    [HideInInspector] public Vector3 ForceDirection { get; private set; }
-
+    [HideInInspector]
+   
+    
+    
+    public static Action<Checker> OnSelect;
+    public static Action<Checker> OnDeselect;
+    public static Action<Checker> OnStartDrag;
+    
+    
     #region Private Variables
     private Rigidbody _rb;
     private Camera _mainCamera;
@@ -42,6 +49,8 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     private CameraController cameraController;
     #endregion
 
+    private Vector3 ForceDirection { get; set; }
+    
     #region Unity Lifecycle
     private void Awake()
     {
@@ -65,8 +74,11 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     #region Input Handlers
     public void OnPointerDown(PointerEventData eventData)
     {
+        // если шашка не игрока
         if (!IsPlayersChecker()) return;
 
+        if (!_isSelected) return;
+        
         _dragStartWorldPos = GetBoardIntersectionPoint(eventData.position);
         StartSelection();
     }
@@ -74,7 +86,7 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     public void OnDrag(PointerEventData eventData)
     {
         if (!_isSelected) return;
-        
+        OnStartDrag?.Invoke(this);
         var LastDirection = ForceDirection;
         ForceDirection = CalculateForce(eventData.position);
         
@@ -84,10 +96,16 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (!_isSelected) return;
-
-        ApplyCalculatedForce();
-        ResetSelection();
+        if (_isSelected)
+        {
+            ApplyCalculatedForce();
+            ResetSelection();
+        }
+        else // если не выбрана
+        {
+            _isSelected = true;
+            OnSelect?.Invoke(this);
+        }
     }
     #endregion
 
@@ -157,7 +175,6 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     private void ApplyCalculatedForce()
     {
         ApplyForce(ForceDirection * _currentForce);
-        GameManager.Instance.DeselectChecker();
     }
     #endregion
 
@@ -192,7 +209,6 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     private void StartSelection()
     {
         _isSelected = true;
-        GameManager.Instance.SelectChecker(this);
         lineRenderer.enabled = true;
         
         lineRenderer.SetPosition(0, transform.position);
@@ -201,10 +217,12 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
 
     private void ResetSelection()
     {
-        _isSelected = false;
         lineRenderer.enabled = false;
         _currentForce = 0f;
         lastAppliedForce = 0f;
+        // после удара снимаем выбор
+        _isSelected = false;
+        OnDeselect?.Invoke(null);
     }
 
     private void ApplyForce(Vector3 force)
@@ -218,7 +236,7 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     [ShowInInspector, BoxGroup("Debug"), ReadOnly]
     private bool IsPlayersChecker()
     {
-        // Заглушка - реализуйте свою логику
+        // todo Заглушка - реализуйте свою логику
         return true;
     }
     #endregion
