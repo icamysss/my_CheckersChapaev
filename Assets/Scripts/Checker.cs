@@ -9,9 +9,9 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
 {
     #region Inspector Variables
     [BoxGroup("Force Settings", true)]
-    [SerializeField, MinValue(minValue: 1)] private float minForce = 5f;
+    [SerializeField, MinValue(minValue: 1)] public float minForce = 5f;
     [BoxGroup("Force Settings")]
-    [SerializeField, MinValue(1)] private float maxForce = 20f;
+    [SerializeField, MinValue(1)] public float maxForce = 20f;
     [BoxGroup("Force Settings")]
     [SerializeField, SuffixLabel("meters", true)] private float maxDragDistance = 2f;
     [BoxGroup("Visual Settings", true)]
@@ -198,8 +198,8 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
 
     private Vector3 GetBoardIntersectionPoint(Vector2 screenPos)
     {
-        Ray ray = _mainCamera.ScreenPointToRay(screenPos);
-        Plane boardPlane = new Plane(Vector3.up, new Vector3(0, boardHeight, 0));
+        var ray = _mainCamera.ScreenPointToRay(screenPos);
+        var boardPlane = new Plane(Vector3.up, new Vector3(0, boardHeight, 0));
         
         return boardPlane.Raycast(ray, out float distance) 
             ? ray.GetPoint(distance) 
@@ -225,7 +225,7 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
         OnDeselect?.Invoke(null);
     }
 
-    private void ApplyForce(Vector3 force)
+    public void ApplyForce(Vector3 force)
     {
         _rb.AddForce(force, ForceMode.Impulse);
         lastAppliedForce = force.magnitude;
@@ -238,6 +238,15 @@ public class Checker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointe
     {
         // todo Заглушка - реализуйте свою логику
         return true;
+    }
+    
+    public void AIActivate()
+    {
+        if (!IsPlayersChecker())
+        {
+            _isSelected = true;
+            OnSelect?.Invoke(this);
+        }
     }
     #endregion
 }

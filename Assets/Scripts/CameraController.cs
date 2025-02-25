@@ -2,7 +2,8 @@ using System;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
-
+// TODO Сделать нормальное отображение в испекторе, интерполция позиции камеры от расстояния выбранной шашки до центра, 
+// добавить к твинам easy
 public class CameraController : MonoBehaviour
 {
     [BoxGroup("Overview Settings")]
@@ -21,6 +22,7 @@ public class CameraController : MonoBehaviour
     [BoxGroup("Tracking Settings")]
     [SerializeField, Tooltip("Позиция камеры во время прицеливания")] 
     private Vector3 TrackingCamPosition ;
+  
     [BoxGroup("Tracking Settings")]
     [SerializeField, Tooltip("Позиция камеры во время прицеливания")] 
     private Quaternion TrackingCamRotation ;
