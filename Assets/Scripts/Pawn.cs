@@ -32,7 +32,7 @@ public class Pawn : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUp
     
     [BoxGroup("Force Settings")]
     [SerializeField, MinValue(minValue: 1)] 
-    public float minForce = 40f;
+    public float minForce = 5f;
    
     [BoxGroup("Force Settings")]
     [SerializeField, MinValue(2)]
@@ -45,19 +45,14 @@ public class Pawn : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUp
     [BoxGroup("Line Settings")]
     [SerializeField, Required] 
     private LineRenderer lineRenderer;
-    
-    [BoxGroup("Line Settings")]
-    [SerializeField, Range(0.01f, 2f)] 
-    private float lineLengthMultiplier = 0.3f;
    
     [BoxGroup("Line Settings")]
     [SerializeField] 
     private float maxLineLength = 3f;
-    
     [BoxGroup("Line Settings")]
-    [SerializeField] 
-    private Ease lineAnimationEase = Ease.OutQuad;
-
+    [SerializeField, Tooltip("Высота на которой показывается линия удара")] 
+    private float YOffset = .1f;
+    
     [BoxGroup("Board Settings")]
     [SerializeField, Tooltip("Высота доски по оси Y")] 
     private float boardHeight = 0.5f;
@@ -84,6 +79,7 @@ public class Pawn : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUp
     #endregion
 
     private Vector3 ForceDirection { get; set; }
+    public PawnColor PawnColor => pawnColor;
     
     #region Unity Lifecycle
     private void Awake()
@@ -163,48 +159,20 @@ public class Pawn : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUp
     #region Visual Effects
     private void UpdateLineVisuals()
     {
-        var baseLength = _currentForce * lineLengthMultiplier / 100;
-        float finalLength = Mathf.Min(baseLength, maxLineLength);
+        var baseLength = _currentForce / maxForce;
+        float finalLength = baseLength * maxLineLength;
         Vector3 endPosition = transform.position + ForceDirection * finalLength;
 
         // Анимация линии с DOTween
         if (!lineRenderer.enabled)
         {
             lineRenderer.enabled = true;
-            AnimateLineAppearance();
         }
 
-        lineRenderer.SetPosition(0, transform.position);
-        lineRenderer.SetPosition(1, endPosition);
+        lineRenderer.SetPosition(0, transform.position + new Vector3(0f, YOffset, 0f));
+        lineRenderer.SetPosition(1, endPosition + new Vector3(0f, YOffset, 0f));
 
-        UpdateLineColor();
-    }
-
-    private void AnimateLineAppearance()
-    {
-        _lineAnimationTween?.Kill();
-        
-        // Анимация ширины линии
-        lineRenderer.widthMultiplier = 0f;
-        _lineAnimationTween = DOTween.To(
-            () => lineRenderer.widthMultiplier,
-            x => lineRenderer.widthMultiplier = x,
-            0.1f, // Конечная ширина
-            0.3f   // Длительность анимации
-        ).SetEase(lineAnimationEase);
-    }
-
-    private void UpdateLineColor()
-    {
-        float t = _currentForce / maxForce;
-        Color gradientColor = Color.Lerp(Color.green, Color.red, t);
-    
-        // Для материалов с поддержкой Vertex Colors
-        lineRenderer.colorGradient = new Gradient
-        {
-            alphaKeys = new[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1) },
-            colorKeys = new[] { new GradientColorKey(gradientColor, 0), new GradientColorKey(gradientColor, 1) }
-        };
+       // UpdateLineColor();TODO изменение цвета от в зависимости от силы 
     }
     #endregion
 

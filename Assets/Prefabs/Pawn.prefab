@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8357993308415859762}
   m_Layer: 0
   m_Name: Pawn
-  m_TagString: Untagged
+  m_TagString: Pawn
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -109,7 +109,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 28edd3a8dda294aadb767e658d5562a9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -140,8 +140,8 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.01292038
-        value: 0.298851
+        time: 0.01550293
+        value: 0.24712372
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -212,9 +212,8 @@ MonoBehaviour:
   maxForce: 350
   maxDragDistance: 2
   lineRenderer: {fileID: 120133405640146930}
-  lineLengthMultiplier: 0.345
   maxLineLength: 3
-  lineAnimationEase: 6
+  YOffset: 0.1
   boardHeight: 0.5
 --- !u!1001 &4635726525711223389
 PrefabInstance:
