@@ -28,7 +28,7 @@ public class CameraController : MonoBehaviour
     private Quaternion TrackingCamRotation ;
     
     [BoxGroup("Debug")]
-    [ShowInInspector, ReadOnly] private Checker currentTarget;  // текущая цель
+    [ShowInInspector, ReadOnly] private Pawn currentTarget;  // текущая цель
     [BoxGroup("Debug")]
     [SerializeField, ReadOnly] private Camera mainCamera;
     [BoxGroup("Debug")]
@@ -49,14 +49,14 @@ public class CameraController : MonoBehaviour
 
     private void OnEnable()
     {
-        Checker.OnSelect += SetTarget;
-        Checker.OnDeselect += SetTarget; // передает null в качестве аргумента
+        Pawn.OnSelect += SetTarget;
+        Pawn.OnDeselect += SetTarget; // передает null в качестве аргумента
     }
     
     private void OnDisable()
     {
-        Checker.OnSelect -= SetTarget;
-        Checker.OnDeselect -= SetTarget;
+        Pawn.OnSelect -= SetTarget;
+        Pawn.OnDeselect -= SetTarget;
     }
 
     private void Start()
@@ -72,9 +72,9 @@ public class CameraController : MonoBehaviour
         if (mainCamera == null) mainCamera = GetComponentInChildren<Camera>();
     }
 
-    private void SetTarget(Checker checker)
+    private void SetTarget(Pawn pawn)
     {
-        currentTarget = checker;
+        currentTarget = pawn;
         KillActiveTweens();
 
         if (currentTarget == null)
