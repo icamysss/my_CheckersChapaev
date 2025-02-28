@@ -6,7 +6,6 @@ using UnityEngine;
 public class AIController : MonoBehaviour
 {
     [SerializeField] private float decisionDelay = 1.5f;
-    [SerializeField] private float edgeAvoidanceRadius = 0.1f;
     [SerializeField] private float maxPredictionDistance = 3f;
     [SerializeField] private float neighborRadius = 1.0f;
     

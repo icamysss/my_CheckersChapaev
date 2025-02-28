@@ -1,7 +1,13 @@
-namespace DefaultNamespace
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Board : MonoBehaviour
 {
-    public class Board
+    private Dictionary<PawnColor, List<Pawn>> pawns;
+    
+    public List<Pawn> GetPawns(PawnColor pawnColor)
     {
-        
+        throw new NotImplementedException();
     }
 }
