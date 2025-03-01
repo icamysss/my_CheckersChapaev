@@ -7,7 +7,7 @@ public class CheckerCatcher : MonoBehaviour
         if (!other.CompareTag("Pawn")) return;
         
         var selectedChecker = GameManager.Instance.SelectedChecker;
-        var catchedChecker = other.gameObject.GetComponent<Checker>();
+        var catchedChecker = other.gameObject.GetComponent<Pawn>();
             
         if (selectedChecker != null && selectedChecker == catchedChecker) 
             GameManager.Instance.SelectedChecker = null;

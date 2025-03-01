@@ -9,11 +9,11 @@ public class AIController : MonoBehaviour
     [SerializeField] private float maxPredictionDistance = 3f;
     [SerializeField] private float neighborRadius = 1.0f;
     
-    public List<Checker> _aiCheckers = new();
-    public List<Checker> _enemyCheckers = new();
+    public List<Pawn> _aiCheckers = new();
+    public List<Pawn> _enemyCheckers = new();
     
-    private Checker targetChecker;
-   [ShowInInspector] private Checker aiChecker;
+    private Pawn targetChecker;
+   [ShowInInspector] private Pawn aiChecker;
     private ScoreCalculator _scoreCalculator;
 
     void Start()
@@ -40,9 +40,9 @@ public class AIController : MonoBehaviour
         ApplyAIShot(aiChecker, direction);
     }
 
-    private Checker SelectBestChecker()
+    private Pawn SelectBestChecker()
     {
-        Checker bestChecker = null;
+        Pawn bestChecker = null;
         float maxScore = float.MinValue;
 
         foreach (var checker in _aiCheckers)
@@ -62,7 +62,7 @@ public class AIController : MonoBehaviour
         return bestChecker;
     }
 
-    private Vector3 CalculateAimDirection(Checker selectedChecker)
+    private Vector3 CalculateAimDirection(Pawn selectedChecker)
     {
         if (_enemyCheckers.Count == 0)
         {
@@ -95,14 +95,13 @@ public class AIController : MonoBehaviour
         return _enemyCheckers[randomIndex].transform.position;
     }
 
-    private void ApplyAIShot(Checker checker, Vector3 direction)
+    private void ApplyAIShot(Pawn checker, Vector3 direction)
     {
         float distance = Vector3.Distance(checker.transform.position, 
             _scoreCalculator.LastCalculatedTarget);
         float forceMultiplier = Mathf.Clamp01(distance / maxPredictionDistance);
         float force = Mathf.Lerp(checker.minForce, checker.maxForce, forceMultiplier);
         
-        checker.AIActivate();
         checker.ApplyForce(direction * force);
     }
 }
@@ -119,7 +118,7 @@ public class ScoreCalculator
         _maxPredictionDistance = maxPredictionDistance;
     }
 
-    public float Calculate(Vector3 checkerPosition, List<Checker> aiCheckers, List<Checker> enemyCheckers)
+    public float Calculate(Vector3 checkerPosition, List<Pawn> aiCheckers, List<Pawn> enemyCheckers)
     {
         float score = 0f;
         
@@ -143,7 +142,7 @@ public class ScoreCalculator
         return score;
     }
 
-    public Vector3 FindOptimalTarget(Vector3 shooterPosition, List<Checker> enemies)
+    public Vector3 FindOptimalTarget(Vector3 shooterPosition, List<Pawn> enemies)
     {
         Vector3 bestTarget = shooterPosition;
         int maxHitCount = 0;
@@ -166,7 +165,7 @@ public class ScoreCalculator
         return bestTarget;
     }
 
-    private int PredictHits(Vector3 origin, Vector3 direction, List<Checker> enemies)
+    private int PredictHits(Vector3 origin, Vector3 direction, List<Pawn> enemies)
     {
         int hitCount = 0;
         RaycastHit[] hits = Physics.RaycastAll(

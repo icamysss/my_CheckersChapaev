@@ -4,8 +4,8 @@ namespace AI
 {
     public class TurnCalculator
     {
-        private List<Checker> _aiCheckers = new();
-        private List<Checker> _enemyCheckers = new();
+        private List<Pawn> _aiCheckers = new();
+        private List<Pawn> _enemyCheckers = new();
         
         // Инициализация списков шашек
         private void InitializeCheckers()

@@ -4,7 +4,7 @@ using UnityEngine;
 public class GameManager: Singleton<GameManager>
 {
     public AIController aiController;
-    public Checker SelectedChecker { get; set; }
+    public Pawn SelectedChecker { get; set; }
 
     private void Awake()
     {

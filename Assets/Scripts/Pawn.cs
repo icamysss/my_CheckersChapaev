@@ -79,8 +79,16 @@ public class Pawn : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUp
     #endregion
 
     private Vector3 ForceDirection { get; set; }
-    public PawnColor PawnColor => pawnColor;
-    
+    public PawnColor PawnColor
+    {
+        get => pawnColor;
+        set
+        {
+            pawnColor = value;
+            UpdateMeshRenderer();
+        }
+    }
+
     #region Unity Lifecycle
     private void Awake()
     {
