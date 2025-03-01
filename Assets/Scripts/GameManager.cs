@@ -1,23 +1,17 @@
 using System;
 using UnityEngine;
 
+public enum PlayerType { Human, AI }
+
 public class GameManager: Singleton<GameManager>
 {
-    public AIController aiController;
-    public Pawn SelectedChecker { get; set; }
+    public static GameManager Instance;
 
-    private void Awake()
-    {
-        InitializeComponents();
-    }
+    [SerializeField] private Board boardPrefab;
+    [SerializeField] private AIController aiController;
     
-    private void InitializeComponents()
-    {
-        aiController = FindFirstObjectByType<AIController>();
-    }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space)) aiController.MakeMove();
-    }
+   
+
+   
 }
