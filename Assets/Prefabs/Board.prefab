@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4214227935049270603}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Borders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 8985998161148401272}
   - component: {fileID: 3905911328922609002}
   - component: {fileID: 2097535427366967062}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cube (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 6043239925896209139}
   - component: {fileID: 2938465233361861641}
   - component: {fileID: 2236862663398096981}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -217,6 +217,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed4e8484fe6548c1840064adb0bfb28d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boardSize: 8
+  cellSize: 0.9
+  pawnPrefab: {fileID: 8357993308415859762, guid: 08806274fe80f4b3984732814f18ae0f, type: 3}
 --- !u!1 &4272395153016362389
 GameObject:
   m_ObjectHideFlags: 0
@@ -228,7 +231,7 @@ GameObject:
   - component: {fileID: 2563499655845339733}
   - component: {fileID: 1124881809622943440}
   - component: {fileID: 9006907473579761312}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -315,7 +318,7 @@ GameObject:
   - component: {fileID: 6751402277601891321}
   - component: {fileID: 3180812870930562456}
   - component: {fileID: 5172576160587483911}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -401,7 +404,7 @@ GameObject:
   - component: {fileID: 7627175909956577299}
   - component: {fileID: 2549970438180767270}
   - component: {fileID: 5447735756642416606}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -487,7 +490,7 @@ GameObject:
   - component: {fileID: 4327065782022915922}
   - component: {fileID: 5600741255183594005}
   - component: {fileID: 4096730691834368325}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -571,7 +574,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9176425458454145815}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Pawns
   m_TagString: Untagged
   m_Icon: {fileID: 0}
