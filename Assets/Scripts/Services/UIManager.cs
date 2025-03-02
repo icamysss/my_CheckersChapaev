@@ -5,14 +5,15 @@ namespace Services
 {
     public class UIManager : MonoBehaviour, IUIManager
     {
-        [SerializeField] private List<Menu> _menuPrefabs = new List<Menu>();
+        [SerializeField] private List<Menu> _menuPrefabs = new ();
 
         private Transform _uiRoot; // кэш своего трансформ
-        private Stack<Menu> _menuStack = new Stack<Menu>();
-        private Dictionary<string, Menu> _prefabCache = new Dictionary<string, Menu>();
-        private Dictionary<string, Menu> _activeMenus = new Dictionary<string, Menu>();
+        private Stack<Menu> _menuStack = new ();
+        private Dictionary<string, Menu> _prefabCache = new ();
+        private Dictionary<string, Menu> _activeMenus = new ();
 
-
+        private IGameManager gameManager;
+        
         private void InitializePrefabCache()
         {
             foreach (var menuPrefab in _menuPrefabs)
@@ -24,8 +25,6 @@ namespace Services
                     Debug.LogError($"Duplicate menu type: {type}");
                     continue;
                 }
-
-                menuPrefab.gameObject.SetActive(true);
             }
         }
 
@@ -35,15 +34,22 @@ namespace Services
             menu.Open();
         }
 
+        private void OnServicesReady()
+        {
+            gameManager = ServiceLocator.Get<IGameManager>();
+            ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
+        }
+        
         #region IService
 
         public void Initialize()
         {
             InitializePrefabCache();
+            ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
             isInitialized = true;
         }
-
+        
         public void Shutdown()
         {
             Debug.Log("UIManager shutting down");

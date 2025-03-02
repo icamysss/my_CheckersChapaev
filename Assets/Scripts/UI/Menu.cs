@@ -1,29 +1,40 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
+[RequireComponent(typeof(CanvasGroup))]
 public abstract class Menu : MonoBehaviour
 {
-    [SerializeField, ReadOnly] private string _menuType;
-
-    public string MenuType => _menuType;
+    [BoxGroup("Menu Debug")]
+    [SerializeField, ReadOnly] private string menuType;
+    [BoxGroup("Menu Debug")]
+    [SerializeField, ReadOnly] protected CanvasGroup canvasGroup;
+    public string MenuType => menuType;
 
 #if UNITY_EDITOR
     protected virtual void OnValidate()
     {
         // Автоматически устанавливаем тип при изменении в редакторе
-        _menuType = GetType().Name;
+        if (string.IsNullOrEmpty(menuType)) menuType = GetType().Name;
+        if ( canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
     }
 #endif
 
     public virtual void Initialize()
     {
+       
     }
 
     public virtual void Open()
     {
+        canvasGroup.blocksRaycasts = true;  
+        canvasGroup.alpha = 1;
+        canvasGroup.interactable = true;
     }
 
     public virtual void Close()
     {
+        canvasGroup.blocksRaycasts = false;  
+        canvasGroup.alpha = 0;
+        canvasGroup.interactable = false;
     }
 }

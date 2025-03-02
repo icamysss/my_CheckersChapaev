@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Game
+namespace Core
 {
     /// <summary>
     /// Класс, управляющий логикой игровой доски и размещением пешек

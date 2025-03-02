@@ -44,5 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1e464fedab14ccdbf1a355aa6f91bf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardPrefab: {fileID: 3166879403089421066, guid: 3ad8bcd08c3f1494e89726eac3718448, type: 3}
-  aiControllerPrefab: {fileID: 0}
+  boardPrefab: {fileID: 2236862663398096981, guid: 3ad8bcd08c3f1494e89726eac3718448, type: 3}
+  aiControllerPrefab: {fileID: 8419785873689230611, guid: f0402bd6456c9499cbafb9b9e24ee5f1, type: 3}
+  gameInfo:
+    FistPlayerColor: 1
+    GameType: 1
+    Turn: 1
+  <CurrentState>k__BackingField: 0

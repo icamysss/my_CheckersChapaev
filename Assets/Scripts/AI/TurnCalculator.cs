@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Game;
+using Core;
 
 namespace AI
 {

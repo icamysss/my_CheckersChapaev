@@ -6,16 +6,34 @@ namespace Services
 {
     public static class ServiceLocator
     {
-        private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        public static event Action OnAllServicesRegistered;
+        
+        private static readonly Dictionary<Type, object> _services = new ();
         private static bool _isAllSent;
+        
+        
         public static void Register<T>(T service) where T : IService
         {
             service.Initialize();
             _services[typeof(T)] = service;
         }
 
+        private static void CheckAndTriggerEvent()
+        {
+            if (AllServicesRegistered)
+            {
+                OnAllServicesRegistered?.Invoke();
+            }
+        }
+
         public static T Get<T>() where T : IService
         {
+            if (!_services.TryGetValue(typeof(T), out var service))
+                throw new InvalidOperationException($"Сервис {typeof(T)} не зарегистрирован.");
+
+            if (!((IService)service).isInitialized)
+                throw new InvalidOperationException($"Сервис {typeof(T)} не инициализирован.");
+
             return (T)_services[typeof(T)];
         }
 
@@ -30,17 +48,12 @@ namespace Services
 
         public static bool AllServicesRegistered
         {
-            get
+            get => _isAllSent && _services.Values.OfType<IService>().All(s => s.isInitialized);
+            set
             {
-                if (!_isAllSent) return false;
-
-                foreach (var service in _services.Values.OfType<IService>())
-                {
-                    if (!service.isInitialized) return false;
-                }
-                return true;
+                _isAllSent = value;
+                CheckAndTriggerEvent();
             }
-            set => _isAllSent = value;
         }
     }
 }

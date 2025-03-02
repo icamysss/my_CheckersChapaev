@@ -12,7 +12,7 @@ namespace Services
 
         public void Shutdown()
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Shutting down Audio Manager ");
         }
 
         public bool isInitialized { get; private set; }

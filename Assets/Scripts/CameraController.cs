@@ -1,6 +1,6 @@
 using System;
+using Core;
 using DG.Tweening;
-using Game;
 using Sirenix.OdinInspector;
 using UnityEngine;
 // TODO Сделать нормальное отображение в испекторе, интерполция позиции камеры от расстояния выбранной шашки до центра, 
@@ -36,8 +36,6 @@ public class CameraController : MonoBehaviour
     [SerializeField, ReadOnly] private Vector3 defaultCamPosition;
     [BoxGroup("Debug")]
     [SerializeField, ReadOnly] private Quaternion defaultCamRotation;
-    
-    
     
     
     private Tweener moveTween;
