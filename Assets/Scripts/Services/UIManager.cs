@@ -1,75 +1,120 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Services
 {
-    public class UIManager : Singleton<UIManager>
+    public class UIManager : MonoBehaviour, IUIManager
     {
-        [SerializeField] private CanvasGroup Mainmenu;
-        [SerializeField] private CanvasGroup SelectColor;
-        [SerializeField] private CanvasGroup InGame;
-        [SerializeField] private CanvasGroup EndGame;
-        [SerializeField] private CanvasGroup HowToPlay;
-        [SerializeField] private CanvasGroup Options;
+        [SerializeField] private List<Menu> _menuPrefabs = new List<Menu>();
 
-        #region ShowMenu
-        
-        public void ShowMainMenu(bool show)
+        private Transform _uiRoot; // кэш своего трансформ
+        private Stack<Menu> _menuStack = new Stack<Menu>();
+        private Dictionary<string, Menu> _prefabCache = new Dictionary<string, Menu>();
+        private Dictionary<string, Menu> _activeMenus = new Dictionary<string, Menu>();
+
+
+        private void InitializePrefabCache()
         {
-            if (show)
-                EnableCanvasGroup(Mainmenu);
-            else DisableCanvasGroup(Mainmenu);
+            foreach (var menuPrefab in _menuPrefabs)
+            {
+                var type = menuPrefab.MenuType;
+
+                if (!_prefabCache.TryAdd(type, menuPrefab))
+                {
+                    Debug.LogError($"Duplicate menu type: {type}");
+                    continue;
+                }
+
+                menuPrefab.gameObject.SetActive(true);
+            }
         }
 
-        public void ShowSelectColor(bool show)
+        private void BringToFront(Menu menu)
         {
-            if (show)
-                EnableCanvasGroup(SelectColor);
-            else DisableCanvasGroup(SelectColor);
+            menu.transform.SetAsLastSibling();
+            menu.Open();
         }
 
-        public void ShowInGame(bool show)
+        #region IService
+
+        public void Initialize()
         {
-            if (show)
-                EnableCanvasGroup(InGame);
-            else DisableCanvasGroup(InGame);
+            InitializePrefabCache();
+            Debug.Log("UIManager initialized");
+            isInitialized = true;
         }
 
-        public void ShowEndGame(bool show)
+        public void Shutdown()
         {
-            if (show)
-                EnableCanvasGroup(EndGame);
-            else DisableCanvasGroup(EndGame);
+            Debug.Log("UIManager shutting down");
         }
 
-        public void ShowHowToPlay(bool show)
-        {
-            if (show)
-                EnableCanvasGroup(HowToPlay);
-            else DisableCanvasGroup(HowToPlay);
-        }
+        public bool isInitialized { get; private set; }
 
-        public void ShowOptions(bool show)
-        {
-            if (show)
-                EnableCanvasGroup(Options);
-            else DisableCanvasGroup(Options);
-        }
         #endregion
-        
-        #region CanvasGroup
 
-        private void EnableCanvasGroup(CanvasGroup group)
+        #region IUIManager
+
+        public void OpenMenu(string menuType)
         {
-            group.alpha = 1;
-            group.interactable = true;
-            group.blocksRaycasts = true;
+            if (_prefabCache.TryGetValue(menuType, out Menu prefab))
+            {
+                // Если меню уже открыто
+                if (_activeMenus.TryGetValue(menuType, out Menu existingMenu))
+                {
+                    BringToFront(existingMenu);
+                    return;
+                }
+
+                // Создаем новый экземпляр
+                var instance = Instantiate(prefab, _uiRoot);
+                instance.Initialize();
+                instance.Open();
+
+                _menuStack.Push(instance);
+                _activeMenus.Add(menuType, instance);
+            }
+            else Debug.LogError($"Could not find menu type: {menuType}");
         }
 
-        private void DisableCanvasGroup(CanvasGroup group)
+        public void CloseMenu(string menuType)
         {
-            group.alpha = 0;
-            group.interactable = false;
-            group.blocksRaycasts = false;
+            if (_activeMenus.TryGetValue(menuType, out Menu menu))
+            {
+                // Удаляем из стека
+                var newStack = new Stack<Menu>();
+                while (_menuStack.Count > 0)
+                {
+                    var item = _menuStack.Pop();
+                    if (item != menu) newStack.Push(item);
+                }
+                _menuStack = newStack;
+
+                // Уничтожаем меню
+                menu.Close();
+                Destroy(menu.gameObject);
+                _activeMenus.Remove(menuType);
+
+                // Восстанавливаем порядок
+                if (_menuStack.Count > 0)
+                {
+                    BringToFront(_menuStack.Peek());
+                }
+            }else Debug.LogError($"Could not find menu type in active menus: {menuType}");
+        }
+
+        public void CloseTopMenu()
+        {
+            if (_menuStack.Count == 0) return;
+
+            var menu = _menuStack.Pop();
+            _activeMenus.Remove(menu.MenuType);
+            menu.Close();
+            
+            if (_menuStack.Count > 0)
+            {
+                BringToFront(_menuStack.Peek());
+            }
         }
 
         #endregion

@@ -6,12 +6,15 @@ namespace Services
     {
         public void Initialize()
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Audio Manager initialized");
+            isInitialized = true;
         }
 
         public void Shutdown()
         {
             throw new System.NotImplementedException();
         }
+
+        public bool isInitialized { get; private set; }
     }
 }

@@ -1,16 +1,10 @@
 using System;
+using Game;
 using UnityEngine;
 
 namespace Services
 {
-    public enum GameType
-    {
-        HvsH,   // человек / человек
-        HvsAI,  // человек / компьютер 
-        AIvsAI  // компьютер / компьютер
-    }
-
-    public class GameManager : Singleton<GameManager>
+    public class GameManager : MonoBehaviour, IGameManager
     {
         [SerializeField] private Board boardPrefab;
         [SerializeField] private AIController aiControllerPrefab;
@@ -20,5 +14,20 @@ namespace Services
         {
             throw new NotImplementedException();
         }
+
+        public void Initialize()
+        {
+           Debug.Log("Initializing Game Manager");
+           isInitialized = true;
+        }
+
+        public void Shutdown()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool isInitialized { get; private set; }
     }
+
+   
 }
