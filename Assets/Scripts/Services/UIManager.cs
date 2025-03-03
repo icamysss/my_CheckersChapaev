@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using Core;
+using UI;
 using UnityEngine;
 
 namespace Services
@@ -13,7 +16,27 @@ namespace Services
         private Dictionary<string, Menu> _activeMenus = new ();
 
         private IGameManager gameManager;
-        
+
+        private void OnChangeGameState(GameState state)
+        {
+            switch (state)
+            {
+                case GameState.MainMenu:
+                    CloseAllMenus();
+                    OpenMenu("MainMenu");
+                    break;
+                case GameState.Gameplay:
+                    CloseMenu("MainMenu");
+                    OpenMenu("InGame");
+                    break;
+                case GameState.Pause:
+                    break;
+                case GameState.GameOver:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
+        }
         private void InitializePrefabCache()
         {
             foreach (var menuPrefab in _menuPrefabs)
@@ -36,15 +59,20 @@ namespace Services
 
         private void OnServicesReady()
         {
+            // ----- ссылки -----
             gameManager = ServiceLocator.Get<IGameManager>();
+            gameManager.OnGameStateChanged += OnChangeGameState;
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
+            // ---- меню ----
+            InitializePrefabCache(); // вызывается тут, потому что нужен gameManager  в некоторых меню
+            OpenMenu("MainMenu");
+            
         }
         
         #region IService
 
         public void Initialize()
         {
-            InitializePrefabCache();
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
             isInitialized = true;
@@ -53,6 +81,7 @@ namespace Services
         public void Shutdown()
         {
             Debug.Log("UIManager shutting down");
+            gameManager.OnGameStateChanged -= OnChangeGameState;
         }
 
         public bool isInitialized { get; private set; }
@@ -121,6 +150,16 @@ namespace Services
             {
                 BringToFront(_menuStack.Peek());
             }
+        }
+
+        public void CloseAllMenus()
+        {
+            _menuStack.Clear();
+            foreach (var menu in _activeMenus.Values)
+            {
+                menu.Close();
+            }
+            _activeMenus.Clear();
         }
 
         #endregion

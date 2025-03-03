@@ -15,7 +15,7 @@ namespace Services
         [BoxGroup("Options")]
         [SerializeField] private Game game;
         [BoxGroup("Options")]
-        [SerializeField] private GameState gameState;
+        [SerializeField] private GameState gameState = GameState.MainMenu;
        
         
         
@@ -24,9 +24,10 @@ namespace Services
         
         private void SetGameState(GameState newState)
         {
-            if (CurrentState == newState) return;
+            Debug.Log($"Game state changed to {newState}, old {gameState}");
+            if (gameState == newState) return;
 
-            CurrentState = newState;
+            gameState = newState;
             OnGameStateChanged?.Invoke(newState);
         
             // Обработка специфичной логики состояний
@@ -58,8 +59,6 @@ namespace Services
         {
             uiManager = ServiceLocator.Get<IUIManager>();
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
-            
-            SetGameState(GameState.MainMenu);
         }
         
         #region IGameManager
@@ -68,11 +67,7 @@ namespace Services
         public GameState CurrentState
         {
             get => gameState;
-            set
-            {
-                gameState = value;
-                SetGameState(gameState);
-            } 
+            set => SetGameState(value);
         }
         public Game CurrentGame => game;
 
@@ -82,16 +77,18 @@ namespace Services
 
         public void Initialize()
         {
+            // -------- Ссылки --------
             if (boardPrefab == null) throw new NullReferenceException("boardPrefab is null");
             if (aiControllerPrefab == null) throw new NullReferenceException("aiControllerPrefab is null");
-            
-             var board = Instantiate(boardPrefab);
-             game.Board = board;
-             var aiController = Instantiate(aiControllerPrefab);
-             game.AIController = aiController;
 
-            
-             
+
+            // -------- Окружение ------- 
+            var board = Instantiate(boardPrefab);
+            var aiController = Instantiate(aiControllerPrefab);
+            // -------- Игра ------------
+            game = new Game(this, board, aiController);
+
+
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("Game Manager initialized");
             isInitialized = true;

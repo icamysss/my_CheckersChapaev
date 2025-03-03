@@ -4,6 +4,8 @@ namespace Services
     {
         void OpenMenu(string menuName);
         void CloseMenu(string menuName);
+        
+        void CloseAllMenus();
         void CloseTopMenu();
     }
 }

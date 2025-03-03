@@ -1,4 +1,5 @@
 using System;
+using Services;
 
 namespace Core
 {
@@ -12,10 +13,21 @@ namespace Core
         public AIController AIController { get; set; }
 
 
+        private GameManager gameManager;
+
+        public Game(GameManager gameManager, Board board, AIController aiController)
+        {
+            this.gameManager = gameManager;
+            Board = board;
+            AIController = aiController;
+        }
+        
         public void StartGame()
         {
-            // Board.Initialize(); // Расстановка шашек
-            CurrentTurn = PawnColor.White;
+            gameManager.CurrentState = GameState.Gameplay;
+            Board.SetupStandardPosition(); // Расстановка шашек
+            CurrentTurn = PawnColor.White; 
+           
             if (GameType == GameType.HumanVsAi && HumanColor != CurrentTurn) 
             {
                 AIController.MakeMove(); // ИИ ходит первым

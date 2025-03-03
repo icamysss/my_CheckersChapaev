@@ -1,20 +1,29 @@
 using Services;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
     public class MainMenu : Menu
     {
-        private GameManager  gameManager;
+        [SerializeField] Button startGameButton;  // обычная игра
+        
+        private IGameManager  gameManager;
        
+        
         
         public override void Initialize()
         {
             base.Initialize();
             canvasGroup.ignoreParentGroups = true;
-            gameManager = ServiceLocator.Get<GameManager>();
-            
+            gameManager = ServiceLocator.Get<IGameManager>();
+           
+            startGameButton.onClick.AddListener(StartGame);
         }
 
-       
+        private void StartGame()
+        {
+            gameManager.CurrentGame.StartGame();
+        }
     }
 }
