@@ -29,10 +29,10 @@ namespace Services
         public static T Get<T>() where T : IService
         {
             if (!_services.TryGetValue(typeof(T), out var service))
-                throw new InvalidOperationException($"Сервис {typeof(T)} не зарегистрирован.");
+                throw new InvalidOperationException($"Service {typeof(T)} not registered.");
 
             if (!((IService)service).isInitialized)
-                throw new InvalidOperationException($"Сервис {typeof(T)} не инициализирован.");
+                throw new InvalidOperationException($"Service {typeof(T)} not initialized.");
 
             return (T)_services[typeof(T)];
         }
