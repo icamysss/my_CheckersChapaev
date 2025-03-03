@@ -45,51 +45,21 @@ namespace Core
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Получить список всех пешек на доске
-        /// </summary>
-        public List<Pawn> GetPawns() => new(pawns);
 
-        /// <summary>
-        /// Получить мировые координаты для указанной клетки
-        /// </summary>
-        /// <param name="column">Колонка (буквенная координата, A=1, B=2...)</param>
-        /// <param name="row">Ряд (числовая координата)</param>
-        public Vector3 GetCellPosition(int column, int row)
+        /// <returns>Список всех шашек на доске указанного цвета</returns>
+        public List<Pawn> GetPawnsOnBoard(PawnColor pawnColor)
         {
-            var halfBoard = (boardSize - 1) * 0.5f;
-            return CenterPosition + new Vector3(
-                (column - halfBoard) * cellSize,
-                0,
-                (row - halfBoard) * cellSize
-                );
-        }
-
-        /// <summary>
-        /// Создать пешку в указанной клетке
-        /// </summary>
-        /// <param name="column">Колонка (1-based)</param>
-        /// <param name="row">Ряд (1-based)</param>
-        /// <param name="color">Цвет пешки</param>
-        /// <returns>Созданная пешка или null при ошибке</returns>
-        public Pawn SpawnPawn(int column, int row, PawnColor color)
-        {
-            if (pawnPrefab == null)
+            var allPawns = GetAllPawnsOnBoard();
+            List<Pawn> pawns = new();
+            foreach (var pawn in allPawns)
             {
-                Debug.LogError("Pawn prefab is not assigned!");
-                return null;
+                if (pawn.PawnColor == pawnColor) pawns.Add(pawn);
             }
-
-            var spawnPosition = GetCellPosition(column, row);
-            var newPawn = Instantiate(pawnPrefab, spawnPosition, Quaternion.identity, transform);
-        
-            newPawn.PawnColor = color;
-            if (!pawns.Contains(newPawn)) pawns.Add(newPawn);
-            return newPawn;
+            return pawns;
         }
-
+        /// <returns>Список всех шашек на доске</returns>
         [Button]
-        public void CheckForPawnsOnBoard()
+        public List<Pawn> GetAllPawnsOnBoard()
         {
             Vector3 halfExtents = new Vector3(boardSize, 1, boardSize);
             var targetTag = "Pawn";
@@ -119,11 +89,13 @@ namespace Core
                     pawns.Add(hit.collider.gameObject.GetComponent<Pawn>());
                 }
             }
+            return pawns;
         }
     
         #endregion
 
         #region Setup Methods
+        
         [Button(ButtonSizes.Large), PropertyOrder(50)]
         [Tooltip("Установить стартовую позицию пешек")]
         public void SetupStandardPosition()
@@ -164,6 +136,44 @@ namespace Core
                 if (pawn != null) DestroyImmediate(pawn.gameObject);
             }
             pawns.Clear();
+        }
+        
+        /// <summary>
+        /// Получить мировые координаты для указанной клетки
+        /// </summary>
+        /// <param name="column">Колонка (буквенная координата, A=1, B=2...)</param>
+        /// <param name="row">Ряд (числовая координата)</param>
+        private Vector3 GetCellPosition(int column, int row)
+        {
+            var halfBoard = (boardSize - 1) * 0.5f;
+            return CenterPosition + new Vector3(
+                (column - halfBoard) * cellSize,
+                0,
+                (row - halfBoard) * cellSize
+                );
+        }
+
+        /// <summary>
+        /// Создать пешку в указанной клетке
+        /// </summary>
+        /// <param name="column">Колонка (1-based)</param>
+        /// <param name="row">Ряд (1-based)</param>
+        /// <param name="color">Цвет пешки</param>
+        /// <returns>Созданная пешка или null при ошибке</returns>
+        private Pawn SpawnPawn(int column, int row, PawnColor color)
+        {
+            if (pawnPrefab == null)
+            {
+                Debug.LogError("Pawn prefab is not assigned!");
+                return null;
+            }
+
+            var spawnPosition = GetCellPosition(column, row);
+            var newPawn = Instantiate(pawnPrefab, spawnPosition, Quaternion.identity, transform);
+        
+            newPawn.PawnColor = color;
+            if (!pawns.Contains(newPawn)) pawns.Add(newPawn);
+            return newPawn;
         }
         #endregion
 
