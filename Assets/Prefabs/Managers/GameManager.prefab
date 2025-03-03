@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5501185173621507567}
   m_Layer: 0
   m_Name: GameManager
-  m_TagString: Untagged
+  m_TagString: GameController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,8 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardPrefab: {fileID: 2236862663398096981, guid: 3ad8bcd08c3f1494e89726eac3718448, type: 3}
   aiControllerPrefab: {fileID: 8419785873689230611, guid: f0402bd6456c9499cbafb9b9e24ee5f1, type: 3}
-  gameInfo:
-    FistPlayerColor: 1
-    GameType: 1
-    Turn: 1
-  <CurrentState>k__BackingField: 0
+  pawnCatcherPrefab: {fileID: 5877671346456723381, guid: 61bd0798652ef497990f38fe04e13485, type: 3}
+  gameState: 0

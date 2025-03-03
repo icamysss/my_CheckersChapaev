@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PawnCatcher : MonoBehaviour
@@ -6,6 +7,14 @@ public class PawnCatcher : MonoBehaviour
     {
         if (!collision.gameObject.CompareTag("Pawn")) return;
         
-       // collision.gameObject.SetActive(false);
+      StartCoroutine(DisablePawn(collision.gameObject));
+    }
+
+    private IEnumerator DisablePawn(GameObject pawn)
+    {
+        yield return new WaitForSeconds(3f);
+        
+        var rb = pawn.GetComponent<Rigidbody>();
+        if (rb)  rb.isKinematic = true;
     }
 }

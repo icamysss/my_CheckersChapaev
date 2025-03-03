@@ -8,9 +8,11 @@ namespace Services
     public class GameManager : MonoBehaviour, IGameManager
     {
         [BoxGroup("References")]
-        [SerializeField] private Board boardPrefab; // todo ссылку в гейминфо
+        [SerializeField] private Board boardPrefab;
         [BoxGroup("References")]
         [SerializeField] private AIController aiControllerPrefab;
+        [BoxGroup("References")]
+        [SerializeField] private PawnCatcher pawnCatcherPrefab;
         
         [BoxGroup("Options")]
         [SerializeField] private Game game;
@@ -85,6 +87,7 @@ namespace Services
             // -------- Окружение ------- 
             var board = Instantiate(boardPrefab);
             var aiController = Instantiate(aiControllerPrefab);
+            var pawnCatcher = Instantiate(pawnCatcherPrefab);
             // -------- Игра ------------
             game = new Game(this, board, aiController);
 
