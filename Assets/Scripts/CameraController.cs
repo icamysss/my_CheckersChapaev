@@ -49,13 +49,13 @@ public class CameraController : MonoBehaviour
     private void OnEnable()
     {
         Pawn.OnSelect += SetTarget;
-        Pawn.OnDeselect += SetTarget; // передает null в качестве аргумента
+        Pawn.OnForceApplied += SetTarget; // передает null в качестве аргумента
     }
     
     private void OnDisable()
     {
         Pawn.OnSelect -= SetTarget;
-        Pawn.OnDeselect -= SetTarget;
+        Pawn.OnForceApplied -= SetTarget;
     }
 
     private void Start()

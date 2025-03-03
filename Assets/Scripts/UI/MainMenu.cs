@@ -1,3 +1,4 @@
+using Core;
 using Services;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ namespace UI
 
         private void StartGame()
         {
-            gameManager.CurrentGame.StartGame();
+            gameManager.CurrentGame.StartGame(GameType.HumanVsAi);
         }
     }
 }
