@@ -1,57 +1,167 @@
 using System;
 using Services;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Core
 {
-    [Serializable]
-    public class Game 
+    public class Game : IDisposable
     {
-        public GameType GameType { get; private set; }
-        public PawnColor HumanColor { get; private set; }
-        public PawnColor CurrentTurn { get; private set; }
-        public Board Board { get; set; }
-        public AIController AIController { get; set; }
+        public GameType GameType { get; private set; } = GameType.HumanVsAi;
+        private PawnColor FirstPlayerColor { get; set; } = PawnColor.None; // цвет первого игрока
+        private PawnColor CurrentTurn { get; set; } = PawnColor.None;
 
 
-        private GameManager gameManager;
+        private Board Board { get; }
+        private AIController AIController { get; }
+        private readonly GameManager gameManager;
+        private PawnColor GameResult;
 
         public Game(GameManager gameManager, Board board, AIController aiController)
         {
             this.gameManager = gameManager;
             Board = board;
+
             AIController = aiController;
+            AIController.Initialize(board, this);
+
+            Pawn.OnForceApplied += OnForceApplied;
         }
-        
-        public void StartGame()
+
+        #region PawnEvents
+
+        private void OnForceApplied(Pawn pawn)
+        {
+            
+            if (EndGame(out GameResult))
+            {
+                Debug.Log($"Game finished with {GameResult}");
+                return;
+            }
+            SwitchTurn();
+        }
+
+        #endregion
+
+        #region GameCircle
+
+        public void StartGame(GameType gameType)
         {
             gameManager.CurrentState = GameState.Gameplay;
             Board.SetupStandardPosition(); // Расстановка шашек
-            CurrentTurn = PawnColor.White; 
-           
-            if (GameType == GameType.HumanVsAi && HumanColor != CurrentTurn) 
+
+            GameType = gameType;
+            // Случайный выбор первого игрока (true - Player1, false - Player2)
+            bool isPlayer1First = Random.Range(0, 2) == 0;
+            StartFirstTurn(isPlayer1First, gameType);
+        }
+
+        private void StartFirstTurn(bool isPlayer1First, GameType gameType)
+        {
+            Debug.Log("StartFirstTurn");
+            if (gameType == GameType.HumanVsAi && !isPlayer1First ||
+                gameType == GameType.AiVsAi)
             {
-                AIController.MakeMove(); // ИИ ходит первым
+                FirstPlayerColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
+                CurrentTurn = GetOppositeColor(FirstPlayerColor);
+                
+                AIController.MakeMove(CurrentTurn);
+            }
+            else
+            {
+                // Активируем все шашки для выбора
+                var allPawns = Board.GetAllPawnsOnBoard();
+                foreach (var pawn in allPawns)
+                {
+                    pawn.Interactable = true;
+                }
             }
         }
 
-        public void PauseGame()
+        public void SwitchTurn()
         {
-            throw new NotImplementedException();
+            if (CurrentTurn == PawnColor.None)
+            {
+                Debug.Log("SwitchTurn called without current turn (PawnColor.None)");
+                return;
+            }
+            // Смена хода
+            CurrentTurn = CurrentTurn == FirstPlayerColor
+                ? GetOppositeColor(FirstPlayerColor)
+                : FirstPlayerColor;
+
+            switch (this.GameType)
+            {
+                case GameType.HumanVsHuman:
+                    UpdatePawnsInteractivity();
+                    break;
+
+                case GameType.HumanVsAi:
+                    // если текущий ход (цвет) равен цвету первого игрока, значит он ходит или 
+                    if (CurrentTurn == FirstPlayerColor) UpdatePawnsInteractivity();
+                    else AIController.MakeMove(CurrentTurn);
+                    break;
+
+                case GameType.AiVsAi:
+                    AIController.MakeMove(CurrentTurn);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        public void MakeMove()
+        private bool EndGame(out PawnColor winnerColor)
         {
-            // Логика хода, проверка на выбивание шашек
-            // Переключение CurrentTurn
-            // if (CheckWinCondition()) 
-            // {
-            //     GameManager.Instance.SetGameState(GameState.GameOver);
-            // }
+            var black = Board.GetPawnsOnBoard(PawnColor.Black);
+            var white = Board.GetPawnsOnBoard(PawnColor.White);
+
+            if (black.Count == 0 && white.Count == 0)
+            {
+                winnerColor = PawnColor.None;
+                return true;
+            }
+
+            if (black.Count == 0)
+            {
+                winnerColor = PawnColor.White;
+                return true;
+            }
+
+            if (white.Count == 0)
+            {
+                winnerColor = PawnColor.Black;
+                return true;
+            }
+
+            winnerColor = PawnColor.None;
+            return false;
         }
 
-        public void EndGame()
+        #endregion
+
+        #region Helpers
+
+        private void UpdatePawnsInteractivity()
         {
-            throw new NotImplementedException();
+            var currentColorPawns = Board.GetPawnsOnBoard(CurrentTurn);
+            foreach (var pawn in currentColorPawns)
+            {
+                pawn.Interactable = true;
+            }
+        }
+
+        private PawnColor GetOppositeColor(PawnColor color)
+        {
+            return color == PawnColor.White
+                ? PawnColor.Black
+                : PawnColor.White;
+        }
+
+        #endregion
+
+        public void Dispose()
+        {
+            Pawn.OnForceApplied -= OnForceApplied;
         }
     }
 }
