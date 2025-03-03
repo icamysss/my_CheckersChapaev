@@ -41,6 +41,7 @@ namespace Core
         /// Центральная позиция доски в мировых координатах
         /// </summary>
         public Vector3 CenterPosition => transform.position;
+        public int BoardSize => boardSize;
     
         #endregion
 

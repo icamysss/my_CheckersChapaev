@@ -24,7 +24,7 @@ namespace UI
 
         private void StartGame()
         {
-            gameManager.CurrentGame.StartGame(GameType.HumanVsAi);
+            gameManager.CurrentGame.StartGame(GameType.AiVsAi);
         }
     }
 }

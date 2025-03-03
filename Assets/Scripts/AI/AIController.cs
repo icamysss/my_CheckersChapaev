@@ -10,100 +10,137 @@ public class AIController : MonoBehaviour
     [SerializeField] private float maxPredictionDistance = 3f;
     [SerializeField] private float neighborRadius = 1.0f;
     
-    public List<Pawn> _aiCheckers = new();
-    public List<Pawn> _enemyCheckers = new();
-    
-    private Pawn targetChecker;
-   [ShowInInspector] private Pawn aiChecker;
-    private ScoreCalculator _scoreCalculator;
+    [Header("Score Weights")]
+    [SerializeField] private float friendlyGroupWeight = 0.7f;
+    [SerializeField] private float enemyProximityWeight = 1.2f;
+    [SerializeField] private float lineOfFireWeight = 2.0f;
+    [SerializeField] private float boardCenterWeight = 0.5f;
+    [SerializeField] private float edgePenaltyWeight = 0.3f;
 
-    void Start()
+    public List<Pawn> _aiPawns = new();
+    public List<Pawn> _enemyPawns = new();
+
+    [ShowInInspector, ReadOnly] private Pawn aiSelectedPawn;
+    private ScoreCalculator _scoreCalculator;
+    private Board _board;
+    private Game _game;
+
+    public void Initialize(Board board, Game game)
     {
         _scoreCalculator = new ScoreCalculator(neighborRadius, maxPredictionDistance);
+        _board = board;
+        _game = game;
     }
 
-    public void MakeMove()
+    public void MakeMove(PawnColor pawnColor)
     {
+        if (pawnColor == PawnColor.None)
+        {
+            Debug.LogError($"Invalid pawn color: {pawnColor}");
+            return;
+        }
+
+        RefreshPawnLists(pawnColor);
         StartCoroutine(AIMoveRoutine());
+    }
+
+    private void RefreshPawnLists(PawnColor pawnColor)
+    {
+        _aiPawns = _board.GetPawnsOnBoard(pawnColor);
+        _enemyPawns = _board.GetPawnsOnBoard(pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black);
     }
 
     private IEnumerator AIMoveRoutine()
     {
-        Debug.Log("AI Move routine");
         yield return new WaitForSeconds(decisionDelay);
         
-        aiChecker = SelectBestChecker();
-        Debug.Log(aiChecker.name);
-        if (aiChecker == null) yield break;
-        
-        var direction = CalculateAimDirection(aiChecker);
-        Debug.Log(direction);
-        ApplyAIShot(aiChecker, direction);
+        aiSelectedPawn = SelectOptimalPawn();
+        if (aiSelectedPawn == null) yield break;
+
+        Vector3 shotDirection = CalculateOptimalDirection(aiSelectedPawn);
+        ExecuteAIShot(aiSelectedPawn, shotDirection);
     }
 
-    private Pawn SelectBestChecker()
+    private Pawn SelectOptimalPawn()
     {
-        Pawn bestChecker = null;
+        Pawn bestPawn = null;
         float maxScore = float.MinValue;
 
-        foreach (var checker in _aiCheckers)
+        foreach (Pawn pawn in _aiPawns)
         {
-            if (checker == null) continue;
-            
-            float score = _scoreCalculator.Calculate(checker.transform.position, 
-                _aiCheckers, 
-                _enemyCheckers);
-            
+            if (pawn == null) continue;
+
+            float score = _scoreCalculator.Calculate(
+                pawn.transform.position,
+                _aiPawns,
+                _enemyPawns,
+                friendlyGroupWeight,
+                enemyProximityWeight,
+                lineOfFireWeight,
+                boardCenterWeight,
+                edgePenaltyWeight,
+                _board.BoardSize
+            );
+
             if (score > maxScore)
             {
                 maxScore = score;
-                bestChecker = checker;
+                bestPawn = pawn;
             }
         }
-        return bestChecker;
+        return bestPawn;
     }
 
-    private Vector3 CalculateAimDirection(Pawn selectedChecker)
+    private Vector3 CalculateOptimalDirection(Pawn selectedPawn)
     {
-        if (_enemyCheckers.Count == 0)
+        if (_enemyPawns.Count == 0)
         {
-            Debug.LogWarning("No enemies found!");
-            return Vector3.forward; // Направление по умолчанию
+            Debug.LogWarning("No enemies available for targeting");
+            return GetFallbackDirection(selectedPawn.transform);
         }
 
         Vector3 targetPosition = _scoreCalculator.FindOptimalTarget(
-            selectedChecker.transform.position, 
-            _enemyCheckers);
-    
-        // Добавляем проверку на валидность цели
-        if (Vector3.Distance(targetPosition, selectedChecker.transform.position) < 0.1f)
+            selectedPawn.transform.position,
+            _enemyPawns
+        );
+
+        if (Vector3.Distance(targetPosition, selectedPawn.transform.position) < 0.1f)
         {
-            Debug.Log("Fallback target selection");
-            targetPosition = FindFallbackTarget(selectedChecker.transform.position);
+            targetPosition = GetFallbackTarget(selectedPawn.transform.position);
         }
 
-        Vector3 direction = (targetPosition - selectedChecker.transform.position).normalized;
-        Debug.DrawRay(selectedChecker.transform.position, direction * 2, Color.green, 2f);
-    
+        Vector3 direction = (targetPosition - selectedPawn.transform.position).normalized;
+        Debug.DrawRay(selectedPawn.transform.position, direction * 2, Color.green, 2f);
+        
         return direction;
     }
-    private Vector3 FindFallbackTarget(Vector3 shooterPosition)
+
+    private Vector3 GetFallbackTarget(Vector3 currentPosition)
     {
-        // Резервная логика: выбираем случайную цель
-        if (_enemyCheckers.Count == 0) return shooterPosition + Vector3.forward;
-    
-        int randomIndex = Random.Range(0, _enemyCheckers.Count);
-        return _enemyCheckers[randomIndex].transform.position;
+        if (_enemyPawns.Count > 0)
+        {
+            return _enemyPawns[Random.Range(0, _enemyPawns.Count)].transform.position;
+        }
+        return currentPosition + Vector3.forward * 2f;
     }
 
-    private void ApplyAIShot(Pawn checker, Vector3 direction)
+    private Vector3 GetFallbackDirection(Transform pawnTransform)
     {
-        float distance = Vector3.Distance(checker.transform.position, 
-            _scoreCalculator.LastCalculatedTarget);
+        return pawnTransform.forward + new Vector3(
+            Random.Range(-0.3f, 0.3f),
+            0,
+            Random.Range(0.5f, 1f)
+        ).normalized;
+    }
+
+    private void ExecuteAIShot(Pawn pawn, Vector3 direction)
+    {
+        float distance = Vector3.Distance(pawn.transform.position, _scoreCalculator.LastCalculatedTarget);
         float forceMultiplier = Mathf.Clamp01(distance / maxPredictionDistance);
-        float force = Mathf.Lerp(checker.minForce, checker.maxForce, forceMultiplier);
-        
-        checker.ApplyForce(direction * force);
+        float force = Mathf.Lerp(pawn.minForce, pawn.maxForce, forceMultiplier);
+
+        pawn.ApplyForce(direction * force);
+        Debug.Log($"AI shot: {pawn.name} with force {force:F1} in direction {direction}");
     }
 }
 
@@ -119,26 +156,50 @@ public class ScoreCalculator
         _maxPredictionDistance = maxPredictionDistance;
     }
 
-    public float Calculate(Vector3 checkerPosition, List<Pawn> aiCheckers, List<Pawn> enemyCheckers)
+    public float Calculate(
+        Vector3 checkerPosition,
+        List<Pawn> friendlyPawns,
+        List<Pawn> enemyPawns,
+        float friendlyWeight,
+        float enemyWeight,
+        float lineOfFireWeight,
+        float centerWeight,
+        float edgePenalty,
+        float boardSize)
     {
         float score = 0f;
-        
-        // Штраф за скученность своих шашек
-        int friendlyCount = Physics.OverlapSphereNonAlloc(checkerPosition, _neighborRadius, 
-            new Collider[10], LayerMask.GetMask("Friendly"));
-        score -= friendlyCount * 2f;
 
-        // Бонус за близость вражеских шашек
-        int enemyCount = Physics.OverlapSphereNonAlloc(checkerPosition, _neighborRadius, 
-            new Collider[10], LayerMask.GetMask("Enemy"));
-        score += enemyCount * 3f;
+        // 1. Группировка своих шашек
+        int friendlyCount = Physics.OverlapSphereNonAlloc(
+            checkerPosition,
+            _neighborRadius,
+            new Collider[10],
+            LayerMask.GetMask("Friendly")
+        );
+        score += friendlyCount * friendlyWeight;
 
-        // Поиск лучшей цели
-        Vector3 target = FindOptimalTarget(checkerPosition, enemyCheckers);
-        float distance = Vector3.Distance(checkerPosition, target);
-        
-        // Бонус за близость к цели
-        score += 10f / (distance + 0.1f);
+        // 2. Близость к врагам
+        int enemyCount = Physics.OverlapSphereNonAlloc(
+            checkerPosition,
+            _neighborRadius,
+            new Collider[10],
+            LayerMask.GetMask("Enemy")
+        );
+        score += enemyCount * enemyWeight;
+
+        // 3. Линия огня
+        Vector3 target = FindOptimalTarget(checkerPosition, enemyPawns);
+        Vector3 fireDirection = (target - checkerPosition).normalized;
+        int potentialHits = PredictHits(checkerPosition, fireDirection, enemyPawns);
+        score += potentialHits * lineOfFireWeight;
+
+        // 4. Позиционирование
+        float distanceFromCenter = Vector3.Distance(checkerPosition, Vector3.zero);
+        score += (1 - Mathf.Clamp01(distanceFromCenter / (boardSize * 0.5f))) * centerWeight;
+
+        // 5. Штраф за края
+        float edgeFactor = Mathf.Clamp01(distanceFromCenter / (boardSize * 0.5f));
+        score -= edgeFactor * edgePenalty;
 
         return score;
     }
@@ -148,21 +209,24 @@ public class ScoreCalculator
         Vector3 bestTarget = shooterPosition;
         int maxHitCount = 0;
 
-        foreach (var enemy in enemies)
+        foreach (Pawn enemy in enemies)
         {
             if (enemy == null) continue;
-            
+
             Vector3 direction = (enemy.transform.position - shooterPosition).normalized;
             int hits = PredictHits(shooterPosition, direction, enemies);
-            
-            if (hits > maxHitCount)
+
+            if (hits > maxHitCount || 
+                (hits == maxHitCount && 
+                 Vector3.Distance(shooterPosition, enemy.transform.position) < 
+                 Vector3.Distance(shooterPosition, bestTarget)))
             {
                 maxHitCount = hits;
                 bestTarget = enemy.transform.position;
                 LastCalculatedTarget = bestTarget;
             }
         }
-        
+
         return bestTarget;
     }
 
@@ -170,28 +234,18 @@ public class ScoreCalculator
     {
         int hitCount = 0;
         RaycastHit[] hits = Physics.RaycastAll(
-            origin, 
-            direction, 
+            origin,
+            direction,
             _maxPredictionDistance,
-            LayerMask.GetMask("Enemy", "Obstacle"));
+            LayerMask.GetMask("Enemy", "Obstacle")
+        );
 
-        Debug.DrawRay(origin, direction * _maxPredictionDistance, Color.yellow, 1f);
-
-        foreach (var hit in hits)
+        foreach (RaycastHit hit in hits)
         {
-            if (hit.collider == null) continue;
-
-            if (hit.collider.CompareTag("Enemy"))
-            {
-                hitCount++;
-                Debug.Log($"Hit enemy: {hit.collider.name}");
-            }
-            else if (hit.collider.CompareTag("Obstacle"))
-            {
-                Debug.Log($"Hit obstacle: {hit.collider.name}");
-                break;
-            }
+            if (hit.collider.CompareTag("Obstacle")) break;
+            if (hit.collider.CompareTag("Enemy")) hitCount++;
         }
+
         return hitCount;
     }
 }
