@@ -10,9 +10,9 @@ namespace Core
     {
         private GameType GameType { get; set; } = GameType.HumanVsAi;
         private PawnColor FirstPlayerColor { get; set; } = PawnColor.None; // Цвет первого игрока
-        private PawnColor CurrentTurn { get; set; } = PawnColor.None; // Текущий ход (цвет игрока)
+        public PawnColor CurrentTurn { get; private set; } = PawnColor.None; // Текущий ход (цвет игрока)
 
-        private Board Board { get; }
+        public Board Board { get; }
         private AIController AIController { get; }
         private readonly GameManager gameManager;
         private PawnColor GameResult; // Результат игры (победитель или ничья)
