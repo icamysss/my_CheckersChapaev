@@ -23,13 +23,11 @@ public class AIController : MonoBehaviour
     [ShowInInspector, ReadOnly] private Pawn aiSelectedPawn;
     private ScoreCalculator _scoreCalculator;
     private Board _board;
-    private Game _game;
 
-    public void Initialize(Board board, Game game)
+    public void Initialize(Board board)
     {
         _scoreCalculator = new ScoreCalculator(neighborRadius, maxPredictionDistance);
         _board = board;
-        _game = game;
     }
 
     public void MakeMove(PawnColor pawnColor)
