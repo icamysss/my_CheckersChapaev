@@ -45,23 +45,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   decisionDelay: 0.5
-  maxPredictionDistance: 5
+  maxPredictionDistance: 8
   neighborRadius: 1
-  _aiCheckers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _enemyCheckers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  friendlyGroupWeight: 0.7
+  enemyProximityWeight: 1.2
+  lineOfFireWeight: 2
+  boardCenterWeight: 0.5
+  edgePenaltyWeight: 0.3
+  _aiPawns: []
+  _enemyPawns: []

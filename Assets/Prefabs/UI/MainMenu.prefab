@@ -730,7 +730,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   menuType: MainMenu
   canvasGroup: {fileID: 1882943018712381861}
-  startGameButton: {fileID: 4798830745419956428}
+  AiVSAiButton: {fileID: 4798830745419956428}
+  HvsHButton: {fileID: 733247085444823666}
 --- !u!1 &6664100825482151857
 GameObject:
   m_ObjectHideFlags: 0
