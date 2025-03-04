@@ -1,5 +1,6 @@
 using Core;
 using Services;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,7 @@ namespace UI
     {
         [SerializeField] Button AiVSAiButton;  // обычная игра
         [SerializeField] Button HvsHButton;
+        [SerializeField] Button HvsAiButton;
         
         private IGameManager  gameManager;
        
@@ -20,18 +22,23 @@ namespace UI
             canvasGroup.ignoreParentGroups = true;
             gameManager = ServiceLocator.Get<IGameManager>();
            
-            AiVSAiButton.onClick.AddListener(StartGame);
-            HvsHButton.onClick.AddListener(StartGameHvsH);
+            AiVSAiButton.onClick.AddListener(AiVSAi);
+            HvsHButton.onClick.AddListener(HumanVSHuman);
+            HvsAiButton.onClick.AddListener(HumanVsAi);
         }
 
-        private void StartGame()
+        private void HumanVSHuman()
+        {
+            gameManager.CurrentGame.StartGame(GameType.HumanVsHuman);
+        }
+        
+        private void AiVSAi()
         {
             gameManager.CurrentGame.StartGame(GameType.AiVsAi);
         }
-        
-        private void StartGameHvsH()
+        private void HumanVsAi()
         {
-            gameManager.CurrentGame.StartGame(GameType.HumanVsHuman);
+            gameManager.CurrentGame.StartGame(GameType.HumanVsAi);
         }
         
         

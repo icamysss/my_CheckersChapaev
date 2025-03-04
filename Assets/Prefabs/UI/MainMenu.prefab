@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 70970813630588231}
   - component: {fileID: 4798830745419956428}
   m_Layer: 5
-  m_Name: Button (play)
+  m_Name: Button (AA)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 4075813477779993386}
   - component: {fileID: 733247085444823666}
   m_Layer: 5
-  m_Name: 'Button (online) '
+  m_Name: 'Button (HA) '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -437,7 +437,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 6696900971490471698}
   m_OnClick:
     m_PersistentCalls:
@@ -595,7 +595,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u0418\u0433\u0440\u0430 \u0432\u0434\u0432\u043E\u0435\u043C"
+  m_Text: Human vs Human
 --- !u!1 &5889253478286753652
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,7 +731,8 @@ MonoBehaviour:
   menuType: MainMenu
   canvasGroup: {fileID: 1882943018712381861}
   AiVSAiButton: {fileID: 4798830745419956428}
-  HvsHButton: {fileID: 733247085444823666}
+  HvsHButton: {fileID: 5074064329458443841}
+  HvsAiButton: {fileID: 733247085444823666}
 --- !u!1 &6664100825482151857
 GameObject:
   m_ObjectHideFlags: 0
@@ -810,7 +811,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u0418\u0433\u0440\u0430\u0442\u044C"
+  m_Text: 'AI vs AI '
 --- !u!1 &7329693103438706869
 GameObject:
   m_ObjectHideFlags: 0
@@ -889,7 +890,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u041E\u043D\u043B\u0430\u0439\u043D \u0438\u0433\u0440\u0430"
+  m_Text: Human vs AI
 --- !u!1 &7753295477441234884
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,7 +904,7 @@ GameObject:
   - component: {fileID: 8394663608000117764}
   - component: {fileID: 5074064329458443841}
   m_Layer: 5
-  m_Name: 'Button (together) '
+  m_Name: 'Button (HH) '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
