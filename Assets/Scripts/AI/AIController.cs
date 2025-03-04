@@ -11,29 +11,22 @@ namespace AI
     {
         #region Inspector Variables
 
-        [Header("Timing Settings")]
-        [SerializeField, Tooltip("Минимальное время принятия решения (сек)")]
-        private float minDecisionDelay = 1f;
-        [SerializeField, Tooltip("Максимальное время принятия решения (сек)")]
-        private float maxDecisionDelay = 4f;
-        [SerializeField, Tooltip("Время имитации прицеливания (сек)")]
-        private float aimingTime = 2f;
+        [Header("Timing Settings")] [SerializeField, Tooltip("Минимальное время принятия решения (сек)")] private float
+            minDecisionDelay = 1f;
 
-        [Header("Score Calculation Settings")]
-        [SerializeField, Tooltip("Радиус поиска соседних шашек")]
-        private float neighborRadius = 1.0f;
+        [SerializeField, Tooltip("Максимальное время принятия решения (сек)")] private float maxDecisionDelay = 4f;
+        [SerializeField, Tooltip("Время имитации прицеливания (сек)")] private float aimingTime = 2f;
 
-        [Header("Score Weights")]
-        [SerializeField, Tooltip("Вес группировки своих шашек")]
-        private float friendlyGroupWeight = 0.7f;
-        [SerializeField, Tooltip("Вес близости к вражеским шашкам")]
-        private float enemyProximityWeight = 1.2f;
-        [SerializeField, Tooltip("Вес линии огня (потенциальных попаданий)")]
-        private float lineOfFireWeight = 2.0f;
-        [SerializeField, Tooltip("Вес позиции ближе к центру доски")]
-        private float boardCenterWeight = 0.5f;
-        [SerializeField, Tooltip("Штраф за близость к краям доски")]
-        private float edgePenaltyWeight = 0.3f;
+        [Header("Score Calculation Settings")] [SerializeField, Tooltip("Радиус поиска соседних шашек")] private float
+            neighborRadius = 1.0f;
+
+        [Header("Score Weights")] [SerializeField, Tooltip("Вес группировки своих шашек")] private float
+            friendlyGroupWeight = 0.7f;
+
+        [SerializeField, Tooltip("Вес близости к вражеским шашкам")] private float enemyProximityWeight = 1.2f;
+        [SerializeField, Tooltip("Вес линии огня (потенциальных попаданий)")] private float lineOfFireWeight = 2.0f;
+        [SerializeField, Tooltip("Вес позиции ближе к центру доски")] private float boardCenterWeight = 0.5f;
+        [SerializeField, Tooltip("Штраф за близость к краям доски")] private float edgePenaltyWeight = 0.3f;
 
         #endregion
 
@@ -42,8 +35,7 @@ namespace AI
         public List<Pawn> _aiPawns = new();
         public List<Pawn> _enemyPawns = new();
 
-        [ShowInInspector, ReadOnly]
-        private Pawn aiSelectedPawn;
+        [ShowInInspector, ReadOnly] private Pawn aiSelectedPawn;
         private ScoreCalculator _scoreCalculator;
         private Board _board;
         private CameraController _cameraController;
@@ -168,46 +160,55 @@ namespace AI
         private IEnumerator AimRoutine()
         {
             float elapsedTime = 0f;
-            Vector3 optimalDirection = CalculateOptimalDirection(aiSelectedPawn); // Оптимальное направление
-            Vector3 currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f; // Начальное случайное отклонение
+            Vector3 optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
+                // Оптимальное направление для выстрела
+            Vector3 currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
+                // Начальное случайное отклонение
             currentDirection.y = 0; // Ограничиваем движение по горизонтали
             currentDirection.Normalize();
 
             // Настройки колебаний
             int oscillationCount = 3; // Количество небольших корректировок
-            float oscillationDuration = aimingTime / (oscillationCount + 1); // Время на каждую фазу
+            float totalAimingTime = aimingTime - 0.5f; // Оставляем 0.5 сек на финальную фиксацию
+            float oscillationDuration = totalAimingTime / oscillationCount; // Время на каждую фазу колебаний
 
             // Этап 1: Колебания (имитация неуверенности или корректировки)
             for (int i = 0; i < oscillationCount; i++)
             {
-                Vector3 targetDirection = optimalDirection + Random.insideUnitSphere * 0.2f; // Небольшое отклонение от цели
+                Vector3 targetDirection = optimalDirection + Random.insideUnitSphere * 0.2f;
+                    // Небольшое отклонение от цели
                 targetDirection.y = 0;
                 targetDirection.Normalize();
 
                 // Плавный переход к новому направлению
-                yield return DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection, oscillationDuration)
-                    .SetEase(Ease.InOutQuad) // Плавное ускорение и замедление
-                    .OnUpdate(() =>
-                    {
-                        float force = CalculateForce(aiSelectedPawn, currentDirection);
-                        aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
-                    })
-                    .WaitForCompletion();
+                yield return
+                    DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection, oscillationDuration)
+                        .SetEase(Ease.InOutQuad)
+                        .OnUpdate(() =>
+                        {
+                            float force = CalculateForce(aiSelectedPawn, currentDirection);
+                            aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
+                        })
+                        .WaitForCompletion();
             }
 
             // Этап 2: Фиксация на оптимальном направлении
-            yield return DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, oscillationDuration)
+            yield return DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)
                 .OnUpdate(() =>
                 {
                     float force = CalculateForce(aiSelectedPawn, currentDirection);
                     aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
                 })
+                .OnComplete(() =>
+                {
+                    // Финальное обновление визуализации перед выстрелом
+                    float finalForce = CalculateForce(aiSelectedPawn, optimalDirection);
+                    aiSelectedPawn.UpdateLineVisuals(finalForce, optimalDirection);
+                })
                 .WaitForCompletion();
 
-            // Финальное обновление направления
-            float finalForce = CalculateForce(aiSelectedPawn, optimalDirection);
-            aiSelectedPawn.UpdateLineVisuals(finalForce, optimalDirection);
+            // Теперь выстрел будет произведён в optimalDirection
         }
 
         /// <summary>
