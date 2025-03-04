@@ -37,7 +37,7 @@ namespace Core
         [BoxGroup("Line Settings")] [SerializeField] private float maxLineLength = 3f;
 
         [BoxGroup("Line Settings")] [SerializeField, Tooltip("Высота на которой показывается линия удара")] private
-            float YOffset = .1f;
+            float yOffset = .1f;
 
         [BoxGroup("Board Settings")] [SerializeField, Tooltip("Высота доски по оси Y")] private float boardHeight = 0.5f;
 
@@ -81,12 +81,53 @@ namespace Core
         
         #endregion
         
+        #region Public Methods
+        
+        public void ApplyForce(Vector3 force)
+        {
+            _rb.AddForce(force, ForceMode.Impulse);
+            ResetSelection();
+        }
+        public void UpdateLineVisuals(float force, Vector3 forceDirection)
+        {
+            var baseLength = force / maxForce;
+            var finalLength = baseLength * maxLineLength;
+            var endPosition = transform.position + forceDirection * finalLength;
+            
+            if (!lineRenderer.enabled)
+            {
+                lineRenderer.enabled = true;
+            }
+
+            lineRenderer.SetPosition(0, transform.position + new Vector3(0f, yOffset, 0f));
+            lineRenderer.SetPosition(1, endPosition + new Vector3(0f, yOffset, 0f));
+
+            // UpdateLineColor();TODO изменение цвета от в зависимости от силы 
+        }
+
+        public void ResetSelection()
+        {
+            SwitchLineRenderer();
+            _currentForce = 0f;
+            // после удара снимаем выбор
+            _isSelected = false;
+            OnForceApplied?.Invoke(null);
+        }
+
+        public void Select()
+        {
+            _isSelected = true;
+            OnSelect?.Invoke(this);
+        }
+        
+        #endregion
+        
         #region Unity Lifecycle
 
         private void Awake()
         {
             InitializeComponents();
-            SetupLineRenderer();
+            SwitchLineRenderer();
         }
 
         private void OnDestroy()
@@ -110,13 +151,11 @@ namespace Core
         public void OnPointerDown(PointerEventData eventData)
         {
             if (!Interactable) return;
-            // если шашка не игрока
-            if (!IsPlayersChecker()) return;
 
             if (!_isSelected) return;
 
             _dragStartWorldPos = GetBoardIntersectionPoint(eventData.position);
-            UpdateLineRenderer();
+            SwitchLineRenderer(true);
         }
         
         public void OnDrag(PointerEventData eventData)
@@ -128,7 +167,7 @@ namespace Core
             ForceDirection = CalculateForce(eventData.position);
 
             if (ForceDirection == lastDirection) return;
-            UpdateLineVisuals();
+            UpdateLineVisuals(_currentForce, ForceDirection);
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -165,15 +204,8 @@ namespace Core
             ApplyForce(ForceDirection * _currentForce);
         }
         
-        public void ApplyForce(Vector3 force)
-        {
-            _rb.AddForce(force, ForceMode.Impulse);
-            ResetSelection();
-        }
-
         #endregion
         
-
         #region Helper Methods
 
         private void InitializeComponents()
@@ -191,10 +223,13 @@ namespace Core
             if (pawnMeshRenderer == null) throw new MissingComponentException("Pawn Mesh Renderer not found");
         }
 
-        private void SetupLineRenderer()
+        private void SwitchLineRenderer(bool enable = false)
         {
             lineRenderer.positionCount = 2;
-            lineRenderer.enabled = false;
+            lineRenderer.SetPosition(0, transform.position);
+            lineRenderer.SetPosition(1, transform.position);
+            
+            lineRenderer.enabled = enable;
         }
 
         private Vector3 GetBoardIntersectionPoint(Vector2 screenPos)
@@ -206,48 +241,7 @@ namespace Core
                 ? ray.GetPoint(distance)
                 : Vector3.zero;
         }
-
-        private void UpdateLineRenderer()
-        {
-            lineRenderer.enabled = true;
-
-            lineRenderer.SetPosition(0, transform.position);
-            lineRenderer.SetPosition(1, transform.position);
-        }
         
-        private void UpdateLineVisuals()
-        {
-            var baseLength = _currentForce / maxForce;
-            var finalLength = baseLength * maxLineLength;
-            var endPosition = transform.position + ForceDirection * finalLength;
-            
-            if (!lineRenderer.enabled)
-            {
-                lineRenderer.enabled = true;
-            }
-
-            lineRenderer.SetPosition(0, transform.position + new Vector3(0f, YOffset, 0f));
-            lineRenderer.SetPosition(1, endPosition + new Vector3(0f, YOffset, 0f));
-
-            // UpdateLineColor();TODO изменение цвета от в зависимости от силы 
-        }
-
-        private void ResetSelection()
-        {
-            lineRenderer.enabled = false;
-            _currentForce = 0f;
-            // после удара снимаем выбор
-            _isSelected = false;
-            OnForceApplied?.Invoke(null);
-        }
-
-        [ShowInInspector, BoxGroup("Debug"), ReadOnly]
-        private bool IsPlayersChecker()
-        {
-            // todo Заглушка - реализуйте свою логику
-            return true;
-        }
-
         private void UpdateMeshRenderer()
         {
             if (pawnMeshRenderer == null) pawnMeshRenderer = GetComponentInChildren<MeshRenderer>();
