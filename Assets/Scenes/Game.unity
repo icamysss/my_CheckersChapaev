@@ -367,6 +367,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1804761031938782104, guid: 798bed07a7c264a71b3f0fcc49e32edd, type: 3}
+      propertyPath: trackingCamPosition.z
+      value: -3
+      objectReference: {fileID: 0}
     - target: {fileID: 9051514619641224775, guid: 798bed07a7c264a71b3f0fcc49e32edd, type: 3}
       propertyPath: m_Name
       value: Camera
