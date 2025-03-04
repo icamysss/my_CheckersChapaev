@@ -22,11 +22,11 @@ public class CameraController : MonoBehaviour
    
     [BoxGroup("Tracking Settings")]
     [SerializeField, Tooltip("Позиция камеры во время прицеливания")] 
-    private Vector3 TrackingCamPosition ;
+    private Vector3 trackingCamPosition ;
   
     [BoxGroup("Tracking Settings")]
     [SerializeField, Tooltip("Позиция камеры во время прицеливания")] 
-    private Quaternion TrackingCamRotation ;
+    private Quaternion trackingCamRotation ;
     
     [BoxGroup("Debug")]
     [ShowInInspector, ReadOnly] private Pawn currentTarget;  // текущая цель
@@ -37,6 +37,8 @@ public class CameraController : MonoBehaviour
     [BoxGroup("Debug")]
     [SerializeField, ReadOnly] private Quaternion defaultCamRotation;
     
+    public float MoveDuration => moveDuration;
+    
     
     private Tweener moveTween;
     private Tweener lookTween;
@@ -44,7 +46,7 @@ public class CameraController : MonoBehaviour
     
     private Tweener moveCamTween;
     private Tweener lookCamTween;
-
+    
 
     private void OnEnable()
     {
@@ -126,13 +128,13 @@ public class CameraController : MonoBehaviour
         lookTween = transform.DORotateQuaternion(targetRotation, moveDuration);
         
         // -------- Изменение положение камеры (Main Camera)
-        if (mainCamera.transform.position != TrackingCamPosition)
+        if (mainCamera.transform.position != trackingCamPosition)
         {
-            moveCamTween = mainCamera.transform.DOLocalMove(TrackingCamPosition, moveDuration);
+            moveCamTween = mainCamera.transform.DOLocalMove(trackingCamPosition, moveDuration);
         }
-        if (mainCamera.transform.rotation != TrackingCamRotation)
+        if (mainCamera.transform.rotation != trackingCamRotation)
         {
-            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(TrackingCamRotation, moveDuration); 
+            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(trackingCamRotation, moveDuration); 
         }
     }
     
