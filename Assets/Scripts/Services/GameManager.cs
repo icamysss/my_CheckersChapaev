@@ -23,8 +23,13 @@ namespace Services
         
         
         private IUIManager uiManager;
-        
-        
+
+        private void Update()
+        {
+            if (!isInitialized) return;
+            game.GameUpdate();
+        }
+
         private void SetGameState(GameState newState)
         {
             Debug.Log($"Game state changed to {newState}, old {gameState}");
@@ -101,6 +106,7 @@ namespace Services
         public void Shutdown()
         {
             Debug.Log("Shutting down Game Manager");
+            game.Dispose();
         }
         
         public bool isInitialized { get; private set; }
