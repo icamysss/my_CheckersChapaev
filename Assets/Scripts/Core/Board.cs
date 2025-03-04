@@ -62,12 +62,12 @@ namespace Core
         [Button]
         public List<Pawn> GetAllPawnsOnBoard()
         {
-            Vector3 halfExtents = new Vector3(boardSize, 1, boardSize);
+            Vector3 halfExtents = new Vector3(boardSize * .5f, 0.5f, boardSize * .5f) ;
             var targetTag = "Pawn";
             float maxDistance = boardSize * 0.5f;
         
             Vector3 center = CenterPosition;
-            Vector3 direction = transform.forward;
+            Vector3 direction = transform.up;
             Quaternion orientation = transform.rotation;
         
 
@@ -80,7 +80,7 @@ namespace Core
                 maxDistance, layerMask: 1 << LayerMask.NameToLayer(targetTag)
                 );
         
-            pawns.Clear(); pawns = new List<Pawn>();
+            pawns.Clear();
         
             // Добавляем объекты с нужным тегом
             foreach (RaycastHit hit in hits)
@@ -182,11 +182,14 @@ namespace Core
     
         #endregion
 
-        #region Unimplemented
-        public void Reset()
+        #region Debug
+        private void OnDrawGizmos()
         {
-            /* Реализация может потребоваться для расширения функционала */
-            throw new NotImplementedException();
+            // Параметры BoxCast из вашего метода
+            var halfExtents = new Vector3(boardSize, 1, boardSize);
+            // Рисуем начальную коробку (зелёная)
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireCube(CenterPosition + Vector3.up * 0.5f, halfExtents);
         }
         #endregion
     }
