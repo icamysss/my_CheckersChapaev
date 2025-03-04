@@ -1,4 +1,5 @@
 using System;
+using AI;
 using Services;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -23,7 +24,7 @@ namespace Core
             Board = board;
 
             AIController = aiController;
-            AIController.Initialize(board, this);
+            AIController.Initialize(board);
 
             Pawn.OnForceApplied += OnForceApplied;
         }
