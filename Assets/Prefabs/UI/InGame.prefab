@@ -1301,3 +1301,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   menuType: InGame
   canvasGroup: {fileID: 7458417870819759431}
+  whiteCount: {fileID: 8700365426427700328}
+  blackCount: {fileID: 5941056210928643223}
+  whoTurn: {fileID: 2746638952360353635}
