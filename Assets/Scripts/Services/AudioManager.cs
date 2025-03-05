@@ -2,17 +2,22 @@ using UnityEngine;
 
 namespace Services
 {
+    [RequireComponent(typeof(AudioSource))]
     public class AudioManager : MonoBehaviour, IAudioService
     {
         [SerializeField] private PawnAudio pawnAudio;      // Клипы для шашек
         [SerializeField] private AudioSource musicSource;  // Источник для фоновой музыки
         [SerializeField] private AudioSource sfxSource;    // Источник для звуков эффектов
 
+        private AudioSource audioSource;
+        
+        
         #region IService
         
         public void Initialize()
         {
             Debug.Log("Audio Manager initialized");
+            audioSource = GetComponent<AudioSource>();
             isInitialized = true;
         }
 

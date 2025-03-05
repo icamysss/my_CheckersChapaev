@@ -22,6 +22,7 @@ public class PawnAudio
     // Начало зацикленного звука движения
     public void StartMovementLoop(AudioSource audioSource)
     {
+        if (audioSource.isPlaying) return;
         if (movementClips.Length > 0)
         {
             AudioClip clip = movementClips[Random.Range(0, movementClips.Length)];

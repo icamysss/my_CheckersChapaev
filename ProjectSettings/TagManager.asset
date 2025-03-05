@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Pawn
+  - Friendly
+  - Enemy
+  - Board
   layers:
   - Default
   - TransparentFX

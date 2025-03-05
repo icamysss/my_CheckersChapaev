@@ -88,6 +88,7 @@ namespace Core
         public void ApplyForce(Vector3 force)
         {
             _rb.AddForce(force, ForceMode.Impulse);
+            _audioService.PawnAudio.PlayStrikeSound(_audioSource);
             ResetSelection();
         }
         public void UpdateLineVisuals(float force, Vector3 forceDirection)
@@ -148,20 +149,23 @@ namespace Core
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!collision.gameObject.CompareTag("Board")) _audioService.PawnAudio.PlayStrikeSound(_audioSource);
-        }
-        
-        private void OnCollisionStay(Collision collision)
-        {
-           // if (collision.gameObject.CompareTag("Board") && _rb.linearVelocity.magnitude > 0.2f )
-               // _audioService.PawnAudio.StartMovementLoop(_audioSource);
+            if (!collision.gameObject.CompareTag("Board")) _audioService.PawnAudio.PlayCollideSound(_audioSource);
         }
 
-        private void OnCollisionExit(Collision collision)
+        private void OnCollisionStay(Collision other)
         {
-            if (collision.gameObject.CompareTag("Board") && _rb.linearVelocity.magnitude > 0 )
-                _audioService.PawnAudio.StopMovementLoop(_audioSource);
+            if (!other.gameObject.CompareTag("Board")) return;
+            if (_rb.linearVelocity.magnitude > .5f && _audioSource.isPlaying == false)
+            {
+                var speedNormalized = _rb.linearVelocity.normalized;
+                
+                _audioService.PawnAudio.PlayMovementSound(_audioSource);
+                _audioSource.volume = Mathf.Clamp(speedNormalized.magnitude, 0.1f, 1);
+                _audioSource.pitch = Mathf.Lerp(2.8f, 8.2f, speedNormalized.magnitude);
+            }
+           
         }
+        
 
         #endregion
 
