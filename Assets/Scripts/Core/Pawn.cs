@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using Services;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -54,12 +55,13 @@ namespace Core
         #region Private Variables
 
         private Rigidbody _rb;
-        private Camera _mainCamera;
+        private AudioSource _audioSource;
         private Vector3 _dragStartWorldPos;
         private bool _isSelected;
         private float _currentForce;
         private Tween _lineAnimationTween;
-        private CameraController cameraController;
+        private ICameraController _cameraController;
+        private IAudioService _audioService;
 
         #endregion
 
@@ -144,6 +146,23 @@ namespace Core
             UpdateMeshRenderer();
         }
 
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (!collision.gameObject.CompareTag("Board")) _audioService.PawnAudio.PlayStrikeSound(_audioSource);
+        }
+        
+        private void OnCollisionStay(Collision collision)
+        {
+           // if (collision.gameObject.CompareTag("Board") && _rb.linearVelocity.magnitude > 0.2f )
+               // _audioService.PawnAudio.StartMovementLoop(_audioSource);
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            if (collision.gameObject.CompareTag("Board") && _rb.linearVelocity.magnitude > 0 )
+                _audioService.PawnAudio.StopMovementLoop(_audioSource);
+        }
+
         #endregion
 
         #region Input Handlers
@@ -211,16 +230,18 @@ namespace Core
         private void InitializeComponents()
         {
             _rb = GetComponent<Rigidbody>();
-            _mainCamera = Camera.main;
-
+            
+            _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null) throw new MissingComponentException("Audio Source is null");
+            
             if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
-
-
-            cameraController = FindFirstObjectByType<CameraController>();
-            if (!cameraController) throw new MissingComponentException("Missing CameraController");
-
+            
             if (pawnMeshRenderer == null) pawnMeshRenderer = GetComponentInChildren<MeshRenderer>();
             if (pawnMeshRenderer == null) throw new MissingComponentException("Pawn Mesh Renderer not found");
+
+            _cameraController = ServiceLocator.Get<ICameraController>();
+            _audioService = ServiceLocator.Get<IAudioService>();
+           
         }
 
         private void SwitchLineRenderer(bool enable = false)
@@ -234,7 +255,7 @@ namespace Core
 
         private Vector3 GetBoardIntersectionPoint(Vector2 screenPos)
         {
-            var ray = _mainCamera.ScreenPointToRay(screenPos);
+            var ray = _cameraController.MainCamera.ScreenPointToRay(screenPos);
             var boardPlane = new Plane(Vector3.up, new Vector3(0, boardHeight, 0));
 
             return boardPlane.Raycast(ray, out var distance)

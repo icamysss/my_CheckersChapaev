@@ -203,7 +203,7 @@ MonoBehaviour:
   overviewRotation: {x: 0, y: 0, z: 0, w: 1}
   moveDuration: 1.5
   backDuration: 0.5
-  trackingCamPosition: {x: 0, y: 4, z: -2.5}
+  trackingCamPosition: {x: 0, y: 4, z: -3}
   trackingCamRotation: {x: 0.3007058, y: 0, z: 0, w: 0.95371693}
   mainCamera: {fileID: 4414416115565162224}
   defaultCamPosition: {x: 0, y: 0, z: 0}

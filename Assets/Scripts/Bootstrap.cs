@@ -6,6 +6,7 @@ public class Bootstrap : MonoBehaviour
     [SerializeField] private GameManager _gameManagerPrefab;
     [SerializeField] private UIManager _uiManagerPrefab;
     [SerializeField] private AudioManager _audioManagerPrefab;
+    [SerializeField] private CameraController _cameraControllerPrefab;
 
     private void Awake()
     {
@@ -32,6 +33,12 @@ public class Bootstrap : MonoBehaviour
         var audioManager = Instantiate(_audioManagerPrefab);
         DontDestroyOnLoad(audioManager.gameObject);
         ServiceLocator.Register<IAudioService>(audioManager);
+        // --------------------------------------------------
+        //              CAMERA CONTROLLER
+        // --------------------------------------------------
+        var cameraController = Instantiate(_cameraControllerPrefab);
+        DontDestroyOnLoad(cameraController.gameObject);
+        ServiceLocator.Register<ICameraController>(cameraController);
         // --------------------------------------------------
         
         // все сервисы отправлены в локатор

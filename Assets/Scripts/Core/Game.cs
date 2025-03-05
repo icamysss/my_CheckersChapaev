@@ -31,7 +31,6 @@ namespace Core
             this.gameManager = gameManager;
             Board = board;
             AIController = aiController;
-            AIController.Initialize(board);
 
             Pawn.OnForceApplied += OnForceApplied;
             Pawn.OnSelect += OnSelect;

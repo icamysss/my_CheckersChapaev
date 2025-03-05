@@ -1,11 +1,12 @@
 using System;
 using Core;
 using DG.Tweening;
+using Services;
 using Sirenix.OdinInspector;
 using UnityEngine;
 // TODO Сделать нормальное отображение в испекторе, интерполция позиции камеры от расстояния выбранной шашки до центра, 
 // добавить к твинам easy
-public class CameraController : MonoBehaviour
+public class CameraController : MonoBehaviour, ICameraController
 {
     [BoxGroup("Overview Settings")]
     [SerializeField] private Vector3 overviewPosition;
@@ -37,9 +38,9 @@ public class CameraController : MonoBehaviour
     [BoxGroup("Debug")]
     [SerializeField, ReadOnly] private Quaternion defaultCamRotation;
     
-    public float MoveDuration => moveDuration;
-    
-    
+  
+
+
     private Tweener moveTween;
     private Tweener lookTween;
     private Tweener rotateTween;
@@ -47,27 +48,13 @@ public class CameraController : MonoBehaviour
     private Tweener moveCamTween;
     private Tweener lookCamTween;
     
-
-    private void OnEnable()
-    {
-        Pawn.OnSelect += SetTarget;
-        Pawn.OnForceApplied += SetTarget; // передает null в качестве аргумента
-    }
     
     private void OnDisable()
     {
         Pawn.OnSelect -= SetTarget;
         Pawn.OnForceApplied -= SetTarget;
     }
-
-    private void Start()
-    {
-        mainCamera = GetComponentInChildren<Camera>();
-        if (mainCamera == null) throw new NullReferenceException("mainCamera not found");
-        
-        SetDefaultPositions();
-    }
-
+    
     private void OnValidate()
     {
         if (mainCamera == null) mainCamera = GetComponentInChildren<Camera>();
@@ -137,5 +124,39 @@ public class CameraController : MonoBehaviour
             lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(trackingCamRotation, moveDuration); 
         }
     }
+
+    #region ICameraController
+
+    public float MoveDuration => moveDuration;
+    public Camera MainCamera => mainCamera;
+
+    #endregion
     
+    
+    #region IService
+    
+    public void Initialize()
+    {
+        mainCamera = GetComponentInChildren<Camera>();
+        if (mainCamera == null) throw new NullReferenceException("mainCamera not found");
+        
+        SetDefaultPositions();
+        
+        Pawn.OnSelect += SetTarget;
+        Pawn.OnForceApplied += SetTarget; // передает null в качестве аргумента
+        
+        isInitialized = true;
+        
+    }
+
+    public void Shutdown()
+    {
+        Pawn.OnSelect -= SetTarget;
+        Pawn.OnForceApplied -= SetTarget;
+    }
+
+    public bool isInitialized { get; private set; }
+    
+    #endregion
+   
 }

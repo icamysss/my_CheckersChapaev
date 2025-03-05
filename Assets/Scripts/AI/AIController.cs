@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core;
 using DG.Tweening;
+using Services;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace AI
 {
@@ -38,19 +41,30 @@ namespace AI
         [ShowInInspector, ReadOnly] private Pawn aiSelectedPawn;
         private ScoreCalculator _scoreCalculator;
         private Board _board;
-        private CameraController _cameraController;
+        private ICameraController _cameraController;
 
         #endregion
 
         #region Initialization
 
+        private void OnEnable()
+        {
+            ServiceLocator.OnAllServicesRegistered += AllServicesRegistered;
+        }
+
+        private void AllServicesRegistered()
+        {
+            var board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
+            Initialize(board);
+        }
+
         /// <summary>
         /// Инициализация контроллера ИИ с доской и камерой
         /// </summary>
-        public void Initialize(Board board)
+        private void Initialize(Board board)
         {
             _board = board;
-            _cameraController = FindFirstObjectByType<CameraController>();
+            _cameraController = ServiceLocator.Get<ICameraController>();
             _scoreCalculator = new ScoreCalculator(neighborRadius, _board.BoardSize);
             SetScoreWeights();
         }
