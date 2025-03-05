@@ -18,6 +18,7 @@ namespace Services
         {
             Debug.Log("Audio Manager initialized");
             audioSource = GetComponent<AudioSource>();
+            pawnAudio.Initialize(audioSource);
             isInitialized = true;
         }
 

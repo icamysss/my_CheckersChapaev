@@ -62,6 +62,7 @@ namespace Core
         private Tween _lineAnimationTween;
         private ICameraController _cameraController;
         private IAudioService _audioService;
+        private bool isOnBoard;
 
         #endregion
 
@@ -88,7 +89,7 @@ namespace Core
         public void ApplyForce(Vector3 force)
         {
             _rb.AddForce(force, ForceMode.Impulse);
-            _audioService.PawnAudio.PlayStrikeSound(_audioSource);
+            _audioService.PawnAudio.PlayStrikeSound();
             ResetSelection();
         }
         public void UpdateLineVisuals(float force, Vector3 forceDirection)
@@ -149,23 +150,59 @@ namespace Core
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!collision.gameObject.CompareTag("Board")) _audioService.PawnAudio.PlayCollideSound(_audioSource);
+            if (!collision.gameObject.CompareTag("Board")) _audioService.PawnAudio.PlayCollideSound();
         }
 
         private void OnCollisionStay(Collision other)
         {
             if (!other.gameObject.CompareTag("Board")) return;
-            if (_rb.linearVelocity.magnitude > .5f && _audioSource.isPlaying == false)
-            {
-                var speedNormalized = _rb.linearVelocity.normalized;
-                
-                _audioService.PawnAudio.PlayMovementSound(_audioSource);
-                _audioSource.volume = Mathf.Clamp(speedNormalized.magnitude, 0.1f, 1);
-                _audioSource.pitch = Mathf.Lerp(2.8f, 8.2f, speedNormalized.magnitude);
-            }
-           
+            isOnBoard = true;
         }
-        
+
+        private void OnCollisionExit(Collision other)
+        {
+            if (!other.gameObject.CompareTag("Board")) return;
+            isOnBoard = false;
+        }
+
+        private void Update()
+        {
+            float minSpeed = 1f;
+            float maxSpeed = 100f;
+            // Проверяем, если шашка на доске и движется быстрее минимальной скорости
+            if (isOnBoard && _rb.linearVelocity.magnitude > minSpeed)
+            {
+                // Включаем звук, если он ещё не играет
+                if (!_audioSource.isPlaying)
+                {
+                    _audioSource.Play();
+                }
+
+                // Вычисляем громкость на основе скорости
+                float speed = _rb.linearVelocity.magnitude;
+                float targetVolume = Mathf.Clamp01((speed - minSpeed) / (maxSpeed - minSpeed));
+
+                // Плавно изменяем громкость
+                _audioSource.volume = Mathf.Lerp(_audioSource.volume, targetVolume, Time.deltaTime * 5);
+            }
+            else
+            {
+                // Если шашка остановилась или оторвалась от доски
+                if (_audioSource.isPlaying)
+                {
+                    // Плавно уменьшаем громкость перед остановкой
+                    if (_audioSource.volume > 0.01f)
+                    {
+                        _audioSource.volume = Mathf.Lerp(_audioSource.volume, 0f, Time.deltaTime * 5);
+                    }
+                    else
+                    {
+                        _audioSource.Stop(); // Останавливаем звук, когда громкость почти нулевая
+                        _audioSource.volume = 0f;
+                    }
+                }
+            }
+        }
 
         #endregion
 

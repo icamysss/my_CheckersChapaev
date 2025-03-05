@@ -9,52 +9,58 @@ public class PawnAudio
     public AudioClip[] collideClips;   // Клипы для столкновения
     public AudioClip[] strikeClips;    // Клипы для удара
     
+    private AudioSource _audioSource;
+
+    public void Initialize(AudioSource source)
+    {
+        _audioSource = source;
+    }
+    
     // Воспроизведение однократного звука движения
-    public void PlayMovementSound(AudioSource audioSource)
+    public void PlayMovementSound()
     {
         if (movementClips.Length > 0)
         {
             AudioClip clip = movementClips[Random.Range(0, movementClips.Length)];
-            audioSource.PlayOneShot(clip);
+            _audioSource.PlayOneShot(clip);
         }
     }
 
     // Начало зацикленного звука движения
-    public void StartMovementLoop(AudioSource audioSource)
+    public void StartMovementLoop(AudioSource pawnAudioSource)
     {
-        if (audioSource.isPlaying) return;
         if (movementClips.Length > 0)
         {
             AudioClip clip = movementClips[Random.Range(0, movementClips.Length)];
-            audioSource.clip = clip;
-            audioSource.loop = true;
-            audioSource.Play();
+            pawnAudioSource.clip = clip;
+            pawnAudioSource.loop = true;
+            pawnAudioSource.Play();
         }
     }
 
     // Остановка зацикленного звука
-    public void StopMovementLoop(AudioSource audioSource)
+    public void StopMovementLoop(AudioSource pawnAudioSource)
     {
-        audioSource.Stop();
+        pawnAudioSource.Stop();
     }
 
     // Воспроизведение звука столкновения
-    public void PlayCollideSound(AudioSource audioSource)
+    public void PlayCollideSound()
     {
         if (collideClips.Length > 0)
         {
             AudioClip clip = collideClips[Random.Range(0, collideClips.Length)];
-            audioSource.PlayOneShot(clip);
+            _audioSource.PlayOneShot(clip);
         }
     }
 
     // Воспроизведение звука удара
-    public void PlayStrikeSound(AudioSource audioSource)
+    public void PlayStrikeSound()
     {
         if (strikeClips.Length > 0)
         {
             AudioClip clip = strikeClips[Random.Range(0, strikeClips.Length)];
-            audioSource.PlayOneShot(clip);
+            _audioSource.PlayOneShot(clip);
         }
     }
 }
