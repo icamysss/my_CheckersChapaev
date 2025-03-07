@@ -47,14 +47,31 @@ public class CameraController : MonoBehaviour, ICameraController
     
     private Tweener moveCamTween;
     private Tweener lookCamTween;
+
+    private Board board;
     
     
     private void OnDisable()
     {
         Pawn.OnSelect -= SetTarget;
         Pawn.OnForceApplied -= SetTarget;
+        ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
+        KillActiveTweens();
     }
-    
+
+    private void OnAllServicesRegistered()
+    {
+        board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
+        if (board != null)
+        {
+            Debug.Log("Board not found");
+        }
+        else
+        {
+            overviewPosition = board.CenterPosition;
+        }
+    }
+
     private void OnValidate()
     {
         if (mainCamera == null) mainCamera = GetComponentInChildren<Camera>();
@@ -132,7 +149,6 @@ public class CameraController : MonoBehaviour, ICameraController
 
     #endregion
     
-    
     #region IService
     
     public void Initialize()
@@ -145,6 +161,9 @@ public class CameraController : MonoBehaviour, ICameraController
         Pawn.OnSelect += SetTarget;
         Pawn.OnForceApplied += SetTarget; // передает null в качестве аргумента
         
+        ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
+        
+        
         isInitialized = true;
         
     }
@@ -153,6 +172,7 @@ public class CameraController : MonoBehaviour, ICameraController
     {
         Pawn.OnSelect -= SetTarget;
         Pawn.OnForceApplied -= SetTarget;
+        ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
     }
 
     public bool isInitialized { get; private set; }
