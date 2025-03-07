@@ -1,182 +1,262 @@
 using System;
+using Common;
 using Core;
 using DG.Tweening;
-using Services;
 using Sirenix.OdinInspector;
 using UnityEngine;
-// TODO Сделать нормальное отображение в испекторе, интерполция позиции камеры от расстояния выбранной шашки до центра, 
-// добавить к твинам easy
-public class CameraController : MonoBehaviour, ICameraController
+
+namespace Services
 {
-    [BoxGroup("Overview Settings")]
-    [SerializeField] private Vector3 overviewPosition;
-    [BoxGroup("Overview Settings")]
-    [SerializeField] private Quaternion overviewRotation;
-
-    [BoxGroup("Tracking Settings")]
-    [SerializeField, Tooltip("Время перемещения к выбранной шашке")] 
-    private float moveDuration = 1f;
+    /// <summary>
+    /// Управляет движением и поворотом камеры в зависимости от выбранной шашки или обзорного режима.
+    /// </summary>
+    public class CameraController : MonoBehaviour, ICameraController
+    {
+        #region Fields
     
-    [BoxGroup("Tracking Settings")]
-    [SerializeField, Tooltip("Время перемещения к стартовому обзору")] 
-    private float backDuration = 0.5f;
+        [BoxGroup("Tracking Settings")]
+        [SerializeField, Tooltip("Время перемещения к выбранной шашке")]
+        private float moveDuration = 1f;
+
+        [BoxGroup("Tracking Settings")]
+        [SerializeField, Tooltip("Время возвращения к обзорному режиму")]
+        private float backDuration = 0.5f;
+        
+        [BoxGroup("Tracking Settings")]
+        [SerializeField, Tooltip("Анимация передвижения ")]
+        private Ease moveEase = Ease.InCubic;
+
+        [BoxGroup("Tracking Settings")]
+        [SerializeField, Tooltip("Минимальные значения позиции камеры")]
+        private CameraOffset minCamPosition;
+    
+        [BoxGroup("Tracking Settings")]
+        [SerializeField, Tooltip("Максимальные значения позиции камеры")]
+        private CameraOffset maxCamPosition;
+
    
-    [BoxGroup("Tracking Settings")]
-    [SerializeField, Tooltip("Позиция камеры во время прицеливания")] 
-    private Vector3 trackingCamPosition ;
-  
-    [BoxGroup("Tracking Settings")]
-    [SerializeField, Tooltip("Позиция камеры во время прицеливания")] 
-    private Quaternion trackingCamRotation ;
-    
-    [BoxGroup("Debug")]
-    [ShowInInspector, ReadOnly] private Pawn currentTarget;  // текущая цель
-    [BoxGroup("Debug")]
-    [SerializeField, ReadOnly] private Camera mainCamera;
-    [BoxGroup("Debug")]
-    [SerializeField, ReadOnly] private Vector3 defaultCamPosition;
-    [BoxGroup("Debug")]
-    [SerializeField, ReadOnly] private Quaternion defaultCamRotation;
-    
-  
 
+        [BoxGroup("Debug")]
+        [ShowInInspector, ReadOnly]
+        private Pawn currentTarget; // Текущая выбранная шашка
 
-    private Tweener moveTween;
-    private Tweener lookTween;
-    private Tweener rotateTween;
-    
-    private Tweener moveCamTween;
-    private Tweener lookCamTween;
+        [BoxGroup("Debug")]
+        [SerializeField, ReadOnly]
+        private Camera mainCamera; // Ссылка на основную камеру
 
-    private Board board;
+        [BoxGroup("Debug")]
+        [SerializeField, ReadOnly]
+        private CameraOffset defaultCamOffset; // Начальная позиция камеры
     
+        [BoxGroup("Debug")]
+        [SerializeField, Tooltip("максимальная дистанци от шашки до центра доски"), ReadOnly]
+        private float maxDistance;  
     
-    private void OnDisable()
-    {
-        Pawn.OnSelect -= SetTarget;
-        Pawn.OnForceApplied -= SetTarget;
-        ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
-        KillActiveTweens();
-    }
+        [BoxGroup("Debug")]
+        [SerializeField, Tooltip("Позиция камеры в обзорном режиме"), ReadOnly]
+        private Vector3 overviewPosition;
 
-    private void OnAllServicesRegistered()
-    {
-        board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
-        if (board != null)
+        [BoxGroup("Debug")]
+        [SerializeField, Tooltip("Поворот камеры в обзорном режиме"),ReadOnly]
+        private Quaternion overviewRotation;
+    
+        private Tweener moveTween;
+        private Tweener lookTween;
+        private Tweener rotateTween;
+        private Tweener moveCamTween;
+        private Tweener lookCamTween;
+
+        private Board board;
+
+        #endregion
+
+        #region Unity Methods
+
+        /// <summary>
+        /// Вызывается при отключении объекта. Отписывается от событий и завершает активные твины.
+        /// </summary>
+        private void OnDisable()
         {
-            Debug.Log("Board not found");
+            Pawn.OnSelect -= SetTarget;
+            Pawn.OnForceApplied -= SetTarget;
+            ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
+            KillActiveTweens();
         }
-        else
+
+        /// <summary>
+        /// Вызывается после регистрации всех сервисов. Получает ссылку на доску.
+        /// </summary>
+        private void OnAllServicesRegistered()
         {
-            overviewPosition = board.CenterPosition;
+            board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
+            if (board == null)
+            {
+                Debug.LogError("Board not found");
+            }
+            Debug.Log($"BoardSize: {board.BoardSize}");
+            maxDistance = (board.BoardSize / 2f) * Mathf.Sqrt(2);
         }
-    }
 
-    private void OnValidate()
-    {
-        if (mainCamera == null) mainCamera = GetComponentInChildren<Camera>();
-    }
-
-    private void SetTarget(Pawn pawn)
-    {
-        currentTarget = pawn;
-        KillActiveTweens();
-
-        if (currentTarget == null)
+        /// <summary>
+        /// Вызывается при валидации в редакторе. Проверяет наличие камеры.
+        /// </summary>
+        private void OnValidate()
         {
-            ReturnToOverview(backDuration);
+            if (mainCamera == null) mainCamera = GetComponentInChildren<Camera>();
         }
-        else
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Устанавливает цель для отслеживания камерой.
+        /// </summary>
+        /// <param name="pawn">Выбранная шашка или null для возврата в обзорный режим.</param>
+        private void SetTarget(Pawn pawn)
         {
-            MoveToTarget(currentTarget.transform);
+            currentTarget = pawn;
+            KillActiveTweens();
+
+            if (currentTarget == null)
+            {
+                ReturnToOverview(backDuration);
+            }
+            else
+            {
+                MoveToTarget(currentTarget.transform);
+            }
         }
-    }
 
-    private void SetDefaultPositions()
-    {
-        overviewPosition = transform.position;
-        overviewRotation = transform.rotation;
-        
-        defaultCamPosition = mainCamera.transform.position;
-        defaultCamRotation = mainCamera.transform.rotation;
-    }
-
-    private void KillActiveTweens()
-    {
-        moveTween?.Kill();
-        lookTween?.Kill();
-        rotateTween?.Kill();
-        moveCamTween?.Kill();
-        lookCamTween?.Kill();
-    }
-
-    private void ReturnToOverview(float time)
-    {
-        // возвращаем родителя на место
-        moveTween = transform.DOMove(overviewPosition, time);
-        rotateTween = transform.DORotateQuaternion(overviewRotation, time);
-        // возвращаем камеру на место
-        moveCamTween = mainCamera.transform.DOMove(defaultCamPosition, time);
-        lookCamTween = mainCamera.transform.DORotateQuaternion(defaultCamRotation, time);
-    }
-
-    private void MoveToTarget(Transform target)
-    {
-        // -------- Изменение положение родителя камеры
-        var targetPosition = currentTarget.transform.position;
-        // перемещение камеры на шашку
-        moveTween = transform.DOMove(targetPosition, moveDuration);
-        // поворот камеры к центру
-        if (targetPosition == overviewPosition) return; // если шашка в центре
-        var targetRotation = Quaternion.LookRotation(overviewPosition - target.position);
-        lookTween = transform.DORotateQuaternion(targetRotation, moveDuration);
-        
-        // -------- Изменение положение камеры (Main Camera)
-        if (mainCamera.transform.position != trackingCamPosition)
+        /// <summary>
+        /// Устанавливает начальные позиции и повороты для обзорного режима и камеры.
+        /// </summary>
+        private void SetDefaultPositions()
         {
-            moveCamTween = mainCamera.transform.DOLocalMove(trackingCamPosition, moveDuration);
+            // позиция для родителя
+            overviewPosition = transform.position;
+            overviewRotation = transform.rotation;
+       
+            // позиция для камеры стартовая
+            defaultCamOffset.HeightY = mainCamera.transform.localPosition.y;
+            defaultCamOffset.OffsetZ = mainCamera.transform.localPosition.z;
+            defaultCamOffset.RotationX = mainCamera.transform.localEulerAngles.x;
         }
-        if (mainCamera.transform.rotation != trackingCamRotation)
+
+        /// <summary>
+        /// Завершает все активные анимации (твины).
+        /// </summary>
+        private void KillActiveTweens()
         {
-            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(trackingCamRotation, moveDuration); 
+            moveTween?.Kill();
+            lookTween?.Kill();
+            rotateTween?.Kill();
+            moveCamTween?.Kill();
+            lookCamTween?.Kill();
         }
+
+        /// <summary>
+        /// Возвращает камеру в обзорную позицию.
+        /// </summary>
+        /// <param name="time">Длительность анимации возвращения.</param>
+        private void ReturnToOverview(float time)
+        {
+            moveTween = transform.DOMove(overviewPosition, time)
+                .SetEase(moveEase);
+            
+            rotateTween = transform.DORotateQuaternion(overviewRotation, time)
+                .SetEase(moveEase);
+            
+            moveCamTween = mainCamera.transform.DOLocalMove(defaultCamOffset.Position, time)
+                .SetEase(moveEase);
+            
+            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(defaultCamOffset.Rotation, time)
+                .SetEase(moveEase);
+        }
+
+        /// <summary>
+        /// Перемещает камеру для отслеживания указанной цели.
+        /// </summary>
+        /// <param name="target">Трансформ цели (шашки).</param>
+        private void MoveToTarget(Transform target)
+        {
+            if (target == null) return;
+
+            var targetPosition = target.position;
+            moveTween = transform.DOMove(targetPosition, moveDuration).SetEase(Ease.InOutQuad);
+
+            if (targetPosition != overviewPosition)
+            {
+                var targetRotation = Quaternion.LookRotation(overviewPosition - targetPosition);
+                lookTween = transform.DORotateQuaternion(targetRotation, moveDuration).SetEase(Ease.InOutQuad);
+            }
+
+            // Вычисление локальной позиции камеры с учётом расстояния до центра доски
+            var distance = Vector3.Distance(targetPosition, board.CenterPosition);
+            var factor = Mathf.Clamp01(distance / maxDistance);
+            var targetZ = Mathf.Lerp(minCamPosition.OffsetZ, maxCamPosition.OffsetZ, factor);
+            var targetY = Mathf.Lerp(minCamPosition.HeightY, maxCamPosition.HeightY, factor);
+            var camLocalPosition = new Vector3(0, targetY, targetZ);
+        
+            moveCamTween = mainCamera.transform.DOLocalMove(camLocalPosition, moveDuration).SetEase(Ease.InOutQuad);
+
+            // Вычисление локального поворота камеры с учётом расстояния до центра доски
+            var camRotation = Quaternion.Lerp(minCamPosition.Rotation, maxCamPosition.Rotation, factor);
+        
+            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDuration).
+                SetEase(Ease.InOutQuad);
+        }
+
+        #endregion
+
+        #region ICameraController
+
+        /// <summary>
+        /// Получает длительность перемещения камеры к цели.
+        /// </summary>
+        public float MoveDuration => moveDuration;
+
+        /// <summary>
+        /// Получает основную камеру.
+        /// </summary>
+        public Camera MainCamera => mainCamera;
+
+        #endregion
+
+        #region IService
+
+        /// <summary>
+        /// Инициализирует контроллер камеры.
+        /// </summary>
+        public void Initialize()
+        {
+            mainCamera = GetComponentInChildren<Camera>();
+            if (mainCamera == null) throw new NullReferenceException("Main camera not found");
+
+            SetDefaultPositions();
+
+            Pawn.OnSelect += SetTarget;
+            Pawn.OnForceApplied += SetTarget;
+            ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
+
+            isInitialized = true;
+        }
+
+        /// <summary>
+        /// Завершает работу контроллера камеры.
+        /// </summary>
+        public void Shutdown()
+        {
+            Pawn.OnSelect -= SetTarget;
+            Pawn.OnForceApplied -= SetTarget;
+            ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
+        }
+
+        /// <summary>
+        /// Указывает, инициализирован ли сервис.
+        /// </summary>
+        public bool isInitialized { get; private set; }
+
+        #endregion
     }
-
-    #region ICameraController
-
-    public float MoveDuration => moveDuration;
-    public Camera MainCamera => mainCamera;
-
-    #endregion
-    
-    #region IService
-    
-    public void Initialize()
-    {
-        mainCamera = GetComponentInChildren<Camera>();
-        if (mainCamera == null) throw new NullReferenceException("mainCamera not found");
-        
-        SetDefaultPositions();
-        
-        Pawn.OnSelect += SetTarget;
-        Pawn.OnForceApplied += SetTarget; // передает null в качестве аргумента
-        
-        ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
-        
-        
-        isInitialized = true;
-        
-    }
-
-    public void Shutdown()
-    {
-        Pawn.OnSelect -= SetTarget;
-        Pawn.OnForceApplied -= SetTarget;
-        ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
-    }
-
-    public bool isInitialized { get; private set; }
-    
-    #endregion
-   
 }
