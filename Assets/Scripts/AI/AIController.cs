@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core;
@@ -35,14 +34,15 @@ namespace AI
 
         #region Private Variables
 
-        public List<Pawn> _aiPawns = new();
-        public List<Pawn> _enemyPawns = new();
+        public List<Pawn> aiPawns = new();
+        public List<Pawn> enemyPawns = new();
 
         [ShowInInspector, ReadOnly] private Pawn aiSelectedPawn;
         private ScoreCalculator _scoreCalculator;
         private Board _board;
         private ICameraController _cameraController;
 
+        private Vector3 finalShotDirection;
         #endregion
 
         #region Initialization
@@ -109,8 +109,8 @@ namespace AI
         /// </summary>
         private void RefreshPawnLists(PawnColor pawnColor)
         {
-            _aiPawns = _board.GetPawnsOnBoard(pawnColor);
-            _enemyPawns = _board.GetPawnsOnBoard(pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black);
+            aiPawns = _board.GetPawnsOnBoard(pawnColor);
+            enemyPawns = _board.GetPawnsOnBoard(pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black);
         }
 
         /// <summary>
@@ -135,9 +135,8 @@ namespace AI
             yield return StartCoroutine(AimRoutine());
 
             // 5. Применение силы и завершение хода
-            Vector3 shotDirection = CalculateOptimalDirection(aiSelectedPawn);
-            float force = CalculateForce(aiSelectedPawn, shotDirection);
-            aiSelectedPawn.ApplyForce(shotDirection * force);
+            var force = CalculateForce(aiSelectedPawn);
+            aiSelectedPawn.ApplyForce(finalShotDirection * force);
         }
 
         /// <summary>
@@ -148,14 +147,14 @@ namespace AI
             Pawn bestPawn = null;
             float maxScore = float.MinValue;
 
-            foreach (Pawn pawn in _aiPawns)
+            foreach (Pawn pawn in aiPawns)
             {
                 if (pawn == null) continue;
 
                 float score = _scoreCalculator.Calculate(
                     pawn.transform.position,
-                    _aiPawns,
-                    _enemyPawns,
+                    aiPawns,
+                    enemyPawns,
                     _board.BoardSize
                     );
 
@@ -173,7 +172,6 @@ namespace AI
         /// </summary>
         private IEnumerator AimRoutine()
         {
-            float elapsedTime = 0f;
             Vector3 optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
                 // Оптимальное направление для выстрела
             Vector3 currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
@@ -200,7 +198,7 @@ namespace AI
                         .SetEase(Ease.InOutQuad)
                         .OnUpdate(() =>
                         {
-                            float force = CalculateForce(aiSelectedPawn, currentDirection);
+                            float force = CalculateForce(aiSelectedPawn);
                             aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
                         })
                         .WaitForCompletion();
@@ -211,14 +209,15 @@ namespace AI
                 .SetEase(Ease.InOutQuad)
                 .OnUpdate(() =>
                 {
-                    float force = CalculateForce(aiSelectedPawn, currentDirection);
+                    float force = CalculateForce(aiSelectedPawn);
                     aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
                 })
                 .OnComplete(() =>
                 {
                     // Финальное обновление визуализации перед выстрелом
-                    float finalForce = CalculateForce(aiSelectedPawn, optimalDirection);
+                    float finalForce = CalculateForce(aiSelectedPawn);
                     aiSelectedPawn.UpdateLineVisuals(finalForce, optimalDirection);
+                    finalShotDirection = optimalDirection;
                 })
                 .WaitForCompletion();
 
@@ -230,7 +229,7 @@ namespace AI
         /// </summary>
         private Vector3 CalculateOptimalDirection(Pawn selectedPawn)
         {
-            if (_enemyPawns.Count == 0)
+            if (enemyPawns.Count == 0)
             {
                 Debug.LogWarning("No enemies available for targeting");
                 return GetFallbackDirection(selectedPawn.transform);
@@ -238,7 +237,7 @@ namespace AI
 
             Vector3 targetPosition = _scoreCalculator.FindOptimalTarget(
                 selectedPawn.transform.position,
-                _enemyPawns
+                enemyPawns
                 );
 
             if (Vector3.Distance(targetPosition, selectedPawn.transform.position) < 0.1f)
@@ -255,7 +254,7 @@ namespace AI
         /// <summary>
         /// Расчет силы выстрела на основе расстояния до цели
         /// </summary>
-        private float CalculateForce(Pawn pawn, Vector3 direction)
+        private float CalculateForce(Pawn pawn)
         {
             float distance = Vector3.Distance(pawn.transform.position, _scoreCalculator.LastCalculatedTarget);
             float forceMultiplier = Mathf.Clamp01(distance / _scoreCalculator.MaxPredictionDistance);
@@ -280,9 +279,9 @@ namespace AI
         /// </summary>
         private Vector3 GetFallbackTarget(Vector3 currentPosition)
         {
-            if (_enemyPawns.Count > 0)
+            if (enemyPawns.Count > 0)
             {
-                return _enemyPawns[Random.Range(0, _enemyPawns.Count)].transform.position;
+                return enemyPawns[Random.Range(0, enemyPawns.Count)].transform.position;
             }
             return currentPosition + Vector3.forward * 2f;
         }
