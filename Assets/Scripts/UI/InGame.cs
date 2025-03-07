@@ -12,11 +12,14 @@ namespace UI
         [SerializeField] private Text whoTurn;
         
         private Game game;
+        private IGameManager gameManager;
 
         public override void Initialize()
         {
             base.Initialize();
-            game = ServiceLocator.Get<IGameManager>().CurrentGame;
+           
+            gameManager = ServiceLocator.Get<IGameManager>();
+            game = gameManager.CurrentGame;
 
             game.OnEndMove += UpdateUI;
             game.OnGameStart += UpdateUI;
@@ -74,6 +77,11 @@ namespace UI
             game.OnEndMove -= UpdateUI;
             game.OnGameStart -= UpdateUI;
             game.OnGameEnd -= OnGameEnded;
+        }
+        
+        public void BackToMainMenu()
+        {
+            gameManager.CurrentState = GameState.MainMenu;
         }
     }
 }
