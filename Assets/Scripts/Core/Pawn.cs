@@ -41,6 +41,10 @@ namespace Core
             float yOffset = .1f;
 
         [BoxGroup("Board Settings")] [SerializeField, Tooltip("Высота доски по оси Y")] private float boardHeight = 0.5f;
+        
+        [BoxGroup("Colors Settings")] [SerializeField, Tooltip("Объект который отображает выбор шашки")] private GameObject ringSelect;
+        
+        
 
         #endregion
 
@@ -115,12 +119,14 @@ namespace Core
             _currentForce = 0f;
             // после удара снимаем выбор
             _isSelected = false;
+            ringSelect.SetActive(false);
             OnForceApplied?.Invoke(null);
         }
 
         public void Select()
         {
             _isSelected = true;
+            ringSelect.SetActive(true);
             OnSelect?.Invoke(this);
         }
         
@@ -239,8 +245,7 @@ namespace Core
             }
             else // если не выбрана
             {
-                _isSelected = true;
-                OnSelect?.Invoke(this);
+               Select();
             }
         }
 
@@ -282,6 +287,9 @@ namespace Core
 
             _cameraController = ServiceLocator.Get<ICameraController>();
             _audioService = ServiceLocator.Get<IAudioService>();
+            
+            if (ringSelect == null) throw new MissingComponentException("Ring Select not found");
+            ringSelect.SetActive(false);
            
         }
 
