@@ -16,11 +16,11 @@ namespace Services
     
         [BoxGroup("Tracking Settings")]
         [SerializeField, Tooltip("Время перемещения к выбранной шашке")]
-        private float moveDuration = 1f;
+        private int moveDuration = 1500;
 
         [BoxGroup("Tracking Settings")]
         [SerializeField, Tooltip("Время возвращения к обзорному режиму")]
-        private float backDuration = 0.5f;
+        private int backDuration = 500;
         
         [BoxGroup("Tracking Settings")]
         [SerializeField, Tooltip("Анимация передвижения ")]
@@ -78,7 +78,7 @@ namespace Services
         private void OnDisable()
         {
             Pawn.OnSelect -= SetTarget;
-            Pawn.OnForceApplied -= SetTarget;
+            Pawn.OnEndAiming -= SetTarget;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
             KillActiveTweens();
         }
@@ -159,7 +159,7 @@ namespace Services
         /// Возвращает камеру в обзорную позицию.
         /// </summary>
         /// <param name="time">Длительность анимации возвращения.</param>
-        private void ReturnToOverview(float time)
+        private void ReturnToOverview(int time)
         {
             moveTween = transform.DOMove(overviewPosition, time)
                 .SetEase(moveEase);
@@ -183,12 +183,14 @@ namespace Services
             if (target == null) return;
 
             var targetPosition = target.position;
-            moveTween = transform.DOMove(targetPosition, moveDuration).SetEase(Ease.InOutQuad);
+            moveTween = transform.DOMove(targetPosition, moveDuration / 1000f)
+                .SetEase(Ease.InOutQuad);
 
             if (targetPosition != overviewPosition)
             {
                 var targetRotation = Quaternion.LookRotation(overviewPosition - targetPosition);
-                lookTween = transform.DORotateQuaternion(targetRotation, moveDuration).SetEase(Ease.InOutQuad);
+                lookTween = transform.DORotateQuaternion(targetRotation, moveDuration / 1000f)
+                    .SetEase(Ease.InOutQuad);
             }
 
             // Вычисление локальной позиции камеры с учётом расстояния до центра доски
@@ -198,12 +200,13 @@ namespace Services
             var targetY = Mathf.Lerp(minCamPosition.HeightY, maxCamPosition.HeightY, factor);
             var camLocalPosition = new Vector3(0, targetY, targetZ);
         
-            moveCamTween = mainCamera.transform.DOLocalMove(camLocalPosition, moveDuration).SetEase(Ease.InOutQuad);
+            moveCamTween = mainCamera.transform.DOLocalMove(camLocalPosition, moveDuration / 1000f)
+                .SetEase(Ease.InOutQuad);
 
             // Вычисление локального поворота камеры с учётом расстояния до центра доски
             var camRotation = Quaternion.Lerp(minCamPosition.Rotation, maxCamPosition.Rotation, factor);
         
-            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDuration).
+            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDuration / 1000f).
                 SetEase(Ease.InOutQuad);
         }
 
@@ -214,7 +217,7 @@ namespace Services
         /// <summary>
         /// Получает длительность перемещения камеры к цели.
         /// </summary>
-        public float MoveDuration => moveDuration;
+        public int MoveDuration => moveDuration;
 
         /// <summary>
         /// Получает основную камеру.
@@ -236,7 +239,7 @@ namespace Services
             SetDefaultPositions();
 
             Pawn.OnSelect += SetTarget;
-            Pawn.OnForceApplied += SetTarget;
+            Pawn.OnEndAiming += SetTarget;
             ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
 
             isInitialized = true;
@@ -248,7 +251,7 @@ namespace Services
         public void Shutdown()
         {
             Pawn.OnSelect -= SetTarget;
-            Pawn.OnForceApplied -= SetTarget;
+            Pawn.OnEndAiming -= SetTarget;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
         }
 
