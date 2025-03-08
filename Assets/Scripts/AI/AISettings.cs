@@ -13,7 +13,7 @@ namespace AI
         //Время имитации прицеливания (милисек)
         public int AimingTime = 2000;
         //Радиус поиска соседних шашек
-        public float NeighborRadius = 1.0f;
+        public float NeighborRadius = 2.0f;
         //Вес группировки своих шашек
         public float FriendlyGroupWeight = 0.7f;
         //Вес близости к вражеским шашкам
