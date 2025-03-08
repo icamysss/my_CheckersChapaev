@@ -21,7 +21,7 @@ namespace UI
             gameManager = ServiceLocator.Get<IGameManager>();
             game = gameManager.CurrentGame;
 
-            game.OnEndMove += UpdateUI;
+            game.OnEndTurn += UpdateUI;
             game.OnGameStart += UpdateUI;
             game.OnGameEnd += OnGameEnded;
             
@@ -36,7 +36,7 @@ namespace UI
             whiteCount.text = game.Board.GetPawnsOnBoard(PawnColor.White).Count.ToString();
             blackCount.text = game.Board.GetPawnsOnBoard(PawnColor.Black).Count.ToString();
 
-            switch (game.CurrentTurn)
+            switch (game.CurrentTurn.PawnColor)
             {
                 case PawnColor.None:
                     whoTurn.text = "Выберите шашку для хода";
@@ -74,7 +74,7 @@ namespace UI
 
         private void OnDestroy()
         {
-            game.OnEndMove -= UpdateUI;
+            game.OnEndTurn -= UpdateUI;
             game.OnGameStart -= UpdateUI;
             game.OnGameEnd -= OnGameEnded;
         }

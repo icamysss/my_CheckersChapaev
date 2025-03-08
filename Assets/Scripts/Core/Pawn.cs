@@ -134,6 +134,17 @@ namespace Core
         
         #region Unity Lifecycle
 
+        private void OnEnable()
+        {
+            // если выбрали шашку, сообщаем остальным шашкам, что выбрана эта
+            OnSelect += OnSelected;
+        }
+
+        private void OnDisable()
+        {
+            OnSelect -= OnSelected;
+        }
+
         private void Awake()
         {
             InitializeComponents();
@@ -273,6 +284,10 @@ namespace Core
         
         #region Helper Methods
 
+        private void OnSelected(Pawn selectedPawn)
+        {
+            if (selectedPawn != this) ResetSelection();
+        }
         private void InitializeComponents()
         {
             _rb = GetComponent<Rigidbody>();

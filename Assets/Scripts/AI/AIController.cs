@@ -88,15 +88,15 @@ namespace AI
         /// <summary>
         /// Запуск хода ИИ для указанного цвета шашек
         /// </summary>
-        public void MakeMove(PawnColor pawnColor)
+        public void MakeMove(Player pl)
         {
-            if (pawnColor == PawnColor.None)
+            if (pl.PawnColor == PawnColor.None)
             {
-                Debug.LogError($"Invalid pawn color: {pawnColor}");
+                Debug.LogError($"Invalid pawn color: {pl.PawnColor}");
                 return;
             }
 
-            RefreshPawnLists(pawnColor);
+            RefreshPawnLists(pl.PawnColor);
             StartCoroutine(AIMoveRoutine());
         }
 

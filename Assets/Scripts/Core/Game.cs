@@ -9,20 +9,23 @@ namespace Core
     public class Game : IDisposable
     {
         private GameType GameType { get; set; } = GameType.HumanVsAi;
-        private PawnColor FirstPlayerColor { get; set; } = PawnColor.None; // Цвет первого игрока
-        public PawnColor CurrentTurn { get; private set; } = PawnColor.None; // Текущий ход (цвет игрока)
-
-        public Board Board { get; }
-        private AIController AIController { get; }
-        private readonly GameManager gameManager;
         private PawnColor GameResult; // Результат игры (победитель или ничья)
 
-        private bool isPlayer1First; // Флаг, указывающий, начинает ли первый игрок (true - Player1, false - Player2)
+        public Player CurrentTurn { get; private set; }  // Текущий ход ( игрока)
+        public Player FirstTurn   { get; private set; }  
+        public Player FirstPlayer { get; private set; }
+        public Player SecondPlayer{ get; private set; }
+     
+        public Board Board { get; }
+        private AIController AIController { get; }
         
         private float delayStartTime; // Время начала задержки
         private bool isDelaying = false; // Флаг активной задержки
         private const float MoveSettleDelay = 1f; // Продолжительность задержки в секундах
-
+        private bool SelectingColor = false; // Флаг выбора цвета на первом ходу
+        private readonly GameManager gameManager;
+        
+        
         /// <summary>
         /// Конструктор игры, инициализирует зависимости и подписывается на события шашек.
         /// </summary>
@@ -40,7 +43,8 @@ namespace Core
     
         public Action OnGameStart;
         public Action<PawnColor> OnGameEnd;
-        public Action OnEndMove;
+        public Action OnEndTurn;
+        public Action OnStartTurn;
         
         #endregion
         
@@ -51,10 +55,11 @@ namespace Core
         /// </summary>
         private void OnSelect(Pawn pawn)
         {
-            if (CurrentTurn == PawnColor.None)
+            // если не определен цвет игроков
+            if (SelectingColor)
             {
-                CurrentTurn = pawn.PawnColor;
-                FirstPlayerColor = isPlayer1First ? pawn.PawnColor : GetOppositeColor(pawn.PawnColor);
+                FirstPlayer.PawnColor = CurrentTurn == FirstPlayer ? pawn.PawnColor : GetOppositeColor(pawn.PawnColor);
+                SecondPlayer.PawnColor = GetOppositeColor(FirstPlayer);
             }
         }
 
@@ -64,12 +69,8 @@ namespace Core
         private void OnForceApplied(Pawn pawn)
         {
             // Отключаем взаимодействие всех шашек
-            var allPawns = Board.GetAllPawnsOnBoard();
-            foreach (var p in allPawns)
-            {
-                p.Interactable = false;
-            }
-
+           UpdateAllPawnsInteractivity(false);
+            OnEndTurn?.Invoke();
             // Запускаем задержку
             isDelaying = true;
             delayStartTime = Time.time;
@@ -88,31 +89,51 @@ namespace Core
             Board.SetupStandardPosition();
 
             GameType = gameType;
-            isPlayer1First = Random.Range(0, 2) == 0;
-            StartFirstTurn(isPlayer1First, gameType);
+            CurrentTurn = Random.Range(0, 2) == 0 ? FirstPlayer : SecondPlayer;
+            
+            StartFirstTurn(CurrentTurn, gameType);
             
             OnGameStart?.Invoke();
         }
 
         /// <summary>
+        /// Метод обновления, вызываемый каждый кадр для обработки задержки.
+        /// </summary>
+        public void GameUpdate()
+        {
+            if (isDelaying && Time.time >= delayStartTime + MoveSettleDelay)
+            {
+                isDelaying = false;
+                if (EndGame(out GameResult))
+                {
+                    Debug.Log($"Игра завершилась с результатом: {GameResult}");
+                    return;
+                }
+                SwitchTurn();
+            }
+        }
+        
+        /// <summary>
         /// Начинает первый ход в зависимости от типа игры и того, кто ходит первым.
         /// </summary>
-        private void StartFirstTurn(bool isPlayer1First, GameType gameType)
+        private void StartFirstTurn(Player currentTurn, GameType gameType)
         {
             Debug.Log("Начало первого хода");
-            if (gameType == GameType.HumanVsAi && !isPlayer1First || gameType == GameType.AiVsAi)
+            if (currentTurn.Type == PlayerType.AI)
             {
-                FirstPlayerColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
-                CurrentTurn = GetOppositeColor(FirstPlayerColor);
+                // ИИ Выбирает цвет
+                CurrentTurn.PawnColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
                 AIController.MakeMove(CurrentTurn);
             }
             else
-            {
+            {  // Игрок выбирает цвет
+                
                 var allPawns = Board.GetAllPawnsOnBoard();
                 foreach (var pawn in allPawns)
                 {
                     pawn.Interactable = true;
                 }
+                SelectingColor = true;
             }
         }
 
@@ -121,42 +142,29 @@ namespace Core
         /// </summary>
         private void SwitchTurn()
         {
-            if (CurrentTurn == PawnColor.None)
+            if (CurrentTurn == null)
             {
-                Debug.Log("Переключение хода вызвано без текущего хода (PawnColor.None)");
+                Debug.Log("Current turn is null");
                 return;
             }
 
-            CurrentTurn = CurrentTurn == FirstPlayerColor
-                ? GetOppositeColor(FirstPlayerColor)
-                : FirstPlayerColor;
+            // смена игрока 
+            CurrentTurn = CurrentTurn == FirstPlayer
+                ? SecondPlayer
+                : FirstPlayer;
 
-            switch (GameType)
+            // Начало хода
+            OnStartTurn?.Invoke();
+            
+            if (CurrentTurn.Type == PlayerType.AI)
             {
-                case GameType.HumanVsHuman:
-                    UpdatePawnsInteractivity();
-                    break;
-
-                case GameType.HumanVsAi:
-                    if (CurrentTurn == FirstPlayerColor)
-                    {
-                        UpdatePawnsInteractivity();
-                    }
-                    else
-                    {
-                        AIController.MakeMove(CurrentTurn);
-                    }
-                    break;
-
-                case GameType.AiVsAi:
-                    AIController.MakeMove(CurrentTurn);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
+                AIController.MakeMove(CurrentTurn);
+            }
+            else
+            {
+                UpdatePawnsInteractivity(CurrentTurn, true);
             }
             
-            OnEndMove?.Invoke();
         }
 
         /// <summary>
@@ -199,12 +207,24 @@ namespace Core
         /// <summary>
         /// Обновляет интерактивность шашек текущего игрока.
         /// </summary>
-        private void UpdatePawnsInteractivity()
+        private void UpdateAllPawnsInteractivity(bool isInteractable = true)
         {
-            var currentColorPawns = Board.GetPawnsOnBoard(CurrentTurn);
+            var AllPawns = Board.GetAllPawnsOnBoard();
+            foreach (var pawn in AllPawns)
+            {
+                pawn.Interactable = isInteractable;
+            }
+        }
+        
+        /// <summary>
+        /// Обновляет интерактивность шашек текущего игрока.
+        /// </summary>
+        private void UpdatePawnsInteractivity(Player pl, bool isInteractable = true)
+        {
+            var currentColorPawns = Board.GetPawnsOnBoard(pl.PawnColor);
             foreach (var pawn in currentColorPawns)
             {
-                pawn.Interactable = true;
+                pawn.Interactable = isInteractable;
             }
         }
 
@@ -213,28 +233,21 @@ namespace Core
         /// </summary>
         private PawnColor GetOppositeColor(PawnColor color)
         {
+            if (color == PawnColor.None) return PawnColor.None;
             return color == PawnColor.White ? PawnColor.Black : PawnColor.White;
+        }
+        
+        /// <summary>
+        /// Возвращает противоположный цвет для заданного игрока.
+        /// </summary>
+        private PawnColor GetOppositeColor(Player pl)
+        {
+            if (pl.PawnColor == PawnColor.None) return PawnColor.None;
+            return pl.PawnColor == PawnColor.White ? PawnColor.Black : PawnColor.White;
         }
 
         #endregion
-
-        /// <summary>
-        /// Метод обновления, вызываемый каждый кадр для обработки задержки.
-        /// </summary>
-        public void GameUpdate()
-        {
-            if (isDelaying && Time.time >= delayStartTime + MoveSettleDelay)
-            {
-                isDelaying = false;
-                if (EndGame(out GameResult))
-                {
-                    Debug.Log($"Игра завершилась с результатом: {GameResult}");
-                    return;
-                }
-                SwitchTurn();
-            }
-        }
-
+        
         /// <summary>
         /// Очищает подписку на события при завершении игры.
         /// </summary>
