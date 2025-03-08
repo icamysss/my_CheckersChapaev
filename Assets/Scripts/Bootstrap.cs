@@ -19,25 +19,21 @@ public class Bootstrap : MonoBehaviour
         //              GAME MANAGER
         // --------------------------------------------------
         var gameManager = Instantiate(_gameManagerPrefab);
-        DontDestroyOnLoad(gameManager);
         ServiceLocator.Register<IGameManager>(gameManager);
         // --------------------------------------------------
         //              UI MANAGER
         // --------------------------------------------------
         var uiManager = Instantiate(_uiManagerPrefab);
-        DontDestroyOnLoad(uiManager.gameObject);
         ServiceLocator.Register<IUIManager>(uiManager);
         // --------------------------------------------------
         //              AUDIO MANAGER
         // --------------------------------------------------
         var audioManager = Instantiate(_audioManagerPrefab);
-        DontDestroyOnLoad(audioManager.gameObject);
         ServiceLocator.Register<IAudioService>(audioManager);
         // --------------------------------------------------
         //              CAMERA CONTROLLER
         // --------------------------------------------------
         var cameraController = Instantiate(_cameraControllerPrefab);
-        DontDestroyOnLoad(cameraController.gameObject);
         ServiceLocator.Register<ICameraController>(cameraController);
         // --------------------------------------------------
         
