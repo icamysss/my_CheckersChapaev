@@ -95,6 +95,7 @@ namespace Core
             _rb.AddForce(force, ForceMode.Impulse);
             _audioService.PawnAudio.PlayStrikeSound();
             ResetSelection();
+            OnEndAiming?.Invoke(null);
         }
         public void UpdateLineVisuals(float force, Vector3 forceDirection)
         {
@@ -113,14 +114,13 @@ namespace Core
             // UpdateLineColor();TODO изменение цвета от в зависимости от силы 
         }
 
-        public void ResetSelection()
+        private void ResetSelection()
         {
             SwitchLineRenderer();
             _currentForce = 0f;
             // после удара снимаем выбор
             _isSelected = false;
             ringSelect.SetActive(false);
-            OnEndAiming?.Invoke(null);
         }
 
         public void Select()

@@ -301,7 +301,7 @@ MonoBehaviour:
   maxDragDistance: 2
   lineRenderer: {fileID: 120133405640146930}
   maxLineLength: 3
-  yOffset: 0.1
+  yOffset: 0.2
   boardHeight: 0.5
   ringSelect: {fileID: 7377361139167518622}
 --- !u!82 &6012630433821557627
