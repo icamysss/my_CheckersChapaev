@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Core;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -59,7 +60,7 @@ namespace AI
             if (pl.AISettings != null)
             {
                 aiSettings = pl.AISettings;
-                scoreCalculator = new ScoreCalculator(aiSettings, this.board.BoardSize);
+                scoreCalculator = new ScoreCalculator(pl, board);
             }
             RefreshPawnLists(pl.PawnColor);
             AIMove().Forget();
@@ -74,8 +75,12 @@ namespace AI
         /// </summary>
         private void RefreshPawnLists(PawnColor pawnColor)
         {
-            aiPawns = board.GetPawnsOnBoard(pawnColor);
-            enemyPawns = board.GetPawnsOnBoard(pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black);
+            aiPawns = board.GetPawnsOnBoard(pawnColor).Where(p => p != null).ToList();
+            enemyPawns = board.GetPawnsOnBoard(
+                pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black
+                ).Where(p => p != null).ToList();
+    
+            Debug.Log($"AI: {aiPawns.Count}, Enemies: {enemyPawns.Count}"); // Для отладки
         }
 
         /// <summary>
@@ -83,25 +88,33 @@ namespace AI
         /// </summary>
         private async UniTask AIMove()
         {
-            // 1. Думает 1-3 секунды
-            var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
-            await UniTask.Delay(decisionDelay);
+            try 
+            {
+                // 1. Думает 1-3 секунды
+                var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
+                await UniTask.Delay(decisionDelay);
 
-            // 2. Выбирает оптимальную шашку и вызывает Select()
-            aiSelectedPawn = SelectOptimalPawn();
-            if (aiSelectedPawn == null) return;
-            aiSelectedPawn.Select();
+                // 2. Выбирает оптимальную шашку и вызывает Select()
+                aiSelectedPawn = SelectOptimalPawn();
+                if (aiSelectedPawn == null) return;
+                aiSelectedPawn.Select();
 
-            // 3. Ждет moveDuration + 0.5 секунды для завершения движения камеры
-            var waitTime = cameraController.MoveDuration + 500;
-            await UniTask.Delay(waitTime);
+                // 3. Ждет moveDuration + 0.5 секунды для завершения движения камеры
+                var waitTime = cameraController.MoveDuration + 500;
+                await UniTask.Delay(waitTime);
 
-            // 4. Имитация прицеливания
-            await AimSimulate();
+                // 4. Имитация прицеливания
+                await AimSimulate();
 
-            // 5. Применение силы и завершение хода
-            var force = CalculateForce(aiSelectedPawn);
-            aiSelectedPawn.ApplyForce(finalShotDirection * force);
+                // 5. Применение силы и завершение хода
+                var force = CalculateForce(aiSelectedPawn);
+                aiSelectedPawn.ApplyForce(finalShotDirection * force);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"AI Move failed: {ex}");
+            }
+            
         }
 
         /// <summary>
@@ -110,17 +123,16 @@ namespace AI
         private Pawn SelectOptimalPawn()
         {
             Pawn bestPawn = null;
-            float maxScore = float.MinValue;
+            var maxScore = float.MinValue;
 
-            foreach (Pawn pawn in aiPawns)
+            foreach (var pawn in aiPawns)
             {
                 if (pawn == null) continue;
 
-                float score = scoreCalculator.Calculate(
+                var score = scoreCalculator.Calculate(
                     pawn.transform.position,
                     aiPawns,
-                    enemyPawns,
-                    board.BoardSize
+                    enemyPawns
                     );
 
                 if (score > maxScore)
@@ -137,6 +149,13 @@ namespace AI
         /// </summary>
         private async UniTask AimSimulate()
         {
+            // Добавляем проверку на уничтоженные шашки
+            if (aiSelectedPawn == null || enemyPawns.Count == 0) 
+            {
+                finalShotDirection = GetFallbackDirection(aiSelectedPawn.transform);
+                return;
+            }
+            
             var optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
             // Оптимальное направление для выстрела
             var currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
@@ -200,7 +219,10 @@ namespace AI
                 Debug.LogWarning("No enemies available for targeting");
                 return GetFallbackDirection(selectedPawn.transform);
             }
-
+            
+            // Фильтрация null-объектов
+            enemyPawns.RemoveAll(p => p == null);
+            
             var targetPosition = scoreCalculator.FindOptimalTarget(
                 selectedPawn.transform.position,
                 enemyPawns
@@ -222,7 +244,7 @@ namespace AI
         /// </summary>
         private float CalculateForce(Pawn pawn)
         {
-            var distance = Vector3.Distance(pawn.transform.position, scoreCalculator.LastCalculatedTarget);
+            var distance = Vector3.Distance(pawn.transform.position, scoreCalculator.CalculatedTarget);
             var forceMultiplier = Mathf.Clamp01(distance / board.BoardSize);
             var force = Mathf.Lerp(pawn.minForce, pawn.maxForce, forceMultiplier);
             return force;

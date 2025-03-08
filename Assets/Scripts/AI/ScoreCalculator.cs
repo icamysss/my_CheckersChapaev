@@ -8,19 +8,15 @@ namespace AI
     {
         #region Properties
 
-        private float FriendlyGroupWeight;
-        private float EnemyProximityWeight;
-        private float LineOfFireWeight;
-        private float BoardCenterWeight;
-        private float EdgePenaltyWeight;
-        private readonly float MaxPredictionDistance;
-        public Vector3 LastCalculatedTarget;
+        public Vector3 CalculatedTarget { get; private set; }
 
         #endregion
 
         #region Private Variables
-
-        private readonly float _neighborRadius;
+        
+        private readonly AISettings aiSettings;
+        private readonly float MaxPredictionDistance;
+        private readonly Board board;
 
         #endregion
 
@@ -29,10 +25,11 @@ namespace AI
         /// <summary>
         /// Конструктор калькулятора очков
         /// </summary>
-        public ScoreCalculator(AISettings settings, float boardSize)
+        public ScoreCalculator(Player aiPlayer, Board board)
         {
-            _neighborRadius = settings.NeighborRadius;
-            MaxPredictionDistance = boardSize; // Устанавливаем равным размеру доски
+            MaxPredictionDistance = board.BoardSize; // Устанавливаем равным размеру доски
+            aiSettings = aiPlayer.AISettings;
+            this.board = board;
         }
 
         #endregion
@@ -42,47 +39,89 @@ namespace AI
         /// <summary>
         /// Расчет очков для позиции шашки
         /// </summary>
-        public float Calculate(
-            Vector3 checkerPosition,
-            List<Pawn> friendlyPawns,
-            List<Pawn> enemyPawns,
-            float boardSize)
+        public float Calculate(Vector3 checkerPosition, List<Pawn> friendlyPawns, List<Pawn> enemyPawns)
         {
-            float score = 0f;
+            
+            var score = 0f;
+            
+            if (friendlyPawns == null || enemyPawns == null) 
+            {
+                Debug.LogError("Pawn lists are null!");
+                return score;
+            }
 
-            // 1. Группировка своих шашек
-            int friendlyCount = Physics.OverlapSphereNonAlloc(
+            #region 1. Группировка своих шашек
+
+            var friendly = new Collider[16];
+            var friendlyCount = 0;
+
+            var numFound = Physics.OverlapSphereNonAlloc(
                 checkerPosition,
-                _neighborRadius,
-                new Collider[10],
-                LayerMask.GetMask("Friendly")
+                aiSettings.NeighborRadius,
+                friendly,
+                LayerMask.GetMask("Pawn")
                 );
-            score += friendlyCount * FriendlyGroupWeight;
 
-            // 2. Близость к врагам
-            int enemyCount = Physics.OverlapSphereNonAlloc(
-                checkerPosition,
-                _neighborRadius,
-                new Collider[10],
-                LayerMask.GetMask("Enemy")
-                );
-            score += enemyCount * EnemyProximityWeight;
+            // Обрабатываем только валидные коллайдеры
+            for (var i = 0; i < numFound; i++)
+            {
+                var col = friendly[i];
+                if (col == null) continue;
 
-            // 3. Линия огня
-            Vector3 target = FindOptimalTarget(checkerPosition, enemyPawns);
-            Vector3 fireDirection = (target - checkerPosition).normalized;
-            int potentialHits = PredictHits(checkerPosition, fireDirection, enemyPawns);
-            score += potentialHits * LineOfFireWeight;
+                var fp = col.GetComponent<Pawn>();
+                if (fp != null && friendlyPawns.Contains(fp))
+                {
+                    friendlyCount++;
+                }
+            }
 
-            // 4. Позиционирование ближе к центру
-            float distanceFromCenter = Vector3.Distance(checkerPosition, Vector3.zero);
-            score += (1 - Mathf.Clamp01(distanceFromCenter / (boardSize * 0.5f))) * BoardCenterWeight;
+            score += friendlyCount * aiSettings.FriendlyGroupWeight;
 
-            // 5. Штраф за края
-            float edgeFactor = Mathf.Clamp01(distanceFromCenter / (boardSize * 0.5f));
-            score -= edgeFactor * EdgePenaltyWeight;
+            #endregion
 
+            #region 2. Близость к врагам
+            
+            var enemy = new Collider[16];
+            var enemyCount = 0;
+            Physics.OverlapSphereNonAlloc(checkerPosition, aiSettings.NeighborRadius, enemy, LayerMask.GetMask("Pawn"));
+
+            foreach (var e in enemy)
+            {
+                if (e == null) continue;
+                var enPawn = e.GetComponent<Pawn>();
+                if (enPawn != null && enemyPawns.Contains(enPawn)) enemyCount++;
+            }
+            
+            score += enemyCount * aiSettings.EnemyProximityWeight;
+
+            #endregion
+
+            #region 3. Линия огня
+
+            var target = FindOptimalTarget(checkerPosition, enemyPawns);
+            var fireDirection = (target - checkerPosition).normalized;
+            var potentialHits = PredictHits(checkerPosition, fireDirection, enemyPawns);
+            
+            score += potentialHits * aiSettings.LineOfFireWeight;
+
+            #endregion
+            
+            #region 4. Позиционирование ближе к центру
+            
+            var distanceFromCenter = Vector3.Distance(checkerPosition, board.CenterPosition);
+            score += (1 - Mathf.Clamp01(distanceFromCenter / (board.BoardSize * 0.5f))) * aiSettings.BoardCenterWeight;
+
+            #endregion
+            
+            #region 5. Штраф за края
+            
+            var edgeFactor = Mathf.Clamp01(distanceFromCenter / (board.BoardSize * 0.5f));
+            score -= edgeFactor * aiSettings.EdgePenaltyWeight;
+            
+            #endregion
+            
             return score;
+            
         }
 
         /// <summary>
@@ -90,25 +129,23 @@ namespace AI
         /// </summary>
         public Vector3 FindOptimalTarget(Vector3 shooterPosition, List<Pawn> enemies)
         {
-            Vector3 bestTarget = shooterPosition;
-            int maxHitCount = 0;
+            var bestTarget = shooterPosition;
+            var maxHitCount = 0;
 
-            foreach (Pawn enemy in enemies)
+            foreach (var enemy in enemies)
             {
                 if (enemy == null) continue;
 
-                Vector3 direction = (enemy.transform.position - shooterPosition).normalized;
-                int hits = PredictHits(shooterPosition, direction, enemies);
+                var direction = (enemy.transform.position - shooterPosition).normalized;
+                var hits = PredictHits(shooterPosition, direction, enemies);
 
-                if (hits > maxHitCount ||
-                    (hits == maxHitCount &&
-                     Vector3.Distance(shooterPosition, enemy.transform.position) <
-                     Vector3.Distance(shooterPosition, bestTarget)))
-                {
-                    maxHitCount = hits;
-                    bestTarget = enemy.transform.position;
-                    LastCalculatedTarget = bestTarget;
-                }
+                if (hits <= maxHitCount && 
+                    (hits != maxHitCount ||
+                     !(Vector3.Distance(shooterPosition, enemy.transform.position) <
+                       Vector3.Distance(shooterPosition, bestTarget)))) continue;
+                maxHitCount = hits;
+                bestTarget = enemy.transform.position;
+                CalculatedTarget = bestTarget;
             }
 
             return bestTarget;
@@ -123,8 +160,8 @@ namespace AI
         /// </summary>
         private int PredictHits(Vector3 origin, Vector3 direction, List<Pawn> enemies)
         {
-            int hitCount = 0;
-            RaycastHit[] hits = Physics.RaycastAll(
+            var hitCount = 0;
+            var hits = Physics.RaycastAll(
                 origin,
                 direction,
                 MaxPredictionDistance,
@@ -133,7 +170,11 @@ namespace AI
 
             foreach (RaycastHit hit in hits)
             {
-                if (hit.collider.CompareTag("Pawn")) hitCount++; //todo     цвет игрока не учитывается почему то oO
+                var pawn = hit.collider.GetComponent<Pawn>();
+                if (pawn != null && enemies.Contains(pawn))
+                {
+                    hitCount++;
+                }
             }
 
             return hitCount;
