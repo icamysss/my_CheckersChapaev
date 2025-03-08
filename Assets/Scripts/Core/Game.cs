@@ -64,6 +64,7 @@ namespace Core
             {
                 FirstPlayer.PawnColor = CurrentTurn == FirstPlayer ? pawn.PawnColor : GetOppositeColor(pawn.PawnColor);
                 SecondPlayer.PawnColor = GetOppositeColor(FirstPlayer);
+                SelectingColor = false;
             }
         }
 
@@ -145,10 +146,12 @@ namespace Core
             {
                 // ИИ Выбирает цвет
                 firsTurn.PawnColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
-                if (firsTurn == FirstPlayer) SecondPlayer.PawnColor = GetOppositeColor(firsTurn);
-                else FirstPlayer.PawnColor = GetOppositeColor(SecondPlayer);
+                var secondPlayer = firsTurn == FirstPlayer ? SecondPlayer : FirstPlayer;
+                secondPlayer.PawnColor = GetOppositeColor(firsTurn.PawnColor);
                 
                 AIController.MakeMove(firsTurn);
+                
+                Debug.Log($"FirstPlayer color: {FirstPlayer.PawnColor}, SecondPlayer: {SecondPlayer.PawnColor}");
             }
             else
             {  // Игрок выбирает цвет
