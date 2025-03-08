@@ -21,6 +21,8 @@ namespace AI
         private AISettings aiSettings;
         private Vector3 finalShotDirection;
 
+        private Tween currenTween;
+
         #endregion
 
         #region Initialization
@@ -87,7 +89,7 @@ namespace AI
 
             // 2. Выбирает оптимальную шашку и вызывает Select()
             aiSelectedPawn = SelectOptimalPawn();
-            if (aiSelectedPawn == null) await UniTask.Yield();
+            if (aiSelectedPawn == null) return;
             aiSelectedPawn.Select();
 
             // 3. Ждет moveDuration + 0.5 секунды для завершения движения камеры
@@ -95,8 +97,7 @@ namespace AI
             await UniTask.Delay(waitTime);
 
             // 4. Имитация прицеливания
-            var aiming = AimSimulate();
-            await aiming;
+            await AimSimulate();
 
             // 5. Применение силы и завершение хода
             var force = CalculateForce(aiSelectedPawn);
@@ -156,20 +157,23 @@ namespace AI
                 targetDirection.y = 0;
                 targetDirection.Normalize();
 
+                
+                currenTween?.Kill();
                 // Плавный переход к новому направлению
-                var toNewDir = DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
+                currenTween = DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
                     oscillationDuration)
                     .SetEase(Ease.InOutQuad)
                     .OnUpdate(() =>
                     {
                         var force = CalculateForce(aiSelectedPawn);
                         aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
-                    });
-                await UniTask.WaitUntil(()=> toNewDir.IsComplete());
+                    })
+                    .OnKill(() => currenTween = null);
+                await currenTween.AsyncWaitForCompletion();
             }
 
             // Этап 2: Фиксация на оптимальном направлении
-            var fixOptimalDir = DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
+            currenTween = DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)
                 .OnUpdate(() =>
                 {
@@ -182,8 +186,8 @@ namespace AI
                     var finalForce = CalculateForce(aiSelectedPawn);
                     aiSelectedPawn.UpdateLineVisuals(finalForce, optimalDirection);
                     finalShotDirection = optimalDirection;
-                });
-            await UniTask.WaitUntil(()=> fixOptimalDir.IsComplete());
+                }).OnKill(()=> currenTween = null);
+            await currenTween.AsyncWaitForCompletion();
         }
 
         /// <summary>
