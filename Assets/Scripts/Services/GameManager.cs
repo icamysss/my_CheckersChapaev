@@ -11,8 +11,6 @@ namespace Services
         [BoxGroup("References")]
         [SerializeField] private Board boardPrefab;
         [BoxGroup("References")]
-        [SerializeField] private AIController aiControllerPrefab;
-        [BoxGroup("References")]
         [SerializeField] private PawnCatcher pawnCatcherPrefab;
         
         [BoxGroup("Options")]
@@ -87,15 +85,13 @@ namespace Services
         {
             // -------- Ссылки --------
             if (boardPrefab == null) throw new NullReferenceException("boardPrefab is null");
-            if (aiControllerPrefab == null) throw new NullReferenceException("aiControllerPrefab is null");
 
 
             // -------- Окружение ------- 
             var board = Instantiate(boardPrefab);
-            var aiController = Instantiate(aiControllerPrefab);
             var pawnCatcher = Instantiate(pawnCatcherPrefab);
             // -------- Игра ------------
-            game = new Game(this, board, aiController);
+            game = new Game(this, board);
 
 
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;

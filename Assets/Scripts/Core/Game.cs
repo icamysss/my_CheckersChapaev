@@ -29,14 +29,18 @@ namespace Core
         /// <summary>
         /// Конструктор игры, инициализирует зависимости и подписывается на события шашек.
         /// </summary>
-        public Game(GameManager gameManager, Board board, AIController aiController)
+        public Game(GameManager gameManager, Board board)
         {
             this.gameManager = gameManager;
             Board = board;
-            AIController = aiController;
-
-            Pawn.OnForceApplied += OnForceApplied;
+            
+            this.AIController = new AIController();
+            this.AIController.Initialize(board);
+            Pawn.OnEndAiming += OnForceApplied;
             Pawn.OnSelect += OnSelect;
+            
+            FirstPlayer = new Player("player1", PawnColor.None, PlayerType.AI);
+            SecondPlayer = new Player("player2", PawnColor.None, PlayerType.AI);
         }
 
         #region GameEvents
@@ -89,9 +93,27 @@ namespace Core
             Board.SetupStandardPosition();
 
             GameType = gameType;
-            CurrentTurn = Random.Range(0, 2) == 0 ? FirstPlayer : SecondPlayer;
+            switch (gameType)
+            {
+                case GameType.HumanVsHuman:
+                    FirstPlayer.Type = PlayerType.Human;
+                    SecondPlayer.Type = PlayerType.Human;
+                    break;
+                case GameType.HumanVsAi:
+                    FirstPlayer.Type = PlayerType.Human;
+                    SecondPlayer.Type = PlayerType.AI;
+                    break;
+                case GameType.AiVsAi:
+                    FirstPlayer.Type = PlayerType.AI;
+                    SecondPlayer.Type = PlayerType.AI;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(gameType), gameType, null);
+            }
             
-            StartFirstTurn(CurrentTurn, gameType);
+            FirstTurn = Random.Range(0, 2) == 0 ? FirstPlayer : SecondPlayer;
+            CurrentTurn = FirstTurn;
+            StartFirstTurn(FirstTurn, gameType);
             
             OnGameStart?.Invoke();
         }
@@ -116,14 +138,17 @@ namespace Core
         /// <summary>
         /// Начинает первый ход в зависимости от типа игры и того, кто ходит первым.
         /// </summary>
-        private void StartFirstTurn(Player currentTurn, GameType gameType)
+        private void StartFirstTurn(Player firsTurn, GameType gameType)
         {
             Debug.Log("Начало первого хода");
-            if (currentTurn.Type == PlayerType.AI)
+            if (firsTurn.Type == PlayerType.AI)
             {
                 // ИИ Выбирает цвет
-                CurrentTurn.PawnColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
-                AIController.MakeMove(CurrentTurn);
+                firsTurn.PawnColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
+                if (firsTurn == FirstPlayer) SecondPlayer.PawnColor = GetOppositeColor(firsTurn);
+                else FirstPlayer.PawnColor = GetOppositeColor(SecondPlayer);
+                
+                AIController.MakeMove(firsTurn);
             }
             else
             {  // Игрок выбирает цвет
@@ -209,8 +234,8 @@ namespace Core
         /// </summary>
         private void UpdateAllPawnsInteractivity(bool isInteractable = true)
         {
-            var AllPawns = Board.GetAllPawnsOnBoard();
-            foreach (var pawn in AllPawns)
+            var allPawns = Board.GetAllPawnsOnBoard();
+            foreach (var pawn in allPawns)
             {
                 pawn.Interactable = isInteractable;
             }
@@ -253,7 +278,7 @@ namespace Core
         /// </summary>
         public void Dispose()
         {
-            Pawn.OnForceApplied -= OnForceApplied;
+            Pawn.OnEndAiming -= OnForceApplied;
             Pawn.OnSelect -= OnSelect;
         }
     }

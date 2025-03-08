@@ -4,7 +4,7 @@ namespace Services
 {
     public interface ICameraController : IService
     {
-        float MoveDuration { get; }
+        int MoveDuration { get; }  // время в милисек
         Camera MainCamera { get; }
     }
 }

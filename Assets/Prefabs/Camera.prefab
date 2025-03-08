@@ -199,8 +199,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d81064610124437284986bbe9a621153, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDuration: 1.5
-  backDuration: 1.5
+  moveDuration: 1500
+  backDuration: 1500
   moveEase: 8
   minCamPosition:
     RotationX: 60

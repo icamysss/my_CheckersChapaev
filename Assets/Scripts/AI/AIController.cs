@@ -1,84 +1,43 @@
-using System.Collections;
 using System.Collections.Generic;
 using Core;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Services;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace AI
 {
-    public class AIController : MonoBehaviour
+    public class AIController
     {
-        #region Inspector Variables
-
-        [Header("Timing Settings")] [SerializeField, Tooltip("Минимальное время принятия решения (сек)")] private float
-            minDecisionDelay = 1f;
-
-        [SerializeField, Tooltip("Максимальное время принятия решения (сек)")] private float maxDecisionDelay = 4f;
-        [SerializeField, Tooltip("Время имитации прицеливания (сек)")] private float aimingTime = 2f;
-
-        [Header("Score Calculation Settings")] [SerializeField, Tooltip("Радиус поиска соседних шашек")] private float
-            neighborRadius = 1.0f;
-
-        [Header("Score Weights")] [SerializeField, Tooltip("Вес группировки своих шашек")] private float
-            friendlyGroupWeight = 0.7f;
-
-        [SerializeField, Tooltip("Вес близости к вражеским шашкам")] private float enemyProximityWeight = 1.2f;
-        [SerializeField, Tooltip("Вес линии огня (потенциальных попаданий)")] private float lineOfFireWeight = 2.0f;
-        [SerializeField, Tooltip("Вес позиции ближе к центру доски")] private float boardCenterWeight = 0.5f;
-        [SerializeField, Tooltip("Штраф за близость к краям доски")] private float edgePenaltyWeight = 0.3f;
-
-        #endregion
-
         #region Private Variables
 
-        public List<Pawn> aiPawns = new();
-        public List<Pawn> enemyPawns = new();
-
-        [ShowInInspector, ReadOnly] private Pawn aiSelectedPawn;
-        private ScoreCalculator _scoreCalculator;
-        private Board _board;
-        private ICameraController _cameraController;
-
+        private List<Pawn> aiPawns = new();
+        private List<Pawn> enemyPawns = new();
+        private Pawn aiSelectedPawn;
+        private ScoreCalculator scoreCalculator;
+        private Board board;
+        private ICameraController cameraController;
+        private AISettings aiSettings;
         private Vector3 finalShotDirection;
+
         #endregion
 
         #region Initialization
 
-        private void OnEnable()
+        private void OnAllServicesReady()
         {
-            ServiceLocator.OnAllServicesRegistered += AllServicesRegistered;
+            cameraController = ServiceLocator.Get<ICameraController>();
         }
-
-        private void AllServicesRegistered()
-        {
-            var board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
-            Initialize(board);
-        }
-
         /// <summary>
         /// Инициализация контроллера ИИ с доской и камерой
         /// </summary>
-        private void Initialize(Board board)
+        public void Initialize(Board instantiatedBoard)
         {
-            _board = board;
-            _cameraController = ServiceLocator.Get<ICameraController>();
-            _scoreCalculator = new ScoreCalculator(neighborRadius, _board.BoardSize);
-            SetScoreWeights();
-        }
-
-        /// <summary>
-        /// Установка весов в ScoreCalculator из значений в инспекторе
-        /// </summary>
-        private void SetScoreWeights()
-        {
-            _scoreCalculator.FriendlyGroupWeight = friendlyGroupWeight;
-            _scoreCalculator.EnemyProximityWeight = enemyProximityWeight;
-            _scoreCalculator.LineOfFireWeight = lineOfFireWeight;
-            _scoreCalculator.BoardCenterWeight = boardCenterWeight;
-            _scoreCalculator.EdgePenaltyWeight = edgePenaltyWeight;
+            board = instantiatedBoard;
+            
+            aiSettings = new AISettings();
+            ServiceLocator.OnAllServicesRegistered += OnAllServicesReady;
         }
 
         #endregion
@@ -95,9 +54,13 @@ namespace AI
                 Debug.LogError($"Invalid pawn color: {pl.PawnColor}");
                 return;
             }
-
+            if (pl.AISettings != null)
+            {
+                aiSettings = pl.AISettings;
+                scoreCalculator = new ScoreCalculator(aiSettings, this.board.BoardSize);
+            }
             RefreshPawnLists(pl.PawnColor);
-            StartCoroutine(AIMoveRoutine());
+            AIMove().Forget();
         }
 
         #endregion
@@ -109,30 +72,31 @@ namespace AI
         /// </summary>
         private void RefreshPawnLists(PawnColor pawnColor)
         {
-            aiPawns = _board.GetPawnsOnBoard(pawnColor);
-            enemyPawns = _board.GetPawnsOnBoard(pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black);
+            aiPawns = board.GetPawnsOnBoard(pawnColor);
+            enemyPawns = board.GetPawnsOnBoard(pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black);
         }
 
         /// <summary>
         /// Основная корутина хода ИИ
         /// </summary>
-        private IEnumerator AIMoveRoutine()
+        private async UniTask AIMove()
         {
             // 1. Думает 1-3 секунды
-            float decisionDelay = Random.Range(minDecisionDelay, maxDecisionDelay);
-            yield return new WaitForSeconds(decisionDelay);
+            var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
+            await UniTask.Delay(decisionDelay);
 
             // 2. Выбирает оптимальную шашку и вызывает Select()
             aiSelectedPawn = SelectOptimalPawn();
-            if (aiSelectedPawn == null) yield break;
+            if (aiSelectedPawn == null) await UniTask.Yield();
             aiSelectedPawn.Select();
 
             // 3. Ждет moveDuration + 0.5 секунды для завершения движения камеры
-            float waitTime = _cameraController.MoveDuration + 0.5f;
-            yield return new WaitForSeconds(waitTime);
+            var waitTime = cameraController.MoveDuration + 500;
+            await UniTask.Delay(waitTime);
 
             // 4. Имитация прицеливания
-            yield return StartCoroutine(AimRoutine());
+            var aiming = AimSimulate();
+            await aiming;
 
             // 5. Применение силы и завершение хода
             var force = CalculateForce(aiSelectedPawn);
@@ -151,11 +115,11 @@ namespace AI
             {
                 if (pawn == null) continue;
 
-                float score = _scoreCalculator.Calculate(
+                float score = scoreCalculator.Calculate(
                     pawn.transform.position,
                     aiPawns,
                     enemyPawns,
-                    _board.BoardSize
+                    board.BoardSize
                     );
 
                 if (score > maxScore)
@@ -170,58 +134,56 @@ namespace AI
         /// <summary>
         /// Корутина для имитации прицеливания с поведением, похожим на человеческое
         /// </summary>
-        private IEnumerator AimRoutine()
+        private async UniTask AimSimulate()
         {
-            Vector3 optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
-                // Оптимальное направление для выстрела
-            Vector3 currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
-                // Начальное случайное отклонение
+            var optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
+            // Оптимальное направление для выстрела
+            var currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
+            // Начальное случайное отклонение
             currentDirection.y = 0; // Ограничиваем движение по горизонтали
             currentDirection.Normalize();
 
             // Настройки колебаний
-            int oscillationCount = 3; // Количество небольших корректировок
-            float totalAimingTime = aimingTime - 0.5f; // Оставляем 0.5 сек на финальную фиксацию
-            float oscillationDuration = totalAimingTime / oscillationCount; // Время на каждую фазу колебаний
+            var oscillationCount = Random.Range(2,6); // Количество небольших корректировок
+            var totalAimingTime = aiSettings.AimingTime/ 1000f - 0.5f; // Оставляем 0.5 сек на финальную фиксацию
+            var oscillationDuration = totalAimingTime / oscillationCount; // Время на каждую фазу колебаний
 
             // Этап 1: Колебания (имитация неуверенности или корректировки)
-            for (int i = 0; i < oscillationCount; i++)
+            for (var i = 0; i < oscillationCount; i++)
             {
-                Vector3 targetDirection = optimalDirection + Random.insideUnitSphere * 0.2f;
-                    // Небольшое отклонение от цели
+                var targetDirection = optimalDirection + Random.insideUnitSphere * 0.2f;
+                // Небольшое отклонение от цели
                 targetDirection.y = 0;
                 targetDirection.Normalize();
 
                 // Плавный переход к новому направлению
-                yield return
-                    DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection, oscillationDuration)
-                        .SetEase(Ease.InOutQuad)
-                        .OnUpdate(() =>
-                        {
-                            float force = CalculateForce(aiSelectedPawn);
-                            aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
-                        })
-                        .WaitForCompletion();
+                var toNewDir = DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
+                    oscillationDuration)
+                    .SetEase(Ease.InOutQuad)
+                    .OnUpdate(() =>
+                    {
+                        var force = CalculateForce(aiSelectedPawn);
+                        aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
+                    });
+                await UniTask.WaitUntil(()=> toNewDir.IsComplete());
             }
 
             // Этап 2: Фиксация на оптимальном направлении
-            yield return DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
+            var fixOptimalDir = DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)
                 .OnUpdate(() =>
                 {
-                    float force = CalculateForce(aiSelectedPawn);
+                    var force = CalculateForce(aiSelectedPawn);
                     aiSelectedPawn.UpdateLineVisuals(force, currentDirection); // Обновляем визуализацию
                 })
                 .OnComplete(() =>
                 {
                     // Финальное обновление визуализации перед выстрелом
-                    float finalForce = CalculateForce(aiSelectedPawn);
+                    var finalForce = CalculateForce(aiSelectedPawn);
                     aiSelectedPawn.UpdateLineVisuals(finalForce, optimalDirection);
                     finalShotDirection = optimalDirection;
-                })
-                .WaitForCompletion();
-
-            // Теперь выстрел будет произведён в optimalDirection
+                });
+            await UniTask.WaitUntil(()=> fixOptimalDir.IsComplete());
         }
 
         /// <summary>
@@ -235,7 +197,7 @@ namespace AI
                 return GetFallbackDirection(selectedPawn.transform);
             }
 
-            Vector3 targetPosition = _scoreCalculator.FindOptimalTarget(
+            var targetPosition = scoreCalculator.FindOptimalTarget(
                 selectedPawn.transform.position,
                 enemyPawns
                 );
@@ -256,9 +218,9 @@ namespace AI
         /// </summary>
         private float CalculateForce(Pawn pawn)
         {
-            float distance = Vector3.Distance(pawn.transform.position, _scoreCalculator.LastCalculatedTarget);
-            float forceMultiplier = Mathf.Clamp01(distance / _scoreCalculator.MaxPredictionDistance);
-            float force = Mathf.Lerp(pawn.minForce, pawn.maxForce, forceMultiplier);
+            var distance = Vector3.Distance(pawn.transform.position, scoreCalculator.LastCalculatedTarget);
+            var forceMultiplier = Mathf.Clamp01(distance / board.BoardSize);
+            var force = Mathf.Lerp(pawn.minForce, pawn.maxForce, forceMultiplier);
             return force;
         }
 

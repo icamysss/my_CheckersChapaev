@@ -1,22 +1,25 @@
-using System;
+using AI;
+using UnityEngine;
 
 namespace Core
 {
-    [Serializable]
+
     public class Player
     {
         public string Name;
         public PawnColor PawnColor;
         public PlayerType Type;
-
-      
+        public AISettings AISettings;
         
         public Player(string name, PawnColor pawnColor, PlayerType playerType)
         {
             Name = name;
             PawnColor = pawnColor;
             Type = playerType;
+            AISettings = new AISettings();
         }
+        
+        
     }
     
     public enum PlayerType

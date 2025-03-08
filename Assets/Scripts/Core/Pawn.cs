@@ -51,8 +51,8 @@ namespace Core
         #region Actions
 
         public static Action<Pawn> OnSelect;
-        public static Action<Pawn> OnForceApplied;
-        public static Action<Pawn> OnStartDrag;
+        public static Action<Pawn> OnEndAiming;
+        public static Action<Pawn> OnStartAiming;
 
         #endregion
 
@@ -120,7 +120,7 @@ namespace Core
             // после удара снимаем выбор
             _isSelected = false;
             ringSelect.SetActive(false);
-            OnForceApplied?.Invoke(null);
+            OnEndAiming?.Invoke(null);
         }
 
         public void Select()
@@ -239,7 +239,7 @@ namespace Core
         {
             if (!Interactable) return;
             if (!_isSelected) return;
-            OnStartDrag?.Invoke(this);
+            OnStartAiming?.Invoke(this);
             var lastDirection = ForceDirection;
             ForceDirection = CalculateForce(eventData.position);
 

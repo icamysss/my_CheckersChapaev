@@ -8,13 +8,13 @@ namespace AI
     {
         #region Properties
 
-        public float FriendlyGroupWeight { get; set; }
-        public float EnemyProximityWeight { get; set; }
-        public float LineOfFireWeight { get; set; }
-        public float BoardCenterWeight { get; set; }
-        public float EdgePenaltyWeight { get; set; }
-        public float MaxPredictionDistance { get; private set; }
-        public Vector3 LastCalculatedTarget { get; private set; }
+        private float FriendlyGroupWeight;
+        private float EnemyProximityWeight;
+        private float LineOfFireWeight;
+        private float BoardCenterWeight;
+        private float EdgePenaltyWeight;
+        private readonly float MaxPredictionDistance;
+        public Vector3 LastCalculatedTarget;
 
         #endregion
 
@@ -29,9 +29,9 @@ namespace AI
         /// <summary>
         /// Конструктор калькулятора очков
         /// </summary>
-        public ScoreCalculator(float neighborRadius, float boardSize)
+        public ScoreCalculator(AISettings settings, float boardSize)
         {
-            _neighborRadius = neighborRadius;
+            _neighborRadius = settings.NeighborRadius;
             MaxPredictionDistance = boardSize; // Устанавливаем равным размеру доски
         }
 
@@ -128,13 +128,12 @@ namespace AI
                 origin,
                 direction,
                 MaxPredictionDistance,
-                LayerMask.GetMask("Enemy", "Obstacle")
+                LayerMask.GetMask("Pawn")
                 );
 
             foreach (RaycastHit hit in hits)
             {
-                if (hit.collider.CompareTag("Obstacle")) break;
-                if (hit.collider.CompareTag("Enemy")) hitCount++;
+                if (hit.collider.CompareTag("Pawn")) hitCount++; //todo     цвет игрока не учитывается почему то oO
             }
 
             return hitCount;
