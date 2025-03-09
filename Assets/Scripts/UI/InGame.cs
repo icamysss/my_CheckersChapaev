@@ -18,11 +18,13 @@ namespace UI
         {
             base.Initialize();
            
+            whoTurn.text = "";
+            
             gameManager = ServiceLocator.Get<IGameManager>();
             game = gameManager.CurrentGame;
 
-            game.OnEndTurn += UpdateUI;
-            game.OnGameStart += UpdateUI;
+            game.OnStartTurn += UpdateUI;
+            game.OnGameStart += OnStartTurn;
             game.OnGameEnd += OnGameEnded;
             
 
@@ -31,6 +33,10 @@ namespace UI
             whoTurn.text = string.Empty;
         }
 
+        private void OnStartTurn()
+        {
+            whoTurn.text = "Выберите шашку";
+        }
         private void UpdateUI()
         {
             whiteCount.text = game.Board.GetPawnsOnBoard(PawnColor.White).Count.ToString();
@@ -61,21 +67,16 @@ namespace UI
                 case PawnColor.None:
                     whoTurn.text = "Ничья";
                     break;
-                case PawnColor.Black:
-                    whoTurn.text = "Черные победили";
-                    break;
-                case PawnColor.White:
-                    whoTurn.text = "Белые победили";
-                    break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(winColor), winColor, null);
+                    whoTurn.text = $"Победил игрок: {winColor} ";
+                    break;
             }
         }
 
         private void OnDestroy()
         {
-            game.OnEndTurn -= UpdateUI;
-            game.OnGameStart -= UpdateUI;
+            game.OnStartTurn -= UpdateUI;
+            game.OnGameStart -= OnStartTurn;
             game.OnGameEnd -= OnGameEnded;
         }
         

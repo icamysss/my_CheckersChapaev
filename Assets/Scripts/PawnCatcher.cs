@@ -1,4 +1,6 @@
 using System.Collections;
+using Core;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class PawnCatcher : MonoBehaviour
@@ -6,15 +8,17 @@ public class PawnCatcher : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (!collision.gameObject.CompareTag("Pawn")) return;
-        
-      StartCoroutine(DisablePawn(collision.gameObject));
+        DisablePawn(collision.gameObject).Forget();
     }
 
-    private IEnumerator DisablePawn(GameObject pawn)
+    private async UniTask DisablePawn(GameObject pawn)
     {
-        yield return new WaitForSeconds(3f);
+        await UniTask.Delay(3000);
         
         var rb = pawn.GetComponent<Rigidbody>();
         if (rb)  rb.isKinematic = true;
+        
+        var p = pawn.GetComponent<Pawn>();
+        if (p)  p.enabled = false;
     }
 }

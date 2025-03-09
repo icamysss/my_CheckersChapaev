@@ -21,13 +21,7 @@ namespace Services
         
         
         private IUIManager uiManager;
-
-        private void Update()
-        {
-            if (!isInitialized) return;
-            game.GameUpdate();
-        }
-
+        
         private void SetGameState(GameState newState)
         {
             Debug.Log($"Game state changed to {newState}, old {gameState}");

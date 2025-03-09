@@ -298,7 +298,7 @@ MonoBehaviour:
   pawnMeshRenderer: {fileID: 6310947253523388121}
   minForce: 5
   maxForce: 350
-  maxDragDistance: 2
+  maxDragDistance: 0.8
   lineRenderer: {fileID: 120133405640146930}
   maxLineLength: 3
   yOffset: 0.2

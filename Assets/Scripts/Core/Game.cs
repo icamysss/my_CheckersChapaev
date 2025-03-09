@@ -1,5 +1,6 @@
 using System;
 using AI;
+using Cysharp.Threading.Tasks;
 using Services;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -11,21 +12,18 @@ namespace Core
         private GameType GameType { get; set; } = GameType.HumanVsAi;
         private PawnColor GameResult; // Результат игры (победитель или ничья)
 
-        public Player CurrentTurn { get; private set; }  // Текущий ход ( игрока)
-        public Player FirstTurn   { get; private set; }  
+        public Player CurrentTurn { get; private set; } // Текущий ход ( игрока)
+        public Player FirstTurn { get; private set; }
         public Player FirstPlayer { get; private set; }
-        public Player SecondPlayer{ get; private set; }
-     
+        public Player SecondPlayer { get; private set; }
+
         public Board Board { get; }
         private AIController AIController { get; }
         
-        private float delayStartTime; // Время начала задержки
-        private bool isDelaying = false; // Флаг активной задержки
-        private const float MoveSettleDelay = 1f; // Продолжительность задержки в секундах
         private bool SelectingColor = false; // Флаг выбора цвета на первом ходу
         private readonly GameManager gameManager;
-        
-        
+
+
         /// <summary>
         /// Конструктор игры, инициализирует зависимости и подписывается на события шашек.
         /// </summary>
@@ -33,25 +31,25 @@ namespace Core
         {
             this.gameManager = gameManager;
             Board = board;
-            
+
             this.AIController = new AIController();
             this.AIController.Initialize(board);
             Pawn.OnEndAiming += OnForceApplied;
             Pawn.OnSelect += OnSelect;
-            
+
             FirstPlayer = new Player("player1", PawnColor.None, PlayerType.AI);
             SecondPlayer = new Player("player2", PawnColor.None, PlayerType.AI);
         }
 
         #region GameEvents
-    
+
         public Action OnGameStart;
         public Action<PawnColor> OnGameEnd;
         public Action OnEndTurn;
         public Action OnStartTurn;
-        
+
         #endregion
-        
+
         #region PawnEvents
 
         /// <summary>
@@ -74,11 +72,8 @@ namespace Core
         private void OnForceApplied(Pawn pawn)
         {
             // Отключаем взаимодействие всех шашек
-           UpdateAllPawnsInteractivity(false);
-            OnEndTurn?.Invoke();
-            // Запускаем задержку
-            isDelaying = true;
-            delayStartTime = Time.time;
+            UpdateAllPawnsInteractivity(false);
+            SwitchTurn().Forget();
         }
 
         #endregion
@@ -91,7 +86,7 @@ namespace Core
         public void StartGame(GameType gameType)
         {
             gameManager.CurrentState = GameState.Gameplay;
-            Board.SetupStandardPosition();
+            Board.InitializeBoard(this);
 
             GameType = gameType;
             switch (gameType)
@@ -111,31 +106,14 @@ namespace Core
                 default:
                     throw new ArgumentOutOfRangeException(nameof(gameType), gameType, null);
             }
-            
+
             FirstTurn = Random.Range(0, 2) == 0 ? FirstPlayer : SecondPlayer;
             CurrentTurn = FirstTurn;
             StartFirstTurn(FirstTurn, gameType);
-            
+
             OnGameStart?.Invoke();
         }
 
-        /// <summary>
-        /// Метод обновления, вызываемый каждый кадр для обработки задержки.
-        /// </summary>
-        public void GameUpdate()
-        {
-            if (isDelaying && Time.time >= delayStartTime + MoveSettleDelay)
-            {
-                isDelaying = false;
-                if (EndGame(out GameResult))
-                {
-                    Debug.Log($"Игра завершилась с результатом: {GameResult}");
-                    return;
-                }
-                SwitchTurn();
-            }
-        }
-        
         /// <summary>
         /// Начинает первый ход в зависимости от типа игры и того, кто ходит первым.
         /// </summary>
@@ -148,15 +126,15 @@ namespace Core
                 firsTurn.PawnColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
                 var secondPlayer = firsTurn == FirstPlayer ? SecondPlayer : FirstPlayer;
                 secondPlayer.PawnColor = GetOppositeColor(firsTurn.PawnColor);
-                
+
                 AIController.MakeMove(firsTurn);
-                
+
                 Debug.Log($"FirstPlayer color: {FirstPlayer.PawnColor}, SecondPlayer: {SecondPlayer.PawnColor}");
             }
             else
-            {  // Игрок выбирает цвет
-                
-                var allPawns = Board.GetAllPawnsOnBoard();
+            {
+                // Игрок выбирает цвет
+                var allPawns = Board.Pawns;
                 foreach (var pawn in allPawns)
                 {
                     pawn.Interactable = true;
@@ -168,7 +146,7 @@ namespace Core
         /// <summary>
         /// Переключает ход между игроками в зависимости от типа игры.
         /// </summary>
-        private void SwitchTurn()
+        private async UniTask SwitchTurn()
         {
             if (CurrentTurn == null)
             {
@@ -176,14 +154,21 @@ namespace Core
                 return;
             }
 
+            // ждем что бы все шашки, успели улететь с доски
+            await UniTask.Delay(1500);
+            // сообщаем что ход завершен, доска должна была обновить список шашек на доске
+            OnEndTurn?.Invoke();
+            // если игра не закончилась
+            if (EndGame(out GameResult)) return;
             // смена игрока 
             CurrentTurn = CurrentTurn == FirstPlayer
                 ? SecondPlayer
                 : FirstPlayer;
 
+            OnStartTurn?.Invoke(); // обновляется доска
+
             // Начало хода
-            OnStartTurn?.Invoke();
-            
+
             if (CurrentTurn.Type == PlayerType.AI)
             {
                 AIController.MakeMove(CurrentTurn);
@@ -192,7 +177,6 @@ namespace Core
             {
                 UpdatePawnsInteractivity(CurrentTurn, true);
             }
-            
         }
 
         /// <summary>
@@ -237,13 +221,13 @@ namespace Core
         /// </summary>
         private void UpdateAllPawnsInteractivity(bool isInteractable = true)
         {
-            var allPawns = Board.GetAllPawnsOnBoard();
+            var allPawns = Board.Pawns;
             foreach (var pawn in allPawns)
             {
                 pawn.Interactable = isInteractable;
             }
         }
-        
+
         /// <summary>
         /// Обновляет интерактивность шашек текущего игрока.
         /// </summary>
@@ -264,7 +248,7 @@ namespace Core
             if (color == PawnColor.None) return PawnColor.None;
             return color == PawnColor.White ? PawnColor.Black : PawnColor.White;
         }
-        
+
         /// <summary>
         /// Возвращает противоположный цвет для заданного игрока.
         /// </summary>
@@ -275,7 +259,7 @@ namespace Core
         }
 
         #endregion
-        
+
         /// <summary>
         /// Очищает подписку на события при завершении игры.
         /// </summary>

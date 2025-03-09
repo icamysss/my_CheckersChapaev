@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -25,15 +27,12 @@ namespace Core
         private Pawn pawnPrefab;
 
    
-        [ShowInInspector, ReadOnly, PropertyOrder(100), Tooltip("Список всех пешек на доске")]
+        [ShowInInspector, ReadOnly, PropertyOrder(100), Tooltip("Список всех шашек на доске")]
         private List<Pawn> pawns = new();
   
-        [field: Title("Debug")]
-        [field: ShowInInspector, PropertyOrder(90)]
-        [field: ReadOnly]
-        [field: Tooltip("Нужна проверка, шашки вылетели с доски")]
-        public bool NeedCheckPawnsOnBoard { private get; set; } = true;
-
+        [ShowInInspector, ReadOnly, PropertyOrder(110)]
+        private Game game;
+        
         #endregion
 
         #region Public Properties
@@ -42,64 +41,82 @@ namespace Core
         /// </summary>
         public Vector3 CenterPosition => transform.position;
         public int BoardSize => boardSize;
-    
+        
+        /// <summary>
+        /// Список всех шашек на доске
+        /// </summary>
+        public List<Pawn> Pawns => pawns;
+
         #endregion
 
         #region Public Methods
 
+        public void InitializeBoard(Game newGame)
+        {
+            SetupStandardPosition();
+            game = newGame;
+
+            game.OnEndTurn += FindAllPawnsOnBoard;
+        }
+        
         /// <returns>Список всех шашек на доске указанного цвета</returns>
         public List<Pawn> GetPawnsOnBoard(PawnColor pawnColor)
         {
-            var allPawns = GetAllPawnsOnBoard();
-            List<Pawn> pawns = new();
-            foreach (var pawn in allPawns)
-            {
-                if (pawn.PawnColor == pawnColor) pawns.Add(pawn);
-            }
-            return pawns;
+            return pawns.Where(pawn => pawn.PawnColor == pawnColor).ToList();
         }
-        /// <returns>Список всех шашек на доске</returns>
-        [Button]
-        public List<Pawn> GetAllPawnsOnBoard()
-        {
-            Vector3 halfExtents = new Vector3(boardSize * .5f, 0.5f, boardSize * .5f) ;
-            var targetTag = "Pawn";
-            float maxDistance = boardSize * 0.5f;
         
-            Vector3 center = CenterPosition;
-            Vector3 direction = transform.up;
-            Quaternion orientation = transform.rotation;
+        #endregion
+        
+        #region Unity Callbacks
+
+        private void OnDestroy()
+        {
+            game.OnEndTurn -= FindAllPawnsOnBoard;
+        }
+
+        #endregion
+        
+        #region Helper Methods
+        
+       /// <summary>
+       /// Обновляет список шашек
+       /// </summary>
+        private void FindAllPawnsOnBoard()
+        {
+            var halfExtents = new Vector3(boardSize * .5f, 0.5f, boardSize * .5f) ;
+            var targetTag = "Pawn";
+            var maxDistance = boardSize * 0.5f;
+        
+            var center = CenterPosition;
+            var direction = transform.up;
+            var orientation = transform.rotation;
         
 
             // Выполняем BoxCast и получаем все попадания
-            RaycastHit[] hits = Physics.BoxCastAll(
-                center, 
-                halfExtents, 
-                direction, 
-                orientation, 
-                maxDistance, layerMask: 1 << LayerMask.NameToLayer(targetTag)
-                );
+            var results = new RaycastHit[16];
+            var size = Physics.BoxCastNonAlloc(center, halfExtents, direction, results, orientation, maxDistance,
+                layerMask: 1 << LayerMask.NameToLayer(targetTag));
         
             pawns.Clear();
         
             // Добавляем объекты с нужным тегом
-            foreach (RaycastHit hit in hits)
+            foreach (var hit in results)
             {
+                if (hit.collider == null) continue;
                 if (hit.collider.CompareTag(targetTag))
                 {
                     pawns.Add(hit.collider.gameObject.GetComponent<Pawn>());
                 }
             }
-            return pawns;
         }
-    
+        
         #endregion
-
+        
         #region Setup Methods
         
         [Button(ButtonSizes.Large), PropertyOrder(50)]
         [Tooltip("Установить стартовую позицию пешек")]
-        public void SetupStandardPosition()
+        private void SetupStandardPosition()
         {
             ClearBoard();
             SpawnPawnsForColor(PawnColor.White, 0, 1);
@@ -108,7 +125,7 @@ namespace Core
 
         [Button(ButtonSizes.Medium), PropertyOrder(51)]
         [Tooltip("Полная очистка доски")]
-        public void DeleteAllPawns()
+        private void DeleteAllPawns()
         {
             ClearBoard();
         }
@@ -177,11 +194,7 @@ namespace Core
             return newPawn;
         }
         #endregion
-
-        #region Unity Callbacks
-    
-        #endregion
-
+        
         #region Debug
         private void OnDrawGizmos()
         {
