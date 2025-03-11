@@ -17,7 +17,7 @@ namespace Services
         private Dictionary<string, Menu> _activeMenus = new ();
 
         private IGameManager gameManager;
- 
+        private IAudioService audioService;
 
         private void OnChangeGameState(GameState state)
         {
@@ -63,12 +63,24 @@ namespace Services
         {
             // ----- ссылки -----
             gameManager = ServiceLocator.Get<IGameManager>();
+            audioService = ServiceLocator.Get<IAudioService>();
             gameManager.OnGameStateChanged += OnChangeGameState;
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
             // ---- меню ----
-            InitializePrefabCache(); // вызывается тут, потому что нужен gameManager  в некоторых меню
             OpenMenu("MainMenu");
             
+        }
+
+        public float GetVolume()
+        {
+            return audioService.Volume;
+        }
+
+        public string GetLanguage()
+        {
+            Debug.Log("Всегда русский !!!");
+            return "ru";
+            // todo получить язык
         }
 
         #region ButtonsHandlers
@@ -92,6 +104,16 @@ namespace Services
         {
             
         }
+
+        public void SetVolume(float volume)
+        {
+            
+        }
+
+        public void SetLanguage(string language)
+        {
+            
+        }
         #endregion
         
         #region IService
@@ -100,6 +122,7 @@ namespace Services
         {
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
+            InitializePrefabCache();
             isInitialized = true;
         }
         

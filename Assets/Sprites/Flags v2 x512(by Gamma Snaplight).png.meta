@@ -1,0 +1,935 @@
+fileFormatVersion: 2
+guid: 1d2f7e7c90147445c9fceb32d3119209
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_0
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 443
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 000308cb5ec2b452daceac2b21c95312
+      internalID: 1417575438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_1
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 443
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ebe2a314b6b34b6aa28abe313a4d457
+      internalID: 1597670825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_2
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 443
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb8d07c9140d444c7b57bb4c7299a1a4
+      internalID: -145524933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_3
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 443
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a87b144516ae423b838778e147a802d
+      internalID: -1579511434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_4
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 443
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b749b95420aa64574aa86bb83eb8bf07
+      internalID: 1904110586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_5
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 443
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ed3a67ad66ec42c9b0e4749f0f67ac9
+      internalID: 1722840930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_6
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 358
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 990aa8ff7b8fb48e4a0fd23579d99747
+      internalID: 341095553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_7
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 358
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b125526238d7d4ad184057c6eeb3fb51
+      internalID: 1287888423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_8
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 358
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90dbda61f81804345b81fcb9bc0d5936
+      internalID: -1694293616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_9
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 358
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0be9d7f12786b4511a0d99343acebe09
+      internalID: 1150493404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_10
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 358
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f672a929d437346a598502a51298657b
+      internalID: -321467514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_11
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 358
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0f8349739007454abc2481fa73c6e32
+      internalID: -1982337727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_12
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 273
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 83752162031614d44a892d1c728295ee
+      internalID: -361950629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_13
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 273
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 765f463f06c5945c78dc688eb9b0ba58
+      internalID: -1599662941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_14
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 273
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38cadd07219d4493581707ad71481dcc
+      internalID: 793536563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_15
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 273
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8133a58336624e5ab322366e5d6c2a2
+      internalID: -2137445307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_16
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 273
+        width: 70
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c2fd709056964c46ba417fd3517aa63
+      internalID: -1768024708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_17
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 273
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d48ad0b433ed4b7e9685e7d1a53c726
+      internalID: 1784024345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_18
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 187
+        width: 69
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b1767066f65b40dd8d7931a5d3cbbad
+      internalID: 1552219314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_19
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 187
+        width: 70
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 160e3db65f6a24d33a3e42acca6e3930
+      internalID: -2101442701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_20
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 187
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 48b2d0241d93b42dfb40b6000afb5695
+      internalID: -1508063450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_21
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 187
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 013777960a8924bc8a70491b90ebe9a7
+      internalID: 424207921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_22
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 187
+        width: 70
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03f9d111cd371467291336340b94b0f0
+      internalID: 412364262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_23
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 187
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bdea897ac7c314362b758a2d1222492c
+      internalID: -829840240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_24
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 102
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 780035a80c20148f480c949cb91c6de2
+      internalID: -1426305276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_25
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 102
+        width: 70
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f43f98766be8441219d7b9e3bf858d04
+      internalID: -543414053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_26
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 102
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 583578b5192634203ab2c4c4b590ebaa
+      internalID: -377641908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_27
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 102
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef63157cc29024a11a52ebf0f6faf0f5
+      internalID: 1138445672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_28
+      rect:
+        serializedVersion: 2
+        x: 350
+        y: 102
+        width: 68
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f76982aa18b44539993edb1ff193e30
+      internalID: -1421391605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_29
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 102
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8ba535f375a24456a8929008c59ca52
+      internalID: 1989943532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_30
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 17
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 390a64248c7a646ce99fda91ee0aeceb
+      internalID: 1005224231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_31
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 17
+        width: 70
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fbad2b33a84a4e5587dce3db1509886
+      internalID: -266472239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_32
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 17
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74219da81c2c34a38be823abf1fc94c8
+      internalID: 248080061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_33
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 17
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ddfd975aef0a24aa5b097877b44b08cd
+      internalID: -1907830627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Flags v2 x512(by Gamma Snaplight)_34
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 17
+        width: 160
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 333a1c552b1fc4a1e9cba1369ab82588
+      internalID: 1986074970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: f69655220f7f04d468a0e19d9a687cb6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Flags v2 x512(by Gamma Snaplight)_0: 1417575438
+      Flags v2 x512(by Gamma Snaplight)_1: 1597670825
+      Flags v2 x512(by Gamma Snaplight)_10: -321467514
+      Flags v2 x512(by Gamma Snaplight)_11: -1982337727
+      Flags v2 x512(by Gamma Snaplight)_12: -361950629
+      Flags v2 x512(by Gamma Snaplight)_13: -1599662941
+      Flags v2 x512(by Gamma Snaplight)_14: 793536563
+      Flags v2 x512(by Gamma Snaplight)_15: -2137445307
+      Flags v2 x512(by Gamma Snaplight)_16: -1768024708
+      Flags v2 x512(by Gamma Snaplight)_17: 1784024345
+      Flags v2 x512(by Gamma Snaplight)_18: 1552219314
+      Flags v2 x512(by Gamma Snaplight)_19: -2101442701
+      Flags v2 x512(by Gamma Snaplight)_2: -145524933
+      Flags v2 x512(by Gamma Snaplight)_20: -1508063450
+      Flags v2 x512(by Gamma Snaplight)_21: 424207921
+      Flags v2 x512(by Gamma Snaplight)_22: 412364262
+      Flags v2 x512(by Gamma Snaplight)_23: -829840240
+      Flags v2 x512(by Gamma Snaplight)_24: -1426305276
+      Flags v2 x512(by Gamma Snaplight)_25: -543414053
+      Flags v2 x512(by Gamma Snaplight)_26: -377641908
+      Flags v2 x512(by Gamma Snaplight)_27: 1138445672
+      Flags v2 x512(by Gamma Snaplight)_28: -1421391605
+      Flags v2 x512(by Gamma Snaplight)_29: 1989943532
+      Flags v2 x512(by Gamma Snaplight)_3: -1579511434
+      Flags v2 x512(by Gamma Snaplight)_30: 1005224231
+      Flags v2 x512(by Gamma Snaplight)_31: -266472239
+      Flags v2 x512(by Gamma Snaplight)_32: 248080061
+      Flags v2 x512(by Gamma Snaplight)_33: -1907830627
+      Flags v2 x512(by Gamma Snaplight)_34: 1986074970
+      Flags v2 x512(by Gamma Snaplight)_4: 1904110586
+      Flags v2 x512(by Gamma Snaplight)_5: 1722840930
+      Flags v2 x512(by Gamma Snaplight)_6: 341095553
+      Flags v2 x512(by Gamma Snaplight)_7: 1287888423
+      Flags v2 x512(by Gamma Snaplight)_8: -1694293616
+      Flags v2 x512(by Gamma Snaplight)_9: 1150493404
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

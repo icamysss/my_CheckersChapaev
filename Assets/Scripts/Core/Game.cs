@@ -104,6 +104,10 @@ namespace Core
                     FirstPlayer.Type = PlayerType.AI;
                     SecondPlayer.Type = PlayerType.AI;
                     break;
+                case GameType.OnWeb:
+                    FirstPlayer.Type = PlayerType.Human;
+                    SecondPlayer.Type = PlayerType.AI;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(gameType), gameType, null);
             }
