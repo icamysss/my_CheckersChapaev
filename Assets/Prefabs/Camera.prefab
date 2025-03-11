@@ -203,9 +203,9 @@ MonoBehaviour:
   backDuration: 1500
   moveEase: 8
   minCamPosition:
-    RotationX: 60
+    RotationX: 50
     HeightY: 4
-    OffsetZ: -5.5
+    OffsetZ: -6
   maxCamPosition:
     RotationX: 30
     HeightY: 4
