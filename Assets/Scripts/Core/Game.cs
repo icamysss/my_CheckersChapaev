@@ -47,6 +47,7 @@ namespace Core
         public Action<PawnColor> OnGameEnd;
         public Action OnEndTurn;
         public Action OnStartTurn;
+        public Action<string, float> OnMessage;
 
         #endregion
 
@@ -267,6 +268,11 @@ namespace Core
         {
             Pawn.OnEndAiming -= OnForceApplied;
             Pawn.OnSelect -= OnSelect;
+        }
+
+        public Player GetPlayerByColor(PawnColor pawnColor)
+        {
+            return pawnColor == FirstPlayer.PawnColor ? FirstPlayer : SecondPlayer;
         }
     }
 }

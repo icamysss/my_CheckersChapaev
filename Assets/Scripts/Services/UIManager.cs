@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core;
+using Services.Interfaces;
 using UI;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ namespace Services
         private Dictionary<string, Menu> _activeMenus = new ();
 
         private IGameManager gameManager;
+ 
 
         private void OnChangeGameState(GameState state)
         {
@@ -68,6 +70,29 @@ namespace Services
             OpenMenu("MainMenu");
             
         }
+
+        #region ButtonsHandlers
+
+        public void StartGame(GameType gameType)
+        {
+            gameManager.CurrentGame.StartGame(gameType);
+        }
+
+        public void RestartGame()
+        {
+            
+        }
+
+        public void OpenMainMenu()
+        {
+            
+        }
+
+        public void SwitchSound(bool isOn)
+        {
+            
+        }
+        #endregion
         
         #region IService
 
@@ -103,7 +128,7 @@ namespace Services
 
                 // Создаем новый экземпляр
                 var instance = Instantiate(prefab, _uiRoot);
-                instance.Initialize();
+                instance.Initialize(this);
                 instance.Open();
 
                 _menuStack.Push(instance);

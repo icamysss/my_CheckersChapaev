@@ -4,6 +4,7 @@ namespace Core
     {
         HumanVsHuman,  
         HumanVsAi, 
-        AiVsAi
+        AiVsAi,
+        OnWeb,
     }
 }

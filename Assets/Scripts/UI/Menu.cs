@@ -1,4 +1,6 @@
+using Services;
 using Sirenix.OdinInspector;
+using UI;
 using UnityEngine;
 
 [RequireComponent(typeof(CanvasGroup))]
@@ -19,7 +21,7 @@ public abstract class Menu : MonoBehaviour
     }
 #endif
 
-    public virtual void Initialize()
+    public virtual void Initialize(UIManager mainMenu)
     {
        
     }

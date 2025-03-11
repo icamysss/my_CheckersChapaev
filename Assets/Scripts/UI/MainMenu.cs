@@ -8,39 +8,43 @@ namespace UI
 {
     public class MainMenu : Menu
     {
-        [SerializeField] Button AiVSAiButton;  // обычная игра
-        [SerializeField] Button HvsHButton;
-        [SerializeField] Button HvsAiButton;
+        [SerializeField] Button Single;  // обычная игра
+        [SerializeField] Button OnWeb;
+        [SerializeField] Button Two;
+        [SerializeField] Button Settings;
         
-        private IGameManager  gameManager;
+        private UIManager  uiManager;
        
         
         
-        public override void Initialize()
+        public override void Initialize(UIManager manager)
         {
-            base.Initialize();
+            base.Initialize(manager);
+            uiManager = manager;
+            
             canvasGroup.ignoreParentGroups = true;
-            gameManager = ServiceLocator.Get<IGameManager>();
-           
-            AiVSAiButton.onClick.AddListener(AiVSAi);
-            HvsHButton.onClick.AddListener(HumanVSHuman);
-            HvsAiButton.onClick.AddListener(HumanVsAi);
+            Single.onClick.AddListener(SingleGame);
+            OnWeb.onClick.AddListener(OnWebGame);
+            Two.onClick.AddListener(HumanVSHuman);
+            Settings.onClick.AddListener(OpenSettings);
         }
 
         private void HumanVSHuman()
         {
-            gameManager.CurrentGame.StartGame(GameType.HumanVsHuman);
+            uiManager.StartGame(GameType.HumanVsHuman);
         }
-        
-        private void AiVSAi()
+        private void SingleGame()
         {
-            gameManager.CurrentGame.StartGame(GameType.AiVsAi);
+            uiManager.StartGame(GameType.HumanVsAi);
         }
-        private void HumanVsAi()
+        private void OnWebGame()
         {
-            gameManager.CurrentGame.StartGame(GameType.HumanVsAi);
+            uiManager.StartGame(GameType.OnWeb);
         }
-        
+        private void OpenSettings()
+        {
+            uiManager.OpenMenu("Settings");
+        }
         
     }
 }

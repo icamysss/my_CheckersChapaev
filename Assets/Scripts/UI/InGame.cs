@@ -1,4 +1,3 @@
-using System;
 using Core;
 using Services;
 using UnityEngine;
@@ -8,81 +7,117 @@ namespace UI
 {
     public class InGame : Menu
     {
+        #region Inspector
+
+        [Header("Text")]
         [SerializeField] private Text whiteCount, blackCount;
         [SerializeField] private Text whoTurn;
         
-        private Game game;
-        private IGameManager gameManager;
+        [Header("Buttons")]
+        [SerializeField] private Button menuButton;
+        [SerializeField] private Button backButton;
+        [SerializeField] private Button soundButton;
+        [SerializeField] private Button restartButton;
+        
+        [Header("Sprites")]
+        [SerializeField] private Sprite volumeOff;
+        [SerializeField] private Sprite volumeOffHover;
+        
+        [SerializeField] private Sprite volumeOn;
+        [SerializeField] private Sprite volumeOnHover;
 
-        public override void Initialize()
+        #endregion
+        
+        private Game game;
+        private UIManager uiManager;
+        private bool soundOn;
+
+        public override void Initialize(UIManager manager)
         {
-            base.Initialize();
+            base.Initialize(manager);
+            uiManager = manager;
            
             whoTurn.text = "";
             
-            gameManager = ServiceLocator.Get<IGameManager>();
-            game = gameManager.CurrentGame;
-
-            game.OnStartTurn += UpdateUI;
-            game.OnGameStart += OnStartTurn;
-            game.OnGameEnd += OnGameEnded;
+            game = ServiceLocator.Get<IGameManager>().CurrentGame;
             
-
+            game.OnStartTurn += UpdateUI;
+            game.OnGameEnd += OnEndGame;
+            game.OnGameStart += OnStartGame;
+            
+            
             whiteCount.text = string.Empty;
             blackCount.text = string.Empty;
             whoTurn.text = string.Empty;
+            
+            menuButton.onClick.AddListener(MenuButton);
+            backButton.onClick.AddListener(BackToMainMenu);
+            soundButton.onClick.AddListener(SwitchSound);
+            restartButton.onClick.AddListener(RestartGame);
+        }
+        private void OnDestroy()
+        {
+            game.OnStartTurn -= UpdateUI;
+            game.OnGameEnd -= OnEndGame;
+            game.OnGameStart -= OnStartGame;
         }
 
-        private void OnStartTurn()
-        {
-            whoTurn.text = "Выберите шашку";
-        }
+        
+        #region Action callbacks
+        
         private void UpdateUI()
         {
             whiteCount.text = game.Board.GetPawnsOnBoard(PawnColor.White).Count.ToString();
             blackCount.text = game.Board.GetPawnsOnBoard(PawnColor.Black).Count.ToString();
-
-            switch (game.CurrentTurn.PawnColor)
-            {
-                case PawnColor.None:
-                    whoTurn.text = "Выберите шашку для хода";
-                    break;
-                case PawnColor.Black:
-                    whoTurn.text = "Ходят черные";
-                    break;
-                case PawnColor.White:
-                    whoTurn.text = "Ходят белые";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            ;
+            
+            whoTurn.text = $" Ходит игрок: {game.CurrentTurn.Name}";
         }
 
-        private void OnGameEnded(PawnColor winColor)
+        private void OnEndGame(PawnColor c)
         {
-            UpdateUI();
-            switch (winColor)
-            {
-                case PawnColor.None:
-                    whoTurn.text = "Ничья";
-                    break;
-                default:
-                    whoTurn.text = $"Победил игрок: {winColor} ";
-                    break;
-            }
+            var p = game.GetPlayerByColor(c);
+            whoTurn.text = $"Победил игрок: {p.Name}";
         }
 
-        private void OnDestroy()
+        private void OnStartGame()
         {
-            game.OnStartTurn -= UpdateUI;
-            game.OnGameStart -= OnStartTurn;
-            game.OnGameEnd -= OnGameEnded;
+           UpdateUI();
         }
+        #endregion
         
-        public void BackToMainMenu()
+        #region Buttons Listeners
+
+        private void BackToMainMenu()
         {
-            gameManager.CurrentState = GameState.MainMenu;
+            uiManager.OpenMainMenu();
         }
+
+        private void MenuButton()
+        {
+            var active = !backButton.gameObject.activeSelf;
+
+            backButton.gameObject.SetActive(active);
+            soundButton.gameObject.SetActive(active);
+            restartButton.gameObject.SetActive(active);
+        }
+
+        private void SwitchSound()
+        {
+            soundOn = !soundOn;
+            var spriteState = soundButton.spriteState;
+            spriteState.highlightedSprite = soundOn ? volumeOnHover : volumeOffHover;
+            soundButton.spriteState = spriteState;
+            soundButton.image.sprite = soundOn ? volumeOn : volumeOff;
+            
+            uiManager.SwitchSound(soundOn);
+        }
+
+        private void RestartGame()
+        {
+            uiManager.RestartGame();
+        }
+
+        #endregion
+       
     }
 }
