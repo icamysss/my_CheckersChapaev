@@ -209,7 +209,7 @@ MonoBehaviour:
   maxCamPosition:
     RotationX: 30
     HeightY: 4
-    OffsetZ: -1.5
+    OffsetZ: -2.3
   mainCamera: {fileID: 4414416115565162224}
   defaultCamOffset:
     RotationX: 0

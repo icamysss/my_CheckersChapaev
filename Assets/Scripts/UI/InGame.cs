@@ -30,7 +30,7 @@ namespace UI
         
         private Game game;
         private UIManager uiManager;
-        private bool soundOn;
+        private bool isMute = false;
 
         public override void Initialize(UIManager manager)
         {
@@ -103,13 +103,13 @@ namespace UI
 
         private void SwitchSound()
         {
-            soundOn = !soundOn;
+            isMute = !isMute;
             var spriteState = soundButton.spriteState;
-            spriteState.highlightedSprite = soundOn ? volumeOnHover : volumeOffHover;
+            spriteState.highlightedSprite = isMute ? volumeOffHover : volumeOnHover;
             soundButton.spriteState = spriteState;
-            soundButton.image.sprite = soundOn ? volumeOn : volumeOff;
+            soundButton.image.sprite = isMute ? volumeOff : volumeOn;
             
-            uiManager.SwitchSound(soundOn);
+            uiManager.Mute(isMute);
         }
 
         private void RestartGame()

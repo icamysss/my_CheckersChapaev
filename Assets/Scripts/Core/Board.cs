@@ -51,6 +51,10 @@ namespace Core
 
         #region Public Methods
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newGame"></param>
         public void InitializeBoard(Game newGame)
         {
             SetupStandardPosition();
@@ -63,6 +67,18 @@ namespace Core
         public List<Pawn> GetPawnsOnBoard(PawnColor pawnColor)
         {
             return pawns.Where(pawn => pawn.PawnColor == pawnColor).ToList();
+        }
+        
+        /// <summary>
+        /// Полная очистка доски от пешек
+        /// </summary>
+        public void ClearBoard()
+        {
+            foreach (var pawn in pawns)
+            {
+                if (pawn != null) DestroyImmediate(pawn.gameObject);
+            }
+            pawns.Clear();
         }
         
         #endregion
@@ -118,7 +134,6 @@ namespace Core
         [Tooltip("Установить стартовую позицию пешек")]
         private void SetupStandardPosition()
         {
-            ClearBoard();
             SpawnPawnsForColor(PawnColor.White, 0, 1);
             SpawnPawnsForColor(PawnColor.Black, boardSize - 1, boardSize);
         }
@@ -142,18 +157,6 @@ namespace Core
                     SpawnPawn(column, row, color);
                 }
             }
-        }
-
-        /// <summary>
-        /// Полная очистка доски от пешек
-        /// </summary>
-        private void ClearBoard()
-        {
-            foreach (var pawn in pawns)
-            {
-                if (pawn != null) DestroyImmediate(pawn.gameObject);
-            }
-            pawns.Clear();
         }
         
         /// <summary>

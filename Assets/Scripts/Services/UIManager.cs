@@ -18,27 +18,9 @@ namespace Services
 
         private IGameManager gameManager;
         private IAudioService audioService;
+        private ILocalizationService localizationService;
 
-        private void OnChangeGameState(GameState state)
-        {
-            switch (state)
-            {
-                case GameState.MainMenu:
-                    CloseAllMenus();
-                    OpenMenu("MainMenu");
-                    break;
-                case GameState.Gameplay:
-                    CloseMenu("MainMenu");
-                    OpenMenu("InGame");
-                    break;
-                case GameState.Pause:
-                    break;
-                case GameState.GameOver:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
-            }
-        }
+       
         private void InitializePrefabCache()
         {
             foreach (var menuPrefab in _menuPrefabs)
@@ -64,26 +46,37 @@ namespace Services
             // ----- ссылки -----
             gameManager = ServiceLocator.Get<IGameManager>();
             audioService = ServiceLocator.Get<IAudioService>();
+            localizationService = ServiceLocator.Get<ILocalizationService>();
             gameManager.OnGameStateChanged += OnChangeGameState;
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
             // ---- меню ----
             OpenMenu("MainMenu");
             
         }
-
-        public float GetVolume()
+        
+        private void OnChangeGameState(GameState state)
         {
-            return audioService.Volume;
+            switch (state)
+            {
+                case GameState.MainMenu:
+                    CloseAllMenus();
+                    OpenMenu("MainMenu");
+                    break;
+                case GameState.Gameplay:
+                    CloseTopMenu();
+                    OpenMenu("InGame");
+                    break;
+                case GameState.Pause:
+                    break;
+                case GameState.GameOver:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
         }
+       
 
-        public string GetLanguage()
-        {
-            Debug.Log("Всегда русский !!!");
-            return "ru";
-            // todo получить язык
-        }
-
-        #region ButtonsHandlers
+        #region Buttons & Menu methods
 
         public void StartGame(GameType gameType)
         {
@@ -92,28 +85,39 @@ namespace Services
 
         public void RestartGame()
         {
-            
+            gameManager.CurrentGame.RestartGame();
         }
 
         public void OpenMainMenu()
         {
-            
+            gameManager.CurrentState = GameState.MainMenu;
         }
 
-        public void SwitchSound(bool isOn)
+        public void Mute(bool isMute)
         {
-            
+            audioService.Mute(isMute);
         }
 
         public void SetVolume(float volume)
         {
-            
+            audioService.Volume = volume;
         }
 
         public void SetLanguage(string language)
         {
-            
+            localizationService.Language = language;
         }
+        
+        public string GetLanguage()
+        {
+            return localizationService.Language;
+        }
+        
+        public float GetVolume()
+        {
+            return audioService.Volume;
+        }
+        
         #endregion
         
         #region IService

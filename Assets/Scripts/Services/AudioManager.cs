@@ -9,6 +9,7 @@ namespace Services
         [SerializeField] private float volume; 
 
         private AudioSource audioSource;
+        private float lastVolume;
         
         
         #region IService
@@ -17,7 +18,8 @@ namespace Services
         {
             Debug.Log("Audio Manager initialized");
             audioSource = GetComponent<AudioSource>();
-            pawnAudio.Initialize(audioSource);
+            volume = 0.6f;
+            pawnAudio.Initialize(this);
             // todo загрузить громкость
             isInitialized = true;
         }
@@ -53,7 +55,16 @@ namespace Services
         // Воспроизведение однократного звука (например, клик в меню)
         public void PlaySound(AudioClip clip)
         {
+            if (volume <= 0) return;
+            audioSource.volume = volume;
             audioSource.PlayOneShot(clip);
+        }
+
+        public void Mute(bool isMute)
+        {
+            if (isMute && volume > 0)  lastVolume = volume;
+           
+            volume = isMute ? 0 : lastVolume;
         }
 
         #endregion

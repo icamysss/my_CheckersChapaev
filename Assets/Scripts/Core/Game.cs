@@ -87,7 +87,7 @@ namespace Core
         public void StartGame(GameType gameType)
         {
             gameManager.CurrentState = GameState.Gameplay;
-            Board.InitializeBoard(this);
+            RestartGame();
 
             GameType = gameType;
             switch (gameType)
@@ -217,6 +217,12 @@ namespace Core
             return false;
         }
 
+        public void RestartGame()
+        {
+            Board.ClearBoard();
+            Board.InitializeBoard(this);
+        }
+
         #endregion
 
         #region Helpers
@@ -278,5 +284,6 @@ namespace Core
         {
             return pawnColor == FirstPlayer.PawnColor ? FirstPlayer : SecondPlayer;
         }
+        
     }
 }

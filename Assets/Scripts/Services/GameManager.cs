@@ -36,22 +36,18 @@ namespace Services
             {
                 case GameState.MainMenu:
                     Time.timeScale = 1;
-                   // UIManager.Instance.OpenMenu<MainMenu>();
                     break;
                 
                 case GameState.Gameplay:
                     Time.timeScale = 1;
-                    //UIManager.Instance.OpenMenu<InGameMenu>();
                     break;
                 
                 case GameState.Pause:
                     Time.timeScale = 0;
-                    //UIManager.Instance.OpenMenu<PauseMenu>();
                     break;
                 
                 case GameState.GameOver:
                     Time.timeScale = 1;
-                   // UIManager.Instance.OpenMenu<GameOverMenu>();
                     break;
             }
         }

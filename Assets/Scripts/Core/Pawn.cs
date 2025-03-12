@@ -43,7 +43,8 @@ namespace Core
         [BoxGroup("Board Settings")] [SerializeField, Tooltip("Высота доски по оси Y")] private float boardHeight = 0.5f;
         
         [BoxGroup("Colors Settings")] [SerializeField, Tooltip("Объект который отображает выбор шашки")] private GameObject ringSelect;
-        
+        [BoxGroup("Audio")] [SerializeField, Tooltip("Звуки воспроизводит")] private AudioSource shotAudioSource;
+        [BoxGroup("Audio")] [SerializeField, Tooltip("Звук перемещения воспроизводит")] private AudioSource moveAudioSource;
         
 
         #endregion
@@ -59,13 +60,12 @@ namespace Core
         #region Private Variables
 
         private Rigidbody _rb;
-        private AudioSource _audioSource;
         private Vector3 _dragStartWorldPos;
         private bool _isSelected;
         private float _currentForce;
         private Tween _lineAnimationTween;
         private ICameraController _cameraController;
-        private IAudioService _audioService;
+        private IAudioService audioService;
         private bool isOnBoard;
 
         #endregion
@@ -93,7 +93,7 @@ namespace Core
         public void ApplyForce(Vector3 force)
         {
             _rb.AddForce(force, ForceMode.Impulse);
-            _audioService.PawnAudio.PlayStrikeSound();
+            audioService.PawnAudio.PlayStrikeSound(shotAudioSource);
             ResetSelection();
             OnEndAiming?.Invoke(null);
         }
@@ -167,7 +167,7 @@ namespace Core
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!collision.gameObject.CompareTag("Board")) _audioService.PawnAudio.PlayCollideSound();
+            if (!collision.gameObject.CompareTag("Board")) audioService.PawnAudio.PlayCollideSound(shotAudioSource);
         }
 
         private void OnCollisionStay(Collision other)
@@ -184,40 +184,23 @@ namespace Core
 
         private void Update()
         {
-            float minSpeed = 1f;
-            float maxSpeed = 100f;
+            var minSpeed = 0.1f;
+            var maxSpeed = 5f;
             // Проверяем, если шашка на доске и движется быстрее минимальной скорости
             if (isOnBoard && _rb.linearVelocity.magnitude > minSpeed)
             {
-                // Включаем звук, если он ещё не играет
-                if (!_audioSource.isPlaying)
-                {
-                    _audioSource.Play();
-                }
-
                 // Вычисляем громкость на основе скорости
-                float speed = _rb.linearVelocity.magnitude;
-                float targetVolume = Mathf.Clamp01((speed - minSpeed) / (maxSpeed - minSpeed));
+                var speed = _rb.linearVelocity.magnitude;
+                var targetVolume = Mathf.Clamp01((speed - minSpeed) / (maxSpeed - minSpeed));
 
                 // Плавно изменяем громкость
-                _audioSource.volume = Mathf.Lerp(_audioSource.volume, targetVolume, Time.deltaTime * 5);
+                var volume = Mathf.Lerp(moveAudioSource.volume, targetVolume, Time.deltaTime * 5);
+               
+                audioService.PawnAudio.PlayMovementSound(moveAudioSource, volume);
             }
             else
             {
-                // Если шашка остановилась или оторвалась от доски
-                if (_audioSource.isPlaying)
-                {
-                    // Плавно уменьшаем громкость перед остановкой
-                    if (_audioSource.volume > 0.01f)
-                    {
-                        _audioSource.volume = Mathf.Lerp(_audioSource.volume, 0f, Time.deltaTime * 5);
-                    }
-                    else
-                    {
-                        _audioSource.Stop(); // Останавливаем звук, когда громкость почти нулевая
-                        _audioSource.volume = 0f;
-                    }
-                }
+                audioService.PawnAudio.StopMovementSound(moveAudioSource);
             }
         }
 
@@ -292,8 +275,7 @@ namespace Core
         {
             _rb = GetComponent<Rigidbody>();
             
-            _audioSource = GetComponent<AudioSource>();
-            if (_audioSource == null) throw new MissingComponentException("Audio Source is null");
+            if (moveAudioSource == null || shotAudioSource == null) throw new MissingComponentException("Audio Source is null");
             
             if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
             
@@ -301,7 +283,7 @@ namespace Core
             if (pawnMeshRenderer == null) throw new MissingComponentException("Pawn Mesh Renderer not found");
 
             _cameraController = ServiceLocator.Get<ICameraController>();
-            _audioService = ServiceLocator.Get<IAudioService>();
+            audioService = ServiceLocator.Get<IAudioService>();
             
             if (ringSelect == null) throw new MissingComponentException("Ring Select not found");
             ringSelect.SetActive(false);
