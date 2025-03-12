@@ -10,8 +10,9 @@ namespace Core
     public class Game : IDisposable
     {
         private GameType GameType { get; set; } = GameType.HumanVsAi;
-        private PawnColor GameResult; // Результат игры (победитель или ничья)
 
+
+        public Player Winner; // Результат игры (победитель или ничья)
         public Player CurrentTurn { get; private set; } // Текущий ход ( игрока)
         public Player FirstTurn { get; private set; }
         public Player FirstPlayer { get; private set; }
@@ -19,7 +20,7 @@ namespace Core
 
         public Board Board { get; }
         private AIController AIController { get; }
-        
+
         private bool SelectingColor = false; // Флаг выбора цвета на первом ходу
         private readonly GameManager gameManager;
 
@@ -44,10 +45,8 @@ namespace Core
         #region GameEvents
 
         public Action OnGameStart;
-        public Action<PawnColor> OnGameEnd;
         public Action OnEndTurn;
         public Action OnStartTurn;
-        public Action<string, float> OnMessage;
 
         #endregion
 
@@ -164,7 +163,7 @@ namespace Core
             // сообщаем что ход завершен, доска должна была обновить список шашек на доске
             OnEndTurn?.Invoke();
             // если игра не закончилась
-            if (EndGame(out GameResult)) return;
+            if (EndGame(out Winner)) return;
             // смена игрока 
             CurrentTurn = CurrentTurn == FirstPlayer
                 ? SecondPlayer
@@ -187,33 +186,33 @@ namespace Core
         /// <summary>
         /// Проверяет, закончилась ли игра, и определяет победителя.
         /// </summary>
-        private bool EndGame(out PawnColor winnerColor)
+        private bool EndGame(out Player winner)
         {
             var black = Board.GetPawnsOnBoard(PawnColor.Black);
             var white = Board.GetPawnsOnBoard(PawnColor.White);
 
-            if (black.Count == 0 && white.Count == 0)
+            switch (black.Count)
             {
-                winnerColor = PawnColor.None; // Ничья
-                OnGameEnd?.Invoke(PawnColor.None);
-                return true;
+                case 0 when white.Count == 0:
+                    winner = null;
+                    gameManager.CurrentState = GameState.GameOver;
+                    return true;
+                // Белые победили
+                case 0:
+                    winner = GetPlayerByColor(PawnColor.White);
+                    gameManager.CurrentState = GameState.GameOver;
+                    return true;
             }
 
-            if (black.Count == 0)
-            {
-                winnerColor = PawnColor.White; // Белые победили
-                OnGameEnd?.Invoke(PawnColor.White);
-                return true;
-            }
-
+            // Черные победили
             if (white.Count == 0)
             {
-                winnerColor = PawnColor.Black; // Черные победили
-                OnGameEnd?.Invoke(PawnColor.Black);
+                winner = GetPlayerByColor(PawnColor.Black);
+                gameManager.CurrentState = GameState.GameOver;
                 return true;
             }
-
-            winnerColor = PawnColor.None; // Игра продолжается
+            // Игра продолжается
+            winner = null;
             return false;
         }
 
@@ -280,10 +279,9 @@ namespace Core
             Pawn.OnSelect -= OnSelect;
         }
 
-        public Player GetPlayerByColor(PawnColor pawnColor)
+        private Player GetPlayerByColor(PawnColor pawnColor)
         {
             return pawnColor == FirstPlayer.PawnColor ? FirstPlayer : SecondPlayer;
         }
-        
     }
 }

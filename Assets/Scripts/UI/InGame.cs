@@ -28,6 +28,7 @@ namespace UI
 
         #endregion
         
+        private IGameManager gameManager;
         private Game game;
         private UIManager uiManager;
         private bool isMute = false;
@@ -38,18 +39,18 @@ namespace UI
             uiManager = manager;
            
             whoTurn.text = "";
-            
-            game = ServiceLocator.Get<IGameManager>().CurrentGame;
-            
+            // ссылки
+            gameManager = manager.GameManager;
+            game = gameManager.CurrentGame;
+            // события 
             game.OnStartTurn += UpdateUI;
-            game.OnGameEnd += OnEndGame;
+            gameManager.OnGameStateChanged += OnEndGame;
             game.OnGameStart += OnStartGame;
-            
-            
+            // инициализация текстовых полей
             whiteCount.text = string.Empty;
             blackCount.text = string.Empty;
             whoTurn.text = string.Empty;
-            
+            // Слушатели для кнопок
             menuButton.onClick.AddListener(MenuButton);
             backButton.onClick.AddListener(BackToMainMenu);
             soundButton.onClick.AddListener(SwitchSound);
@@ -58,7 +59,7 @@ namespace UI
         private void OnDestroy()
         {
             game.OnStartTurn -= UpdateUI;
-            game.OnGameEnd -= OnEndGame;
+            gameManager.OnGameStateChanged -= OnEndGame;
             game.OnGameStart -= OnStartGame;
         }
 
@@ -73,23 +74,28 @@ namespace UI
             whoTurn.text = $" Ходит игрок: {game.CurrentTurn.Name}";
         }
 
-        private void OnEndGame(PawnColor c)
+        private void OnEndGame(GameState state)
         {
-            var p = game.GetPlayerByColor(c);
-            whoTurn.text = $"Победил игрок: {p.Name}";
+            if (state != GameState.GameOver) return;
+            
+            var winner = game.Winner;
+            whoTurn.text = winner == null ? "Ничья" 
+                                          : $"Победил игрок: {winner.Name}";
+           
         }
 
         private void OnStartGame()
         {
            UpdateUI();
         }
+        
         #endregion
         
         #region Buttons Listeners
 
         private void BackToMainMenu()
         {
-            uiManager.OpenMainMenu();
+            gameManager.CurrentState = GameState.MainMenu;
         }
 
         private void MenuButton()
@@ -109,12 +115,12 @@ namespace UI
             soundButton.spriteState = spriteState;
             soundButton.image.sprite = isMute ? volumeOff : volumeOn;
             
-            uiManager.Mute(isMute);
+            uiManager.AudioService.Mute(isMute);
         }
 
         private void RestartGame()
         {
-            uiManager.RestartGame();
+            game.RestartGame();
         }
 
         #endregion

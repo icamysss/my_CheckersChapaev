@@ -4,6 +4,7 @@ using Core;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Services;
+using Services.Interfaces;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -80,7 +81,7 @@ namespace AI
                 pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black
                 ).Where(p => p != null).ToList();
     
-            Debug.Log($"AI: {aiPawns.Count}, Enemies: {enemyPawns.Count}"); // Для отладки
+        //    Debug.Log($"AI: {aiPawns.Count}, Enemies: {enemyPawns.Count}"); // Для отладки
         }
 
         /// <summary>

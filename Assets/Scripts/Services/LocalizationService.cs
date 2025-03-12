@@ -64,7 +64,7 @@ namespace Services
         
         public void Initialize()
         {
-            Language = RUSSIAN;
+            Language = ENGLISH;
             Debug.Log("Initializing Localization Service");
             isInitialized = true;
         }

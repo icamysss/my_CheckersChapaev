@@ -746,10 +746,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   menuType: MainMenu
   canvasGroup: {fileID: 1882943018712381861}
-  Single: {fileID: 4798830745419956428}
-  OnWeb: {fileID: 733247085444823666}
-  Two: {fileID: 5074064329458443841}
-  Settings: {fileID: 4974743690001357513}
+  single: {fileID: 4798830745419956428}
+  onWeb: {fileID: 733247085444823666}
+  two: {fileID: 5074064329458443841}
+  settings: {fileID: 4974743690001357513}
 --- !u!1 &6664100825482151857
 GameObject:
   m_ObjectHideFlags: 0

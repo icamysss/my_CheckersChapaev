@@ -16,9 +16,9 @@ namespace Services
         private Dictionary<string, Menu> _prefabCache = new ();
         private Dictionary<string, Menu> _activeMenus = new ();
 
-        private IGameManager gameManager;
-        private IAudioService audioService;
-        private ILocalizationService localizationService;
+        public IGameManager GameManager { get; private set; }
+        public IAudioService AudioService { get; private set; }
+        public ILocalizationService LocalizationService { get; private set; }
 
        
         private void InitializePrefabCache()
@@ -44,12 +44,13 @@ namespace Services
         private void OnServicesReady()
         {
             // ----- ссылки -----
-            gameManager = ServiceLocator.Get<IGameManager>();
-            audioService = ServiceLocator.Get<IAudioService>();
-            localizationService = ServiceLocator.Get<ILocalizationService>();
-            gameManager.OnGameStateChanged += OnChangeGameState;
+            GameManager = ServiceLocator.Get<IGameManager>();
+            AudioService = ServiceLocator.Get<IAudioService>();
+            LocalizationService = ServiceLocator.Get<ILocalizationService>();
+            GameManager.OnGameStateChanged += OnChangeGameState;
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
             // ---- меню ----
+            InitializePrefabCache();
             OpenMenu("MainMenu");
             
         }
@@ -74,51 +75,6 @@ namespace Services
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
         }
-       
-
-        #region Buttons & Menu methods
-
-        public void StartGame(GameType gameType)
-        {
-            gameManager.CurrentGame.StartGame(gameType);
-        }
-
-        public void RestartGame()
-        {
-            gameManager.CurrentGame.RestartGame();
-        }
-
-        public void OpenMainMenu()
-        {
-            gameManager.CurrentState = GameState.MainMenu;
-        }
-
-        public void Mute(bool isMute)
-        {
-            audioService.Mute(isMute);
-        }
-
-        public void SetVolume(float volume)
-        {
-            audioService.Volume = volume;
-        }
-
-        public void SetLanguage(string language)
-        {
-            localizationService.Language = language;
-        }
-        
-        public string GetLanguage()
-        {
-            return localizationService.Language;
-        }
-        
-        public float GetVolume()
-        {
-            return audioService.Volume;
-        }
-        
-        #endregion
         
         #region IService
 
@@ -126,14 +82,14 @@ namespace Services
         {
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
-            InitializePrefabCache();
+           
             isInitialized = true;
         }
         
         public void Shutdown()
         {
             Debug.Log("UIManager shutting down");
-            gameManager.OnGameStateChanged -= OnChangeGameState;
+            GameManager.OnGameStateChanged -= OnChangeGameState;
         }
 
         public bool isInitialized { get; private set; }
