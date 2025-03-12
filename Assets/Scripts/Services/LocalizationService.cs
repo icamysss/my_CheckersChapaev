@@ -1,86 +1,93 @@
 using System;
-using UnityEngine;
 using System.Collections.Generic;
-using Localization;
 using Services.Interfaces;
+using UnityEngine;
 
 namespace Services
 {
     public class LocalizationService : ILocalizationService
     {
-        private Dictionary<string, Dictionary<string, string>> _translations;
-        private string currentLanguage = Languages.RUSSIAN;
-        private const string FALLBACK_LANGUAGE = Languages.RUSSIAN;
-
+    
+        private Dictionary<string, string> localizationData = new Dictionary<string, string>();
+        private string currentLanguage;
         public event Action LanguageChanged;
-
-        public void Initialize()
+    
+        public const string ENGLISH = "en";
+        public const string RUSSIAN = "ru";
+    
+        public string Language
         {
-            LoadAllTranslations();
-            LoadSavedLanguage();
-            isInitialized = true;
-            Debug.Log("LocalizationService initialized");
-        }
-
-        private void LoadAllTranslations()
-        {
-            _translations = new Dictionary<string, Dictionary<string, string>>();
-
-            var translationFiles = Resources.LoadAll<TextAsset>("Localization");
-            foreach (var file in translationFiles)
+            get => currentLanguage;
+            set
             {
-                string langCode = file.name;
-                _translations[langCode] = JsonUtility.FromJson<SerializationDictionary>(file.text).ToDictionary();
+                currentLanguage = value;
+                LoadLocalization(currentLanguage);
+                LanguageChanged?.Invoke();
             }
         }
-
-        private void LoadSavedLanguage()
+        // Загрузка локализации для указанного языка
+        private void LoadLocalization(string language)
         {
-            string savedLang = PlayerPrefs.GetString("SelectedLanguage", currentLanguage);
-            SetLanguage(savedLang);
+            var json = LoadJsonFile(language);
+            localizationData = ParseJson(json);
         }
 
-        public void SetLanguage(string languageCode)
-        {
-            if (!_translations.ContainsKey(languageCode))
-                languageCode = FALLBACK_LANGUAGE;
-
-            currentLanguage = languageCode;
-            // PlayerPrefs.SetString("SelectedLanguage", languageCode);
-            LanguageChanged?.Invoke();
-        }
-
+        // Получение переведенной строки по ключу
         public string GetLocalizedString(string key)
         {
-            if (_translations[currentLanguage].TryGetValue(key, out var value))
-                return value;
-
-            Debug.LogWarning($"Translation missing: {key}");
-            return key;
+            return localizationData.GetValueOrDefault(key, key); // Если перевода нет, возвращаем сам ключ
         }
 
-        public string GetCurrentLanguage() => currentLanguage;
+   
+
+        // Загрузка JSON-файла из Resources
+        private string LoadJsonFile(string language)
+        {
+            var textAsset = Resources.Load<TextAsset>($"Localization/{language}");
+            return textAsset != null ? textAsset.text : "{}"; // Возвращаем пустой JSON, если файл не найден
+        }
+
+        // Парсинг JSON в словарь
+        private Dictionary<string, string> ParseJson(string json)
+        {
+            var data = JsonUtility.FromJson<LocalizationData>(json);
+            var dict = new Dictionary<string, string>();
+
+            if (data?.entries == null) return dict;
+        
+            foreach (var entry in data.entries)
+            {
+                dict[entry.key] = entry.value;
+            }
+            return dict;
+        }
+        
+        public void Initialize()
+        {
+            Language = RUSSIAN;
+            Debug.Log("Initializing Localization Service");
+            isInitialized = true;
+        }
 
         public void Shutdown()
         {
-            Debug.Log("Shutting down LocalizationService");
+            Debug.Log("Shutting down Localization Service");
         }
 
         public bool isInitialized { get; private set; }
+    }
+    
+    // Вспомогательные классы для десериализации JSON
+    [System.Serializable]
+    public class LocalizationData
+    {
+        public List<LocalizationEntry> entries;
+    }
 
-        [System.Serializable]
-        private class SerializationDictionary
-        {
-            public List<string> keys = new List<string>();
-            public List<string> values = new List<string>();
-
-            public Dictionary<string, string> ToDictionary()
-            {
-                var dict = new Dictionary<string, string>();
-                for (int i = 0; i < keys.Count; i++)
-                    dict[keys[i]] = values[i];
-                return dict;
-            }
-        }
+    [System.Serializable]
+    public class LocalizationEntry
+    {
+        public string key;
+        public string value;
     }
 }

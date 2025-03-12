@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7157311827298737246}
   - component: {fileID: 3374766002508078014}
   - component: {fileID: 8622644486825496318}
-  - component: {fileID: 2058036058117682663}
+  - component: {fileID: 7450498131831911134}
   m_Layer: 5
   m_Name: SettingsText
   m_TagString: Untagged
@@ -80,7 +80,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u0432"
---- !u!114 &2058036058117682663
+--- !u!114 &7450498131831911134
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -89,11 +89,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 493018737174749914}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cbf6ddcfd0946e5b1b62f6e4257da27, type: 3}
+  m_Script: {fileID: 11500000, guid: ba68dc127aa04024ae21b798a97f5eb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: {fileID: 8622644486825496318}
-  key: SettingsText
+  key: Settings
+  language: en
+  value: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
 --- !u!1 &502896186290534384
 GameObject:
   m_ObjectHideFlags: 0
