@@ -38,7 +38,12 @@ namespace Services
             var cameraController = Instantiate(_cameraControllerPrefab);
             ServiceLocator.Register<ICameraController>(cameraController);
             // --------------------------------------------------
-        
+            //              LOCALIZATION
+            // --------------------------------------------------
+            var localizationService = new LocalizationService();
+            ServiceLocator.Register<ILocalizationService>(localizationService);
+            // --------------------------------------------------
+            
             // все сервисы отправлены в локатор
             ServiceLocator.AllServicesRegistered = true;
         }

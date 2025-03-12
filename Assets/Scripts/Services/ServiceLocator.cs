@@ -7,7 +7,6 @@ namespace Services
     public static class ServiceLocator
     {
         public static event Action OnAllServicesRegistered;
-        
         private static readonly Dictionary<Type, object> _services = new ();
         private static bool _isAllSent;
         

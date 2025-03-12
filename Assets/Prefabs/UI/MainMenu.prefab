@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 7157311827298737246}
   - component: {fileID: 3374766002508078014}
   - component: {fileID: 8622644486825496318}
+  - component: {fileID: 2058036058117682663}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: SettingsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +79,21 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+  m_Text: "\u0432"
+--- !u!114 &2058036058117682663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 493018737174749914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cbf6ddcfd0946e5b1b62f6e4257da27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 8622644486825496318}
+  key: SettingsText
 --- !u!1 &502896186290534384
 GameObject:
   m_ObjectHideFlags: 0
@@ -529,7 +544,7 @@ GameObject:
   - component: {fileID: 1688417817729268730}
   - component: {fileID: 7636174312739092799}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: TwoPlayersText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -746,7 +761,7 @@ GameObject:
   - component: {fileID: 9001410271998558992}
   - component: {fileID: 6125573437658609814}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: OnePlayerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -825,7 +840,7 @@ GameObject:
   - component: {fileID: 3256636637205151047}
   - component: {fileID: 2487099378380213318}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: OnInternetText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

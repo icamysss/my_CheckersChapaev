@@ -1,183 +1,86 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
-using System.IO;
-using System.Linq;
+using System.Collections.Generic;
+using Localization;
+using Services.Interfaces;
 
 namespace Services
 {
     public class LocalizationService : ILocalizationService
     {
-        #region Fields and Properties
+        private Dictionary<string, Dictionary<string, string>> _translations;
+        private string currentLanguage = Languages.RUSSIAN;
+        private const string FALLBACK_LANGUAGE = Languages.RUSSIAN;
 
-        private string _currentLanguage = Languages.RUSSIAN;
-        private Dictionary<string, string> _translations = new();
-        private Dictionary<string, UnityEngine.Sprite> _localizedSprites = new();
-        private HashSet<Action> _uiUpdateCallbacks = new();
-
-        public bool isInitialized { get; private set; }
-
-        #endregion
-
-        #region IService Implementation
+        public event Action LanguageChanged;
 
         public void Initialize()
         {
-            // Автоматическое определение языка (заглушка)
-            DetectSystemLanguage();
-            
-            // Асинхронная загрузка переводов
-            PreloadTranslationsAsync().Forget();
-            
+            LoadAllTranslations();
+            LoadSavedLanguage();
             isInitialized = true;
+            Debug.Log("LocalizationService initialized");
         }
+
+        private void LoadAllTranslations()
+        {
+            _translations = new Dictionary<string, Dictionary<string, string>>();
+
+            var translationFiles = Resources.LoadAll<TextAsset>("Localization");
+            foreach (var file in translationFiles)
+            {
+                string langCode = file.name;
+                _translations[langCode] = JsonUtility.FromJson<SerializationDictionary>(file.text).ToDictionary();
+            }
+        }
+
+        private void LoadSavedLanguage()
+        {
+            string savedLang = PlayerPrefs.GetString("SelectedLanguage", currentLanguage);
+            SetLanguage(savedLang);
+        }
+
+        public void SetLanguage(string languageCode)
+        {
+            if (!_translations.ContainsKey(languageCode))
+                languageCode = FALLBACK_LANGUAGE;
+
+            currentLanguage = languageCode;
+            // PlayerPrefs.SetString("SelectedLanguage", languageCode);
+            LanguageChanged?.Invoke();
+        }
+
+        public string GetLocalizedString(string key)
+        {
+            if (_translations[currentLanguage].TryGetValue(key, out var value))
+                return value;
+
+            Debug.LogWarning($"Translation missing: {key}");
+            return key;
+        }
+
+        public string GetCurrentLanguage() => currentLanguage;
 
         public void Shutdown()
         {
-            _translations.Clear();
-            _localizedSprites.Clear();
-            _uiUpdateCallbacks.Clear();
-            isInitialized = false;
+            Debug.Log("Shutting down LocalizationService");
         }
 
-        #endregion
+        public bool isInitialized { get; private set; }
 
-        #region ILocalizationService Implementation
-
-        public event Action OnLanguageChanged;
-
-        public string GetTranslation(string key)
+        [System.Serializable]
+        private class SerializationDictionary
         {
-            if (_translations.TryGetValue(key, out var value))
-                return value;
+            public List<string> keys = new List<string>();
+            public List<string> values = new List<string>();
 
-            Debug.LogWarning($"Translation missing for key: {key}");
-            return key; // Возвращаем ключ как fallback
-        }
-
-        public void SetLanguage(string language)
-        {
-            if (_currentLanguage == language) return;
-            
-            _currentLanguage = language;
-            SaveLanguagePreference(); // Заглушка
-            ReloadTranslations();
-            OnLanguageChanged?.Invoke();
-        }
-
-        public async UniTaskVoid PreloadTranslationsAsync()
-        {
-            try
+            public Dictionary<string, string> ToDictionary()
             {
-                // Загрузка JSON (пример для WebGL/Resources)
-                var jsonPath = $"Locales/{_currentLanguage}";
-                var jsonAsset = await Resources.LoadAsync<TextAsset>(jsonPath).ToUniTask();
-                
-                if (jsonAsset is TextAsset textAsset)
-                {
-                    ParseTranslations(textAsset.text);
-                }
-
-                // Загрузка спрайтов (пример)
-                await LoadLocalizedSpritesAsync();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Localization loading failed: {ex.Message}");
+                var dict = new Dictionary<string, string>();
+                for (int i = 0; i < keys.Count; i++)
+                    dict[keys[i]] = values[i];
+                return dict;
             }
         }
-
-        public UnityEngine.Sprite GetLocalizedSprite(string assetKey)
-        {
-            return _localizedSprites.TryGetValue(assetKey, out var sprite) 
-                ? sprite 
-                : null;
-        }
-
-        public void RegisterLocalizedUI(Action updateAction)
-        {
-            _uiUpdateCallbacks.Add(updateAction);
-            OnLanguageChanged += updateAction;
-        }
-
-        public void UnregisterLocalizedUI(Action updateAction)
-        {
-            _uiUpdateCallbacks.Remove(updateAction);
-            OnLanguageChanged -= updateAction;
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void DetectSystemLanguage()
-        {
-            // Заглушка для автоматического определения
-            // _currentLanguage = Application.systemLanguage;
-        }
-
-        private void SaveLanguagePreference()
-        {
-            // Заглушка для PlayerPrefs/SaveSystem
-        }
-
-        private void ParseTranslations(string json)
-        {
-            // Пример парсинга (реализовать под свой JSON)
-            _translations = JsonUtility.FromJson<TranslationData>(json).ToDictionary();
-        }
-
-        private async UniTask LoadLocalizedSpritesAsync()
-        {
-            // Пример загрузки спрайтов через Addressables/Resources
-            var spriteKeys = new[] { "icon_play", "icon_settings" };
-            foreach (var key in spriteKeys)
-            {
-                var path = $"Sprites/{_currentLanguage}/{key}";
-                var sprite = await Resources.LoadAsync<UnityEngine.Sprite>(path).ToUniTask() as UnityEngine.Sprite;
-                if (sprite != null)
-                    _localizedSprites[key] = sprite;
-            }
-        }
-
-        private void ReloadTranslations()
-        {
-            PreloadTranslationsAsync().Forget();
-            foreach (var callback in _uiUpdateCallbacks)
-                callback?.Invoke();
-        }
-
-        #endregion
-
-        #region Editor Integration
-
-#if UNITY_EDITOR
-        [UnityEditor.MenuItem("Tools/Open Localization Editor")]
-        private static void OpenEditorWindow()
-        {
-            // Пример вызова кастомного редактора
-            LocalizationEditorWindow.Open();
-        }
-#endif
-
-        #endregion
-    }
-
-    // Вспомогательный класс для парсинга JSON
-    [Serializable]
-    public class TranslationData
-    {
-        public List<TranslationEntry> entries;
-
-        public Dictionary<string, string> ToDictionary() => 
-            entries.ToDictionary(e => e.key, e => e.value);
-    }
-
-    [Serializable]
-    public class TranslationEntry
-    {
-        public string key;
-        public string value;
     }
 }

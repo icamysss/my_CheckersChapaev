@@ -1,5 +1,8 @@
-public static class Languages
+namespace Localization
 {
-    public const string ENGLISH = "en";
-    public const string RUSSIAN = "ru";
+    public static class Languages
+    {
+        public const string ENGLISH = "en";
+        public const string RUSSIAN = "ru";
+    }
 }
