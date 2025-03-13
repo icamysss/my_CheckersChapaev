@@ -14,6 +14,7 @@ public class PawnCatcher : MonoBehaviour
     private async UniTask DisablePawn(GameObject pawn)
     {
         await UniTask.Delay(3000);
+        if (pawn == null) return;
         
         var rb = pawn.GetComponent<Rigidbody>();
         if (rb)  rb.isKinematic = true;

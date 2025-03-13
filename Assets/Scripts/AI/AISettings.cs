@@ -6,6 +6,7 @@ namespace AI
     {
         #region Inspector Variables
 
+        public int TimeAfterCamSetPosition = 500;
         //Минимальное время принятия решения (милисек)
         public int MinDecisionDelay = 1000;
         //Максимальное время принятия решения (милисек)

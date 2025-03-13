@@ -9,9 +9,8 @@ namespace Core
 {
     public class Game : IDisposable
     {
-        private GameType GameType { get; set; } = GameType.HumanVsAi;
-
-
+        public GameType GameType { get; private set; } = GameType.HumanVsAi;
+        
         public Player Winner; // Результат игры (победитель или ничья)
         public Player CurrentTurn { get; private set; } // Текущий ход ( игрока)
         public Player FirstTurn { get; private set; }
@@ -34,7 +33,7 @@ namespace Core
             Board = board;
 
             this.AIController = new AIController();
-            this.AIController.Initialize(board);
+            this.AIController.Initialize(this);
             Pawn.OnEndAiming += OnForceApplied;
             Pawn.OnSelect += OnSelect;
 
@@ -150,7 +149,7 @@ namespace Core
         /// <summary>
         /// Переключает ход между игроками в зависимости от типа игры.
         /// </summary>
-        private async UniTask SwitchTurn()
+        public async UniTask SwitchTurn()
         {
             if (CurrentTurn == null)
             {
