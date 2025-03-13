@@ -12,8 +12,6 @@ namespace UI
         [SerializeField] private Button onWeb;
         [SerializeField] private Button two;
         [SerializeField] private Button settings;
-        
-        private UIManager  uiManager;
         private Game game;
         
         

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using AI;
 using Cysharp.Threading.Tasks;
 using Services;
@@ -22,7 +23,7 @@ namespace Core
 
         private bool SelectingColor = false; // Флаг выбора цвета на первом ходу
         private readonly GameManager gameManager;
-
+        private CancellationTokenSource endTurn;
 
         /// <summary>
         /// Конструктор игры, инициализирует зависимости и подписывается на события шашек.
@@ -39,6 +40,8 @@ namespace Core
 
             FirstPlayer = new Player("player1", PawnColor.None, PlayerType.AI);
             SecondPlayer = new Player("player2", PawnColor.None, PlayerType.AI);
+            
+            endTurn = new CancellationTokenSource();
         }
 
         #region GameEvents
@@ -72,7 +75,7 @@ namespace Core
         {
             // Отключаем взаимодействие всех шашек
             UpdateAllPawnsInteractivity(false);
-            SwitchTurn().Forget();
+            SwitchTurnAsync().Forget();
         }
 
         #endregion
@@ -130,7 +133,7 @@ namespace Core
                 var secondPlayer = firsTurn == FirstPlayer ? SecondPlayer : FirstPlayer;
                 secondPlayer.PawnColor = GetOppositeColor(firsTurn.PawnColor);
 
-                AIController.MakeMove(firsTurn);
+                _ = AIController.MakeMove(firsTurn, endTurn.Token);
 
                 Debug.Log($"FirstPlayer color: {FirstPlayer.PawnColor}, SecondPlayer: {SecondPlayer.PawnColor}");
             }
@@ -149,7 +152,7 @@ namespace Core
         /// <summary>
         /// Переключает ход между игроками в зависимости от типа игры.
         /// </summary>
-        public async UniTask SwitchTurn()
+        public async UniTask SwitchTurnAsync()
         {
             if (CurrentTurn == null)
             {
@@ -174,11 +177,11 @@ namespace Core
 
             if (CurrentTurn.Type == PlayerType.AI)
             {
-                AIController.MakeMove(CurrentTurn);
+                await AIController.MakeMove(CurrentTurn, endTurn.Token);
             }
             else
             {
-                UpdatePawnsInteractivity(CurrentTurn, true);
+                UpdatePawnsInteractivity(CurrentTurn);
             }
         }
 

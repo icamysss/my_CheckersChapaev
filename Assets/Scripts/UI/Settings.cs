@@ -15,8 +15,7 @@ namespace UI
         [Header("Sprites")]
         [SerializeField] private Sprite rusSprite;
         [SerializeField] private Sprite engSprite;
-
-        private UIManager uiManager;
+        
         private ILocalizationService localizationService;
         private IAudioService audioService;
         

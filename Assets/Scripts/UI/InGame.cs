@@ -30,7 +30,6 @@ namespace UI
         
         private IGameManager gameManager;
         private Game game;
-        private UIManager uiManager;
         private bool isMute = false;
 
         public override void Initialize(UIManager manager)

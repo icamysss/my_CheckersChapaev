@@ -29,7 +29,7 @@ namespace UI
         public override void Initialize(UIManager manager)
         {
             base.Initialize(manager);
-            game = manager.GameManager.CurrentGame;
+            game = uiManager.GameManager.CurrentGame;
 
             header.text = string.Empty;
             mainText.text = string.Empty;
