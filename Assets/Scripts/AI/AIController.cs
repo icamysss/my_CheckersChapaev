@@ -125,7 +125,7 @@ namespace AI
 
             finally
             {
-                game.StartGame(game.GameType);
+                game.SwitchTurn();
             }
         }
 
@@ -225,11 +225,9 @@ namespace AI
             catch (Exception e)
             {
                 Debug.LogWarning($"AI AimSimulate failed: {e}");
+                // BUG: таже самая проблема, игра завершилась, ход нет 
             }
-            finally
-            {
-                game.StartGame(game.GameType); // BUG: таже самая проблема, игра завершилась, ход нет 
-            }
+           
         }
 
         /// <summary>
