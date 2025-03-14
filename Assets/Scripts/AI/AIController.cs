@@ -61,27 +61,27 @@ namespace AI
                 Debug.LogError($"Invalid pawn color: {pl.PawnColor}");
                 return;
             }
-            if (pl.AISettings != null)
-            {
-                aiSettings = pl.AISettings;
-                scoreCalculator = new ScoreCalculator(pl, board);
-            }
+
+            aiSettings = pl.AISettings ?? new AISettings();
+            scoreCalculator = new ScoreCalculator(pl, board);
+
             RefreshPawnLists(pl.PawnColor);
 
             try
             {
                 await AIMove(cancellationToken);
-                game.SwitchTurnAsync();
             }
             catch (OperationCanceledException)
             {
                 Debug.Log("AI move was cancelled.");
-                // Ход не переключается, если задача отменена (например, игра завершена)
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"AI Move failed: {ex}");
-                game.SwitchTurnAsync(); // Переключаем ход даже при ошибке, как в оригинале
+            }
+            finally
+            {
+                await game.SwitchTurnAsync();
             }
         }
 
@@ -107,17 +107,17 @@ namespace AI
         {
             // 1. Задержка для имитации "размышлений" ИИ
             var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
-            await UniTask.Delay(TimeSpan.FromSeconds(decisionDelay), cancellationToken: cancellationToken);
+            await UniTask.Delay(decisionDelay, cancellationToken: cancellationToken);
 
             // 2. Выбор оптимальной шашки и ее активация
             aiSelectedPawn = SelectOptimalPawn();
             if (aiSelectedPawn == null)
-                throw new Exception($"Invalid optimal pawn: {aiSelectedPawn}");
+                throw new Exception("No valid pawn selected for AI move.");
             aiSelectedPawn.Select();
 
             // 3. Ожидание завершения движения камеры
             var cameraMoveDelay = cameraController.MoveDuration + aiSettings.TimeAfterCamSetPosition;
-            await UniTask.Delay(TimeSpan.FromSeconds(cameraMoveDelay), cancellationToken: cancellationToken);
+            await UniTask.Delay(cameraMoveDelay, cancellationToken: cancellationToken);
 
             // 4. Имитация прицеливания
             await AimSimulateAsync(cancellationToken);
@@ -158,7 +158,7 @@ namespace AI
         /// Метод имитации прицеливания с поведением, похожим на человеческое
         /// </summary>
         private async UniTask AimSimulateAsync(CancellationToken cancellationToken)
-        {
+        {// todo добавить колебания по силе удара
             if (aiSelectedPawn == null || enemyPawns.Count == 0)
             {
                 finalShotDirection = GetFallbackDirection(aiSelectedPawn?.transform);
@@ -201,7 +201,7 @@ namespace AI
                     currenTween?.Kill(); // Остановка анимации при отмене
                 }
             }
-
+           
             // Этап 2: Финальная фиксация направления
             currenTween = DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)
@@ -220,6 +220,7 @@ namespace AI
 
             try
             {
+                if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
                 await currenTween.AsyncWaitForCompletion();
             }
             finally

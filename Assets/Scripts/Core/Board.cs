@@ -194,6 +194,7 @@ namespace Core
             if (!pawns.Contains(newPawn)) pawns.Add(newPawn);
             return newPawn;
         }
+        
         #endregion
         
         #region Debug

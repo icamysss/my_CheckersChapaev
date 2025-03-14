@@ -60,7 +60,7 @@ namespace Core
 
         #region Private Variables
 
-        private Rigidbody _rb;
+        private Rigidbody rb;
         private Vector3 _dragStartWorldPos;
         private bool _isSelected;
         private float _currentForce;
@@ -93,13 +93,21 @@ namespace Core
         
         public void ApplyForce(Vector3 force)
         {
-            _rb.AddForce(force, ForceMode.Impulse);
-            audioService.PawnAudio.PlayStrikeSound(shotAudioSource);
+            rb.AddForce(force, ForceMode.Impulse);
+            
+            if (audioService != null) audioService.PawnAudio.PlayStrikeSound(shotAudioSource);
+            else Debug.LogWarning($"audioService = null: {this}");
+            
             ResetSelection();
             OnEndAiming?.Invoke(null);
         }
         public void UpdateLineVisuals(float force, Vector3 forceDirection)
         {
+            if (lineRenderer == null)
+            {
+                Debug.LogWarning($"lineRenderer = null: {this}");
+                return;
+            }
             var baseLength = force / maxForce;
             var finalLength = baseLength * maxLineLength;
             var endPosition = transform.position + forceDirection * finalLength;
@@ -188,10 +196,10 @@ namespace Core
             var minSpeed = 0.1f;
             var maxSpeed = 5f;
             // Проверяем, если шашка на доске и движется быстрее минимальной скорости
-            if (isOnBoard && _rb.linearVelocity.magnitude > minSpeed)
+            if (isOnBoard && rb.linearVelocity.magnitude > minSpeed)
             {
                 // Вычисляем громкость на основе скорости
-                var speed = _rb.linearVelocity.magnitude;
+                var speed = rb.linearVelocity.magnitude;
                 var targetVolume = Mathf.Clamp01((speed - minSpeed) / (maxSpeed - minSpeed));
 
                 // Плавно изменяем громкость
@@ -274,7 +282,7 @@ namespace Core
         }
         private void InitializeComponents()
         {
-            _rb = GetComponent<Rigidbody>();
+            rb = GetComponent<Rigidbody>();
             
             if (moveAudioSource == null || shotAudioSource == null) throw new MissingComponentException("Audio Source is null");
             

@@ -25,6 +25,7 @@ namespace Core
         private readonly GameManager gameManager;
         private CancellationTokenSource endTurn;
 
+        private const int TURN_DELAY_MS = 1500; // Задержка перед сменой хода
         /// <summary>
         /// Конструктор игры, инициализирует зависимости и подписывается на события шашек.
         /// </summary>
@@ -87,6 +88,9 @@ namespace Core
         /// </summary>
         public void StartGame(GameType gameType)
         {
+            endTurn?.Cancel();
+            endTurn = new CancellationTokenSource();
+            
             gameManager.CurrentState = GameState.Gameplay;
             RestartGame();
 
@@ -156,24 +160,18 @@ namespace Core
         {
             if (CurrentTurn == null)
             {
-                Debug.Log("Current turn is null");
+                Debug.LogError("Current turn is null.");
                 return;
             }
 
-            // ждем что бы все шашки, успели улететь с доски
-            await UniTask.Delay(1500);
-            // сообщаем что ход завершен, доска должна была обновить список шашек на доске
+
+            await UniTask.Delay(TURN_DELAY_MS, cancellationToken: endTurn.Token);
+
             OnEndTurn?.Invoke();
-            // если игра не закончилась
             if (EndGame(out Winner)) return;
-            // смена игрока 
-            CurrentTurn = CurrentTurn == FirstPlayer
-                ? SecondPlayer
-                : FirstPlayer;
 
-            OnStartTurn?.Invoke(); // обновляется доска
-
-            // Начало хода
+            CurrentTurn = CurrentTurn == FirstPlayer ? SecondPlayer : FirstPlayer;
+            OnStartTurn?.Invoke();
 
             if (CurrentTurn.Type == PlayerType.AI)
             {
