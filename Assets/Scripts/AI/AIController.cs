@@ -79,10 +79,6 @@ namespace AI
             {
                 Debug.LogWarning($"AI Move failed: {ex}");
             }
-            finally
-            {
-                await game.SwitchTurnAsync();
-            }
         }
 
         #endregion

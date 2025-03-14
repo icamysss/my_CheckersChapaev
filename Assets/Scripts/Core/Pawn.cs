@@ -53,7 +53,7 @@ namespace Core
         #region Actions
 
         public static Action<Pawn> OnSelect;
-        public static Action<Pawn> OnEndAiming;
+        public static Action OnEndAiming;
         public static Action<Pawn> OnStartAiming;
 
         #endregion
@@ -99,7 +99,7 @@ namespace Core
             else Debug.LogWarning($"audioService = null: {this}");
             
             ResetSelection();
-            OnEndAiming?.Invoke(null);
+            OnEndAiming?.Invoke();
         }
         public void UpdateLineVisuals(float force, Vector3 forceDirection)
         {

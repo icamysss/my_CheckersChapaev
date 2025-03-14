@@ -44,7 +44,7 @@ namespace UI
 
         private void ToMainMenu()
         {
-            uiManager.GameManager.CurrentState = GameState.MainMenu;
+            uiManager.GameManager.CurrentState = ApplicationState.MainMenu;
         }
 
         private void RestartGame()
@@ -54,7 +54,7 @@ namespace UI
 
         private void UpdateUI()
         {
-            if (uiManager.GameManager.CurrentState != GameState.GameOver) return;
+            if (uiManager.GameManager.CurrentState != ApplicationState.GameOver) return;
             // заголовок
             header.text = uiManager.LocalizationService.GetLocalizedString("END_GAME");
             if (game.Winner == null)

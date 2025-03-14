@@ -5,8 +5,8 @@ namespace Services
 {
     public interface IGameManager : IService
     {
-        public event Action<GameState> OnGameStateChanged;
-        public GameState CurrentState { get; set; }
+        public event Action<ApplicationState> OnGameStateChanged;
+        public ApplicationState CurrentState { get; set; }
         public Game CurrentGame { get; }
         
     }

@@ -1,6 +1,6 @@
 namespace Core
 {
-    public enum GameState
+    public enum ApplicationState
     {
         MainMenu,     // Главное меню
         Gameplay,     // Игровой процесс

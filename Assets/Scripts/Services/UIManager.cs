@@ -55,21 +55,21 @@ namespace Services
             
         }
         
-        private void OnChangeGameState(GameState state)
+        private void OnChangeGameState(ApplicationState state)
         {
             switch (state)
             {
-                case GameState.MainMenu:
+                case ApplicationState.MainMenu:
                     CloseAllMenus();
                     OpenMenu("MainMenu");
                     break;
-                case GameState.Gameplay:
+                case ApplicationState.Gameplay:
                     CloseTopMenu();
                     OpenMenu("InGame");
                     break;
-                case GameState.Pause:
+                case ApplicationState.Pause:
                     break;
-                case GameState.GameOver:
+                case ApplicationState.GameOver:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);

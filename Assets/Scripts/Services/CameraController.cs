@@ -70,7 +70,7 @@ namespace Services
         private Board board;
 
         #endregion
-
+        
         #region Unity Methods
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Services
         private void OnDisable()
         {
             Pawn.OnSelect -= SetTarget;
-            Pawn.OnEndAiming -= SetTarget;
+            Pawn.OnEndAiming -= ReturnToOverview;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
             KillActiveTweens();
         }
@@ -121,7 +121,7 @@ namespace Services
 
             if (currentTarget == null)
             {
-                ReturnToOverview(backDuration);
+                ReturnToOverview();
             }
             else
             {
@@ -159,19 +159,18 @@ namespace Services
         /// <summary>
         /// Возвращает камеру в обзорную позицию.
         /// </summary>
-        /// <param name="time">Длительность анимации возвращения.</param>
-        private void ReturnToOverview(int time)
+        private void ReturnToOverview()
         {
-            moveTween = transform.DOMove(overviewPosition, time)
+            moveTween = transform.DOMove(overviewPosition, backDuration)
                 .SetEase(moveEase);
             
-            rotateTween = transform.DORotateQuaternion(overviewRotation, time)
+            rotateTween = transform.DORotateQuaternion(overviewRotation, backDuration)
                 .SetEase(moveEase);
             
-            moveCamTween = mainCamera.transform.DOLocalMove(defaultCamOffset.Position, time)
+            moveCamTween = mainCamera.transform.DOLocalMove(defaultCamOffset.Position, backDuration)
                 .SetEase(moveEase);
             
-            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(defaultCamOffset.Rotation, time)
+            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(defaultCamOffset.Rotation, backDuration)
                 .SetEase(moveEase);
         }
 
@@ -210,6 +209,7 @@ namespace Services
             lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDuration / 1000f).
                 SetEase(Ease.InOutQuad);
         }
+        
 
         #endregion
 
@@ -240,7 +240,7 @@ namespace Services
             SetDefaultPositions();
 
             Pawn.OnSelect += SetTarget;
-            Pawn.OnEndAiming += SetTarget;
+            Pawn.OnEndAiming += ReturnToOverview;
             ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
 
             isInitialized = true;
@@ -251,8 +251,8 @@ namespace Services
         /// </summary>
         public void Shutdown()
         {
-            Pawn.OnSelect -= SetTarget;
-            Pawn.OnEndAiming -= SetTarget;
+            // Pawn.OnSelect -= SetTarget;
+            // Pawn.OnEndAiming -= SetTarget;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
         }
 

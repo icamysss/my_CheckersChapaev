@@ -7,6 +7,11 @@ using UnityEngine;
 
 namespace Services
 {
+    // todo связать состояние игры с состоянием приложения
+    // gameManager.CurrentState = ApplicationState.Gameplay;
+    
+    
+    
     public class GameManager : MonoBehaviour, IGameManager
     {
         [BoxGroup("References")]
@@ -17,36 +22,36 @@ namespace Services
         [BoxGroup("Options")]
         [SerializeField] private Game game;
         [BoxGroup("Options")]
-        [SerializeField] private GameState gameState = GameState.MainMenu;
+        [SerializeField] private ApplicationState applicationState = ApplicationState.MainMenu;
        
         
         
         private IUIManager uiManager;
         
-        private void SetGameState(GameState newState)
+        private void SetGameState(ApplicationState newState)
         {
-            Debug.Log($"Game state changed to {newState}, old {gameState}");
-            if (gameState == newState) return;
+            Debug.Log($"Game state changed to {newState}, old {applicationState}");
+            if (applicationState == newState) return;
 
-            gameState = newState;
+            applicationState = newState;
             OnGameStateChanged?.Invoke(newState);
         
             // Обработка специфичной логики состояний
             switch (newState)
             {
-                case GameState.MainMenu:
+                case ApplicationState.MainMenu:
                     Time.timeScale = 1;
                     break;
                 
-                case GameState.Gameplay:
+                case ApplicationState.Gameplay:
                     Time.timeScale = 1;
                     break;
                 
-                case GameState.Pause:
+                case ApplicationState.Pause:
                     Time.timeScale = 0;
                     break;
                 
-                case GameState.GameOver:
+                case ApplicationState.GameOver:
                     Time.timeScale = 1;
                     break;
             }
@@ -60,10 +65,10 @@ namespace Services
         
         #region IGameManager
         
-        public event Action<GameState> OnGameStateChanged;
-        public GameState CurrentState
+        public event Action<ApplicationState> OnGameStateChanged;
+        public ApplicationState CurrentState
         {
-            get => gameState;
+            get => applicationState;
             set => SetGameState(value);
         }
         public Game CurrentGame => game;
@@ -93,7 +98,6 @@ namespace Services
         public void Shutdown()
         {
             Debug.Log("Shutting down Game Manager");
-            game.Dispose();
         }
         
         public bool isInitialized { get; private set; }
