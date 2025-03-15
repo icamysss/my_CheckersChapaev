@@ -53,6 +53,11 @@ namespace Services
             InitializePrefabCache();
             OpenMenu("MainMenu");
             
+            GameManager.CurrentGame.OnStart += () =>
+            {
+                CloseMenu("MainMenu");
+                OpenMenu("InGame");
+            };
         }
         
         private void OnChangeGameState(ApplicationState state)
@@ -82,7 +87,7 @@ namespace Services
         {
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
-           
+            
             isInitialized = true;
         }
         
@@ -90,6 +95,7 @@ namespace Services
         {
             Debug.Log("UIManager shutting down");
             GameManager.OnGameStateChanged -= OnChangeGameState;
+            GameManager.CurrentGame.OnStart -= () => { };
         }
 
         public bool isInitialized { get; private set; }
