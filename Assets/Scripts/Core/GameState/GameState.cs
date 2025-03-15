@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Core.GameState
 {
@@ -13,14 +14,12 @@ namespace Core.GameState
 
         public virtual void Enter()
         {
-            // прервать все асинхронные методы связанныет с прошлым ходом
-            ThisGame.CancelAllAsyncOnLastTurn();
-            //проверить условия конца игры, закончить игру
-            if (ThisGame.IsGameOver()) ThisGame.CurrentState = ThisGame.GameOver;
+            Debug.Log($"Enter {this.GetType().Name}");
         }
 
         public virtual void Exit()
         {
+            Debug.Log($"Exit {this.GetType().Name}");
         }
 
 
