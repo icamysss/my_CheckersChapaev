@@ -30,7 +30,7 @@ namespace Services
         
         private void SetGameState(ApplicationState newState)
         {
-            Debug.Log($"Game state changed to {newState}, old {applicationState}");
+           // Debug.Log($"Game state changed to {newState}, old {applicationState}");
             if (applicationState == newState) return;
 
             applicationState = newState;

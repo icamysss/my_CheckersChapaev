@@ -43,7 +43,7 @@ namespace UI
             game = gameManager.CurrentGame;
             // события 
             game.OnStartTurn += UpdateUI;
-            gameManager.OnGameStateChanged += OnEndGame;
+            game.OnEndGame += OnEndGame;
             game.OnStart += OnStartGame;
             // инициализация текстовых полей
             whiteCount.text = string.Empty;
@@ -58,7 +58,7 @@ namespace UI
         private void OnDestroy()
         {
             game.OnStartTurn -= UpdateUI;
-            gameManager.OnGameStateChanged -= OnEndGame;
+            game.OnEndGame -= OnEndGame;
             game.OnStart -= OnStartGame;
         }
 
@@ -73,14 +73,12 @@ namespace UI
             whoTurn.text = $" Ходит игрок: {game.CurrentTurn.Name}";
         }
 
-        private void OnEndGame(ApplicationState state)
+        private void OnEndGame()
         {
-            if (state != ApplicationState.GameOver) return;
-            
             var winner = game.Winner;
-            whoTurn.text = winner == null ? "Ничья" 
-                                          : $"Победил игрок: {winner.Name}";
-           
+            whoTurn.text = winner == null
+                ? "Ничья"
+                : $"Победил игрок: {winner.Name}";
         }
 
         private void OnStartGame()

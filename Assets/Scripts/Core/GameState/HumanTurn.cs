@@ -10,12 +10,14 @@ namespace Core.GameState
         public override void Enter()
         {
             base.Enter();
+            ThisGame.SwitchPlayer();
             ThisGame.UpdatePawnsInteractivity(ThisGame.CurrentTurn);
+            
         }
 
         public override void Exit()
         {
-            base.Next();
+            base.Exit();
             ThisGame.UpdatePawnsInteractivity(ThisGame.CurrentTurn, false);
         }
     }

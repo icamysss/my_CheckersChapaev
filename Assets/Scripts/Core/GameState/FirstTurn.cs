@@ -43,6 +43,7 @@ namespace Core.GameState
 
             if (ThisGame.CurrentTurn.Type == PlayerType.AI)
             {
+                Debug.Log("AI turn");
                 // ИИ Выбирает цвет для хода и соответственно свой
                 ThisGame.CurrentTurn.PawnColor = Random.Range(0, 2) == 0 ? PawnColor.Black : PawnColor.White;
                 // другому игоку достается противоположный цвет
@@ -53,6 +54,7 @@ namespace Core.GameState
             }
             else
             {
+                Debug.Log("Player turn");
                 // Игрок выбирает цвет, все шашки активны, игрок ходит
                 var allPawns = ThisGame.Board.Pawns;
 

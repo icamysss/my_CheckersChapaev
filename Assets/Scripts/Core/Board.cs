@@ -85,7 +85,8 @@ namespace Core
 
         private void OnDestroy()
         {
-            game.OnEndTurn -= FindAllPawnsOnBoard;
+            if (game != null)
+                game.OnEndTurn -= FindAllPawnsOnBoard;
         }
 
         #endregion
@@ -97,7 +98,7 @@ namespace Core
        /// </summary>
         private void FindAllPawnsOnBoard()
         {
-            var halfExtents = new Vector3(boardSize * .5f, 0.5f, boardSize * .5f) ;
+            var halfExtents = new Vector3(boardSize * .5f, 0.1f, boardSize * .5f) ;
             var targetTag = "Pawn";
             var maxDistance = boardSize * 0.5f;
         

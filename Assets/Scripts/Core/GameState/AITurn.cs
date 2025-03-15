@@ -20,6 +20,8 @@ namespace Core.GameState
             cts = new CancellationTokenSource();
             
             base.Enter();
+            // меняем игрока 
+            ThisGame.SwitchPlayer();
             // ход ии
             UniTask.Void(async () => await aiController.MakeMove(ThisGame.CurrentTurn, cts.Token));
         }

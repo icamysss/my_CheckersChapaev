@@ -149,7 +149,7 @@ namespace Services
                 {
                     BringToFront(_menuStack.Peek());
                 }
-            }else Debug.LogError($"Could not find menu type in active menus: {menuType}");
+            }else Debug.LogWarning($"Could not find menu type in active menus: {menuType}");
         }
 
         public void CloseTopMenu()

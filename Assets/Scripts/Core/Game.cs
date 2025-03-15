@@ -30,20 +30,18 @@ namespace Core
         public Player CurrentTurn { get; private set; } // Текущий ход ( игрока)
         public Player FirstPlayer { get; private set; }
         public Player SecondPlayer { get; private set; }
+
         public GameState.GameState CurrentState
         {
-           get => currentState;
-            set
+            get => currentState;
+            private set
             {
                 if (value == null)
                 {
                     Debug.LogWarning("Value is null, nothing changed");
-                    return; 
+                    return;
                 }
-                
-                currentState?.Exit();
                 currentState = value;
-                currentState.Enter();
             }
         }
         
@@ -61,13 +59,21 @@ namespace Core
             this.AIController.Initialize(this);
             InitializeStateMachine();
         }
-        
+
+        public void ChangeState(GameState.GameState newState)
+        {
+            CurrentState?.Exit();
+            CurrentState = IsGameOver() ? GameOver : newState;
+            CurrentState.Enter();
+        }
 
         #region GameEvents
 
         public Action OnStart;
         public Action OnEndTurn;
         public Action OnStartTurn;
+        public Action OnEndGame;
+        public Action<GameState.GameState> OnChangeState;
 
         #endregion
 
@@ -79,7 +85,7 @@ namespace Core
         public void StartGame(GameType gameType)
         {
             GameType = gameType;
-            CurrentState = FirstTurn;
+            ChangeState(FirstTurn);
         }
 
         /// <summary>
@@ -87,6 +93,11 @@ namespace Core
         /// </summary>
         public bool IsGameOver()
         {
+            if (CurrentState == FirstTurn 
+                || CurrentState == GameOver 
+                || CurrentState == null) 
+                return false;
+            
             var black = Board.GetPawnsOnBoard(PawnColor.Black);
             var white = Board.GetPawnsOnBoard(PawnColor.White);
 
@@ -175,7 +186,7 @@ namespace Core
         }
         
         public void InitPlayerTypes()
-        {
+        { // todo инициализация игроков, генерация для противника
             FirstPlayer = new Player("игрок1");
             SecondPlayer = new Player("игрок2");
             switch (GameType)

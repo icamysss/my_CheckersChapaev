@@ -21,15 +21,5 @@ namespace Core.GameState
         {
             Debug.Log($"Exit {this.GetType().Name}");
         }
-
-
-        /// <summary>
-        /// Следущее состояние, Проверяет на условия победы
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public virtual void Next()
-        {
-            ThisGame.UpdateAllPawnsInteractivity(false);
-        }
     }
 }
