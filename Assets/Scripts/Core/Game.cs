@@ -105,12 +105,10 @@ namespace Core
             {
                 case 0 when white.Count == 0:
                     Winner = null;
-                    gameManager.CurrentState = ApplicationState.GameOver;
                     return true;
                 // Белые победили
                 case 0:
                     Winner = GetOppositePlayer(PawnColor.White);
-                    gameManager.CurrentState = ApplicationState.GameOver;
                     return true;
             }
 
@@ -118,7 +116,6 @@ namespace Core
             if (white.Count == 0)
             {
                 Winner = GetOppositePlayer(PawnColor.Black);
-                gameManager.CurrentState = ApplicationState.GameOver;
                 return true;
             }
             // Игра продолжается
