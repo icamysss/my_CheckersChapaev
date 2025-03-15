@@ -34,9 +34,8 @@ namespace Core.GameState
         {
             base.Next();
             SwitchNextState();
+           
         }
-
-        
         // вызывают Next с ожиданием TURN_DELAY_MS, после удара по шашке
         private void OnKickPawn()
         {
@@ -50,7 +49,10 @@ namespace Core.GameState
             try
             {
                 await UniTask.Delay(TURN_DELAY_MS, cancellationToken: ct.Token );
-                Next();
+                if (cts.IsCancellationRequested) return;
+                
+                if (ThisGame.IsGameOver()) ThisGame.CurrentState = ThisGame.GameOver;
+                else Next();
             }
             catch (OperationCanceledException)
             {
