@@ -10,7 +10,7 @@ public class PawnCatcher : MonoBehaviour
 {
     private Game currentGame;
     private List<GameObject> pawnsGo = new();
-   
+    private const int TIME_TO_DESTROY = 5000;
     
     private void OnEnable()
     {
@@ -41,7 +41,7 @@ public class PawnCatcher : MonoBehaviour
 
     private async UniTask DisablePawn(GameObject pawn)
     {
-        await UniTask.Delay(3000);
+        await UniTask.Delay(TIME_TO_DESTROY);
         if (pawn == null) return;
         
         var rb = pawn.GetComponent<Rigidbody>();

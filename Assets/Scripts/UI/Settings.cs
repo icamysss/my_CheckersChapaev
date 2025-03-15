@@ -40,14 +40,15 @@ namespace UI
             volumeSlider.value = currentVolume;
             //  язык
             language = localizationService.Language;
-            lang.sprite = language == "ru" ? rusSprite : engSprite;
+            lang.sprite = language == "ru" ? rusSprite : engSprite; 
+            // todo смена спрайта в зависимости от языка
         }
 
         private void PressOk()
         {
             localizationService.Language = language;
             audioService.Volume = currentVolume;
-            uiManager.CloseMenu("Settings");
+            uiManager.HideMenu("Settings");
         }
 
         private void NextLanguage()

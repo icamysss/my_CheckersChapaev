@@ -39,7 +39,7 @@ namespace Core.GameState
             // Кто первый ходит
             ThisGame.WhoseTurnFirst();
 
-            ThisGame.OnStart?.Invoke();
+           
 
             if (ThisGame.CurrentTurn.Type == PlayerType.AI)
             {
@@ -49,6 +49,9 @@ namespace Core.GameState
                 // другому игоку достается противоположный цвет
                 var anotherPlayer = ThisGame.GetOppositePlayer(ThisGame.CurrentTurn);
                 anotherPlayer.PawnColor = ThisGame.GetOppositeColor(ThisGame.CurrentTurn.PawnColor);
+                
+                ThisGame.OnStart?.Invoke();
+                
                 // ход ии
                 UniTask.Void(async () => await aiController.MakeMove(ThisGame.CurrentTurn, cts.Token));
             }
@@ -62,6 +65,8 @@ namespace Core.GameState
                 {
                     pawn.Interactable = true;
                 }
+                
+                ThisGame.OnStart?.Invoke();
             }
         }
 

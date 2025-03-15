@@ -20,6 +20,12 @@ namespace UI
         private IGameManager gameManager;
         private ILocalizationService localizationService;
 
+        public override void Show()
+        {
+            base.Show();
+            UpdateUI(); 
+        }
+        
         private void OnEnable()
         {
             if (mainMenuButton == null ||

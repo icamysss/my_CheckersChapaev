@@ -9,82 +9,89 @@ namespace Services
 {
     public class UIManager : MonoBehaviour, IUIManager
     {
-        [SerializeField] private List<Menu> _menuPrefabs = new ();
+        [SerializeField] private List<Menu> menuPrefabs = new ();
 
-        private Transform _uiRoot; // кэш своего трансформ
-        private Stack<Menu> _menuStack = new ();
-        private Dictionary<string, Menu> _prefabCache = new ();
-        private Dictionary<string, Menu> _activeMenus = new ();
+        private Transform uiRoot; // кэш своего трансформ
+        private readonly Dictionary<string, Menu> InstantiatedMenus = new ();
 
         public IGameManager GameManager { get; private set; }
         public IAudioService AudioService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
 
-       
-        private void InitializePrefabCache()
+
+        private void OnDisable()
         {
-            foreach (var menuPrefab in _menuPrefabs)
+            GameManager.OnGameStateChanged -= OnChangeApplicationState;
+            GameManager.CurrentGame.OnEndGame -= OnGameEnd;
+            GameManager.CurrentGame.OnStart -= () => { };
+        }
+
+        private void InitializeMenus()
+        {
+            foreach (var menuPrefab in menuPrefabs)
             {
                 var type = menuPrefab.MenuType;
-
-                if (!_prefabCache.TryAdd(type, menuPrefab))
+                var menu = Instantiate(menuPrefab, uiRoot);
+                menu.Hide();
+                menu.Initialize(this);
+               
+                if (!InstantiatedMenus.TryAdd(type, menu))
                 {
                     Debug.LogError($"Duplicate menu type: {type}");
-                    continue;
                 }
             }
         }
-
-        private void BringToFront(Menu menu)
+        
+        private void OnChangeApplicationState(ApplicationState state)
         {
-            menu.transform.SetAsLastSibling();
-            menu.Open();
+            switch (state)
+            {
+                case ApplicationState.MainMenu:
+                    CloseAllMenus();
+                    ShowMenu("MainMenu");
+                    break;
+                case ApplicationState.Gameplay:
+                    CloseAllMenus();
+                    ShowMenu("InGame");
+                    break;
+                case ApplicationState.ShowAD:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
         }
-
+        private void OnGameEnd()
+        {
+            ShowMenu("EndGame");
+        }
+        
         private void OnServicesReady()
         {
             // ----- ссылки -----
             GameManager = ServiceLocator.Get<IGameManager>();
             AudioService = ServiceLocator.Get<IAudioService>();
             LocalizationService = ServiceLocator.Get<ILocalizationService>();
-            GameManager.OnGameStateChanged += OnChangeGameState;
+            GameManager.OnGameStateChanged += OnChangeApplicationState;
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
             // ---- меню ----
-            InitializePrefabCache();
-            OpenMenu("MainMenu");
+            InitializeMenus();
+            ShowMenu("MainMenu");
             
             GameManager.CurrentGame.OnStart += () =>
             {
-                CloseMenu("MainMenu");
-                OpenMenu("InGame");
+                CloseAllMenus();
+                ShowMenu("InGame");
             };
-        }
-        
-        private void OnChangeGameState(ApplicationState state)
-        {
-            switch (state)
-            {
-                case ApplicationState.MainMenu:
-                    CloseAllMenus();
-                    OpenMenu("MainMenu");
-                    break;
-                case ApplicationState.Gameplay:
-                    CloseTopMenu();
-                    OpenMenu("InGame");
-                    break;
-                case ApplicationState.Pause:
-                    break;
-                case ApplicationState.GameOver:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
-            }
+            
+            GameManager.CurrentGame.OnEndGame += OnGameEnd;
         }
         
         #region IService
 
         public void Initialize()
         {
+            if (isInitialized) return;
+            uiRoot = transform;
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
             
@@ -94,8 +101,6 @@ namespace Services
         public void Shutdown()
         {
             Debug.Log("UIManager shutting down");
-            GameManager.OnGameStateChanged -= OnChangeGameState;
-            GameManager.CurrentGame.OnStart -= () => { };
         }
 
         public bool isInitialized { get; private set; }
@@ -104,76 +109,30 @@ namespace Services
 
         #region IUIManager
 
-        public void OpenMenu(string menuType)
+        public void ShowMenu(string menuType)
         {
-            if (_prefabCache.TryGetValue(menuType, out Menu prefab))
+            if (InstantiatedMenus.TryGetValue(menuType, out var menu))
             {
-                // Если меню уже открыто
-                if (_activeMenus.TryGetValue(menuType, out Menu existingMenu))
-                {
-                    BringToFront(existingMenu);
-                    return;
-                }
-
-                // Создаем новый экземпляр
-                var instance = Instantiate(prefab, _uiRoot);
-                instance.Initialize(this);
-                instance.Open();
-
-                _menuStack.Push(instance);
-                _activeMenus.Add(menuType, instance);
+                menu.Show();
             }
             else Debug.LogError($"Could not find menu type: {menuType}");
         }
 
-        public void CloseMenu(string menuType)
+        public void HideMenu(string menuType)
         {
-            if (_activeMenus.TryGetValue(menuType, out Menu menu))
+            if (InstantiatedMenus.TryGetValue(menuType, out var menu))
             {
-                // Удаляем из стека
-                var newStack = new Stack<Menu>();
-                while (_menuStack.Count > 0)
-                {
-                    var item = _menuStack.Pop();
-                    if (item != menu) newStack.Push(item);
-                }
-                _menuStack = newStack;
-
-                // Уничтожаем меню
-                menu.Close();
-                Destroy(menu.gameObject);
-                _activeMenus.Remove(menuType);
-
-                // Восстанавливаем порядок
-                if (_menuStack.Count > 0)
-                {
-                    BringToFront(_menuStack.Peek());
-                }
-            }else Debug.LogWarning($"Could not find menu type in active menus: {menuType}");
-        }
-
-        public void CloseTopMenu()
-        {
-            if (_menuStack.Count == 0) return;
-
-            var menu = _menuStack.Pop();
-            _activeMenus.Remove(menu.MenuType);
-            menu.Close();
-            
-            if (_menuStack.Count > 0)
-            {
-                BringToFront(_menuStack.Peek());
+                menu.Hide();
             }
+            else Debug.LogError($"Could not find menu type: {menuType}");
         }
 
         public void CloseAllMenus()
         {
-            _menuStack.Clear();
-            foreach (var menu in _activeMenus.Values)
+            foreach (var menu in InstantiatedMenus.Values)
             {
-                menu.Close();
+               menu.Hide();
             }
-            _activeMenus.Clear();
         }
 
         #endregion

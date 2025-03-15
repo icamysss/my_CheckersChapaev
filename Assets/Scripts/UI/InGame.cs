@@ -1,5 +1,6 @@
 using Core;
 using Services;
+using Services.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,6 +30,7 @@ namespace UI
         #endregion
         
         private IGameManager gameManager;
+        private ILocalizationService localizationService;
         private Game game;
         private bool isMute = false;
 
@@ -41,6 +43,7 @@ namespace UI
             // ссылки
             gameManager = manager.GameManager;
             game = gameManager.CurrentGame;
+            localizationService = manager.LocalizationService;
             // события 
             game.OnStartTurn += UpdateUI;
             game.OnEndGame += OnEndGame;
@@ -55,6 +58,11 @@ namespace UI
             soundButton.onClick.AddListener(SwitchSound);
             restartButton.onClick.AddListener(RestartGame);
         }
+
+        public override void Show()
+        {
+            base.Show();
+        }
         private void OnDestroy()
         {
             game.OnStartTurn -= UpdateUI;
@@ -67,18 +75,21 @@ namespace UI
         
         private void UpdateUI()
         {
+            if (game == null) return;
             whiteCount.text = game.Board.GetPawnsOnBoard(PawnColor.White).Count.ToString();
             blackCount.text = game.Board.GetPawnsOnBoard(PawnColor.Black).Count.ToString();
-            
-            whoTurn.text = $" Ходит игрок: {game.CurrentTurn.Name}";
+
+            if (game.CurrentTurn == null) return;
+            var s = localizationService.GetLocalizedString("MOVING_PLAYER");
+            whoTurn.text = $" {s}: {game.CurrentTurn.Name}";
         }
 
         private void OnEndGame()
         {
             var winner = game.Winner;
             whoTurn.text = winner == null
-                ? "Ничья"
-                : $"Победил игрок: {winner.Name}";
+                ? localizationService.GetLocalizedString("DRAW")
+                : $"{localizationService.GetLocalizedString("WIN_PLAYER")}: {winner.Name}";
         }
 
         private void OnStartGame()

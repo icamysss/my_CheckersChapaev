@@ -31,14 +31,14 @@ namespace UI
             uiManager = manager;
         }
 
-        public virtual void Open()
+        public virtual void Show()
         {
             canvasGroup.blocksRaycasts = true;  
             canvasGroup.alpha = 1;
             canvasGroup.interactable = true;
         }
 
-        public virtual void Close()
+        public virtual void Hide()
         {
             canvasGroup.blocksRaycasts = false;  
             canvasGroup.alpha = 0;

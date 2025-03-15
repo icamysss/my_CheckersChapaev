@@ -28,6 +28,8 @@ namespace UI
             onWeb.onClick.AddListener(OnWebGame);
             two.onClick.AddListener(HumanVSHuman);
             settings.onClick.AddListener(OpenSettings);
+            
+            
         }
 
         private void HumanVSHuman()
@@ -44,7 +46,7 @@ namespace UI
         }
         private void OpenSettings()
         {
-            uiManager.OpenMenu("Settings");
+            uiManager.ShowMenu("Settings");
         }
         
     }

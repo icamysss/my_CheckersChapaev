@@ -158,13 +158,16 @@ namespace AI
         /// Метод имитации прицеливания с поведением, похожим на человеческое
         /// </summary>
         private async UniTask AimSimulateAsync(CancellationToken cancellationToken)
-        {// todo добавить колебания по силе удара
+        {
+            // todo добавить колебания по силе удара
             if (aiSelectedPawn == null || enemyPawns.Count == 0)
             {
                 finalShotDirection = GetFallbackDirection(aiSelectedPawn?.transform);
                 return;
             }
-
+            
+            if (cancellationToken.IsCancellationRequested) return;
+            
             var optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
             var currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
             currentDirection.y = 0;
@@ -174,6 +177,7 @@ namespace AI
             var totalAimingTime = aiSettings.AimingTime / 1000f - 0.5f;
             var oscillationDuration = totalAimingTime / oscillationCount;
 
+            
             // Этап 1: Колебания для имитации корректировки
             for (var i = 0; i < oscillationCount; i++)
             {
@@ -201,7 +205,7 @@ namespace AI
                     currenTween?.Kill(); // Остановка анимации при отмене
                 }
             }
-           
+            if (cancellationToken.IsCancellationRequested) return;
             // Этап 2: Финальная фиксация направления
             currenTween = DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)

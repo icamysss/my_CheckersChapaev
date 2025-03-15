@@ -79,24 +79,12 @@ namespace Services
         private void OnDisable()
         {
             Pawn.OnSelect -= SetTarget;
-            Pawn.OnEndAiming -= ReturnToOverview;
+            Pawn.OnKickPawn -= ReturnToOverview;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
             KillActiveTweens();
         }
 
-        /// <summary>
-        /// Вызывается после регистрации всех сервисов. Получает ссылку на доску.
-        /// </summary>
-        private void OnAllServicesRegistered()
-        {
-            board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
-            if (board == null)
-            {
-                Debug.LogError("Board not found");
-            }
-            Debug.Log($"BoardSize: {board.BoardSize}");
-            maxDistance = (board.BoardSize / 2f) * Mathf.Sqrt(2);
-        }
+      
 
         /// <summary>
         /// Вызывается при валидации в редакторе. Проверяет наличие камеры.
@@ -227,6 +215,20 @@ namespace Services
 
         #endregion
 
+        /// <summary>
+        /// Вызывается после регистрации всех сервисов. Получает ссылку на доску.
+        /// </summary>
+        private void OnAllServicesRegistered()
+        {
+            board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
+            if (board == null)
+            {
+                Debug.LogError("Board not found");
+            }
+            Debug.Log($"BoardSize: {board.BoardSize}");
+            maxDistance = (board.BoardSize / 2f) * Mathf.Sqrt(2);
+        }
+        
         #region IService
 
         /// <summary>
@@ -240,7 +242,7 @@ namespace Services
             SetDefaultPositions();
 
             Pawn.OnSelect += SetTarget;
-            Pawn.OnEndAiming += ReturnToOverview;
+            Pawn.OnKickPawn += ReturnToOverview;
             ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
 
             isInitialized = true;
@@ -252,7 +254,7 @@ namespace Services
         public void Shutdown()
         {
             // Pawn.OnSelect -= SetTarget;
-            // Pawn.OnEndAiming -= SetTarget;
+            // Pawn.OnKickPawn -= SetTarget;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
         }
 

@@ -19,14 +19,14 @@ namespace Core.GameState
         {
             base.Enter();
 
-            Pawn.OnEndAiming += OnKickPawn;
+            Pawn.OnKickPawn += OnKickPawn;
             ThisGame.OnStartTurn?.Invoke();
         }
 
         public override void Exit()
         {
             base.Exit();
-            Pawn.OnEndAiming -= OnKickPawn;
+            Pawn.OnKickPawn -= OnKickPawn;
             CancelAsync();
             ThisGame.OnEndTurn?.Invoke();
         }
