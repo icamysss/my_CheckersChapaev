@@ -19,6 +19,14 @@ namespace Core
             AISettings = new AISettings();
         }
         
+        public Player(string name)
+        {
+            Name = name;
+            PawnColor = PawnColor.None;
+            Type = PlayerType.Human;
+            AISettings = new AISettings();
+        }
+        
         
     }
     
