@@ -1,6 +1,7 @@
 using System;
 using Core;
 using Services;
+using Services.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,8 @@ namespace UI
         [SerializeField] private Text mainText;
         
         private Game game;
+        private IGameManager gameManager;
+        private ILocalizationService localizationService;
 
         private void OnEnable()
         {
@@ -29,8 +32,11 @@ namespace UI
         public override void Initialize(UIManager manager)
         {
             base.Initialize(manager);
+            
             game = uiManager.GameManager.CurrentGame;
-
+            gameManager = uiManager.GameManager;
+            localizationService = uiManager.LocalizationService;
+            
             header.text = string.Empty;
             mainText.text = string.Empty;
            
@@ -44,7 +50,7 @@ namespace UI
 
         private void ToMainMenu()
         {
-            uiManager.GameManager.CurrentState = ApplicationState.MainMenu;
+            gameManager.CurrentState = ApplicationState.MainMenu;
         }
 
         private void RestartGame()
@@ -54,20 +60,19 @@ namespace UI
 
         private void UpdateUI()
         {
-            if (uiManager.GameManager.CurrentState != ApplicationState.GameOver) return;
+            if (game.CurrentState != game.GameOver) return;
             // заголовок
-            header.text = uiManager.LocalizationService.GetLocalizedString("END_GAME");
+            header.text = localizationService.GetLocalizedString("END_GAME");
             if (game.Winner == null)
             {   // ничья
-                var result = uiManager.LocalizationService.GetLocalizedString("DRAW");
+                var result = localizationService.GetLocalizedString("DRAW");
                 mainText.text = result;
             }
             else
             {   // есть победитель
-                var winPlayer = uiManager.LocalizationService.GetLocalizedString("WIN_PLAYER"); // = Победил игрок
+                var winPlayer = localizationService.GetLocalizedString("WIN_PLAYER"); // = Победил игрок
                 mainText.text = $"{winPlayer} : {game.Winner.Name}";
             }
-           
         }
     }
 }
