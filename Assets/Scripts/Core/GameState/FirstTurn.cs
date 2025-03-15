@@ -83,7 +83,7 @@ namespace Core.GameState
             ThisGame.CurrentTurn.PawnColor = pawn.PawnColor;
             // другой игрок противоположный цвет 
             var anotherPlayer = ThisGame.GetOppositePlayer(ThisGame.CurrentTurn);
-            anotherPlayer.PawnColor = pawn.PawnColor;
+            anotherPlayer.PawnColor = ThisGame.GetOppositeColor(pawn.PawnColor);
             // блокируем противоположный цвет 
             ThisGame.UpdatePawnsInteractivity(anotherPlayer, false );
            
