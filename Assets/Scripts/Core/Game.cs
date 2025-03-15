@@ -4,6 +4,7 @@ using AI;
 using Core.GameState;
 using Cysharp.Threading.Tasks;
 using Services;
+using Services.Interfaces;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -21,6 +22,7 @@ namespace Core
         public HumanTurn HumanMove ;
         public EndGame GameOver ;
         private GameState.GameState currentState;
+        private ILocalizationService localizationService;
         #endregion
 
         #region Public properties
@@ -58,6 +60,7 @@ namespace Core
             this.AIController = new AIController();
             this.AIController.Initialize(this);
             InitializeStateMachine();
+            localizationService = ServiceLocator.Get<ILocalizationService>();
         }
 
         public void ChangeState(GameState.GameState newState)
@@ -183,27 +186,29 @@ namespace Core
         }
         
         public void InitPlayerTypes()
-        { // todo инициализация игроков, генерация для противника
-            FirstPlayer = new Player("игрок1");
-            SecondPlayer = new Player("игрок2");
+        {
+            FirstPlayer = new Player($"{localizationService.GetLocalizedString("PLAYER")}_1");
             switch (GameType)
             {
                 case GameType.HumanVsHuman:
+                    
+                    SecondPlayer = new Player($"{localizationService.GetLocalizedString("PLAYER")}_2");
+                    
                     FirstPlayer.Type = PlayerType.Human;
                     SecondPlayer.Type = PlayerType.Human;
+                    
                     break;
+                
                 case GameType.HumanVsAi:
+                    
+                    SecondPlayer = new Player($"{localizationService.GetLocalizedString("COMPUTER")}");
+                    
                     FirstPlayer.Type = PlayerType.Human;
                     SecondPlayer.Type = PlayerType.AI;
                     break;
+                
                 case GameType.AiVsAi:
-                    FirstPlayer.Type = PlayerType.AI;
-                    SecondPlayer.Type = PlayerType.AI;
-                    break;
                 case GameType.OnWeb:
-                    FirstPlayer.Type = PlayerType.Human;
-                    SecondPlayer.Type = PlayerType.AI;
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(GameType), GameType, null);
             }

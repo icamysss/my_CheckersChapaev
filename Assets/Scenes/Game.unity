@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba68dc127aa04024ae21b798a97f5eb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  key: WIN_PLAYER
+  key: COMPUTER
   language: 
   value: 
 --- !u!114 &346863965

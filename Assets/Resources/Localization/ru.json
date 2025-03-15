@@ -15,6 +15,14 @@
         {
             "key": "WIN_PLAYER",
             "value": "Победил игрок"
+        },
+        {
+            "key": "COMPUTER",
+            "value": "Компьютер"
+        },
+        {
+            "key": "PLAYER",
+            "value": "Игрок"
         }
     ]
 }
