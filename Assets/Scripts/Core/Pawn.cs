@@ -93,6 +93,7 @@ namespace Core
         
         public void ApplyForce(Vector3 force)
         {
+            if (rb == null) return;
             rb.AddForce(force, ForceMode.Impulse);
             
             if (audioService != null) audioService.PawnAudio.PlayStrikeSound(shotAudioSource);

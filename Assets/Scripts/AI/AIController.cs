@@ -30,11 +30,7 @@ namespace AI
         #endregion
 
         #region Initialization
-
-        private void OnAllServicesReady()
-        {
-            cameraController = ServiceLocator.Get<ICameraController>();
-        }
+        
 
         /// <summary>
         /// Инициализация контроллера ИИ с объектом игры
@@ -44,7 +40,7 @@ namespace AI
             board = newGame.Board;
             game = newGame;
             aiSettings = new AISettings();
-            ServiceLocator.OnAllServicesRegistered += OnAllServicesReady;
+            cameraController ??= ServiceLocator.Get<ICameraController>();
         }
 
         #endregion
@@ -69,6 +65,7 @@ namespace AI
 
             try
             {
+                if (cancellationToken.IsCancellationRequested) return;
                 await AIMove(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -101,10 +98,6 @@ namespace AI
         /// </summary>
         private async UniTask AIMove(CancellationToken cancellationToken)
         {
-            // aiSelectedPawn = SelectOptimalPawn();
-            // aiSelectedPawn.ApplyForce(new Vector3(1,1,1));
-            // return;
-            
             // 1. Задержка для имитации "размышлений" ИИ
             var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
             await UniTask.Delay(decisionDelay, cancellationToken: cancellationToken);
