@@ -7,11 +7,6 @@ using UnityEngine;
 
 namespace Services
 {
-    // todo связать состояние игры с состоянием приложения
-    // gameManager.CurrentState = ApplicationState.Gameplay;
-    
-    
-    
     public class GameManager : MonoBehaviour, IGameManager
     {
         [BoxGroup("References")]
@@ -23,74 +18,72 @@ namespace Services
         [SerializeField] private Game game;
         [BoxGroup("Options")]
         [SerializeField] private ApplicationState applicationState = ApplicationState.MainMenu;
-       
         
+        public event Action<ApplicationState> OnGameStateChanged;
         
-        private IUIManager uiManager;
+        private Board board;
         
-        private void SetGameState(ApplicationState newState)
+        private void OnDisable()
         {
-           // Debug.Log($"Game state changed to {newState}, old {applicationState}");
-            if (applicationState == newState) return;
+            game.OnStart -= OnStartGame;
+            game.OnEndGame -= OnEndGame;
+        }
 
+        private void SetApplicationState(ApplicationState newState)
+        {
+            Debug.Log($"Game state changed to {newState}, old {applicationState}");
+            if (applicationState == newState) return;
             applicationState = newState;
             OnGameStateChanged?.Invoke(newState);
+        }
         
-            // Обработка специфичной логики состояний
-            switch (newState)
-            {
-                case ApplicationState.MainMenu:
-                    Time.timeScale = 1;
-                    break;
-                
-                case ApplicationState.Gameplay:
-                    Time.timeScale = 1;
-                    break;
-                
-                case ApplicationState.Pause:
-                    Time.timeScale = 0;
-                    break;
-                
-                case ApplicationState.GameOver:
-                    Time.timeScale = 1;
-                    break;
-            }
+        # region Game Events
+
+        private void OnStartGame()
+        {
+            SetApplicationState(ApplicationState.Gameplay);
         }
 
-        private void OnServicesReady()
+        private void OnEndGame()
         {
-            uiManager = ServiceLocator.Get<IUIManager>();
-            ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
+            
         }
+        
+        
+        #endregion
         
         #region IGameManager
         
-        public event Action<ApplicationState> OnGameStateChanged;
         public ApplicationState CurrentState
         {
             get => applicationState;
-            set => SetGameState(value);
+            set => SetApplicationState(value);
         }
         public Game CurrentGame => game;
 
         #endregion
+
+        private void OnAllServicesRegistered()
+        {
+            ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
+            // -------- Игра ------------
+            game = new Game(this, board);
+            game.OnStart += OnStartGame;
+            game.OnEndGame += OnEndGame;
+        }
         
         #region IService
 
         public void Initialize()
         {
+            ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
             // -------- Ссылки --------
             if (boardPrefab == null) throw new NullReferenceException("boardPrefab is null");
-
-
+            
             // -------- Окружение ------- 
-            var board = Instantiate(boardPrefab);
+            board = Instantiate(boardPrefab);
             var pawnCatcher = Instantiate(pawnCatcherPrefab);
-            // -------- Игра ------------
-            game = new Game(this, board);
-
-
-            ServiceLocator.OnAllServicesRegistered += OnServicesReady;
+            
             Debug.Log("Game Manager initialized");
             isInitialized = true;
         }
