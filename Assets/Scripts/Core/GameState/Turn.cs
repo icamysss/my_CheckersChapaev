@@ -46,9 +46,8 @@ namespace Core.GameState
             {
                 await UniTask.Delay(TURN_DELAY_MS, cancellationToken: ct.Token);
                 if (cts.IsCancellationRequested) return;
-
-                if (ThisGame.IsGameOver()) ThisGame.ChangeState(ThisGame.GameOver);
-                else ThisGame.ChangeState(GetNextState());
+                
+                ThisGame.ChangeState(GetNextState());
             }
             catch (OperationCanceledException)
             {
