@@ -11,13 +11,8 @@ namespace Core
 {
     public class Game 
     {
-       
-        
-
-       
         private AIController AIController { get; }
         private readonly GameManager gameManager;
-        private CancellationTokenSource cts;
 
         #region StateMachine variables
 
@@ -64,7 +59,6 @@ namespace Core
 
             this.AIController = new AIController();
             this.AIController.Initialize(this);
-            cts = new CancellationTokenSource();
             InitializeStateMachine();
         }
         
@@ -179,16 +173,11 @@ namespace Core
             if (player == null) return null;
             return null;
         }
-
-        public void CancelAllAsyncOnLastTurn()
-        {
-            cts?.Cancel();
-            cts = null;
-            cts = new CancellationTokenSource();
-        }
         
         public void InitPlayerTypes()
         {
+            FirstPlayer = new Player("игрок1");
+            SecondPlayer = new Player("игрок2");
             switch (GameType)
             {
                 case GameType.HumanVsHuman:
