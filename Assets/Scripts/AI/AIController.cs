@@ -113,7 +113,7 @@ namespace AI
             shotPower = CalculateForce(aiSelectedPawn);
             
             // 3. ========= Ожидание завершения движения камеры =========
-            var cameraMoveDelay = cameraController.MoveDuration + aiSettings.TimeAfterCamSetPosition;
+            var cameraMoveDelay = cameraController.MoveDurationMS + aiSettings.TimeAfterCamSetPosition;
             await UniTask.Delay(cameraMoveDelay, cancellationToken: cancellationToken);
 
             // 4. ========== Имитация прицеливания ================

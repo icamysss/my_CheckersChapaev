@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Common;
 using Core;
 using DG.Tweening;
@@ -14,63 +15,46 @@ namespace Services
     public class CameraController : MonoBehaviour, ICameraController
     {
         #region Fields
-    
-        [BoxGroup("Tracking Settings")]
-        [SerializeField, Tooltip("Время перемещения к выбранной шашке")]
-        private int moveDuration = 1500;
 
-        [BoxGroup("Tracking Settings")]
-        [SerializeField, Tooltip("Время возвращения к обзорному режиму")]
-        private int backDuration = 500;
+        [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Время перемещения к выбранной шашке")] private int
+            moveDurationMS = 1500;
+
+        [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Время возвращения к обзорному режиму")] private int
+            backDurationMS = 500;
+
+        [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Анимация передвижения ")] private Ease moveEase =
+            Ease.InCubic;
+        [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Анимация возвращения ")] private Ease moveBack =
+            Ease.InOutCubic;
+
+        [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Минимальные значения позиции камеры")] private
+            CameraOffset minCamPosition;
+
+        [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Максимальные значения позиции камеры")] private
+            CameraOffset maxCamPosition;
+
+
+        [BoxGroup("Debug")] [ShowInInspector, ReadOnly] private Pawn currentTarget; // Текущая выбранная шашка
+
+        [BoxGroup("Debug")] [SerializeField, ReadOnly] private Camera mainCamera; // Ссылка на основную камеру
+
+        [BoxGroup("Debug")] [SerializeField, ReadOnly] private CameraOffset defaultCamOffset;
+            // Начальная позиция камеры
+
+        [BoxGroup("Debug")] [SerializeField, Tooltip("максимальная дистанци от шашки до центра доски"), ReadOnly] private float maxDistance;
+
+        [BoxGroup("Debug")] [SerializeField, Tooltip("Позиция камеры в обзорном режиме"), ReadOnly] private Vector3
+            overviewPosition;
+
+        [BoxGroup("Debug")] [SerializeField, Tooltip("Поворот камеры в обзорном режиме"), ReadOnly] private Quaternion
+            overviewRotation;
         
-        [BoxGroup("Tracking Settings")]
-        [SerializeField, Tooltip("Анимация передвижения ")]
-        private Ease moveEase = Ease.InCubic;
-
-        [BoxGroup("Tracking Settings")]
-        [SerializeField, Tooltip("Минимальные значения позиции камеры")]
-        private CameraOffset minCamPosition;
-    
-        [BoxGroup("Tracking Settings")]
-        [SerializeField, Tooltip("Максимальные значения позиции камеры")]
-        private CameraOffset maxCamPosition;
-
-   
-
-        [BoxGroup("Debug")]
-        [ShowInInspector, ReadOnly]
-        private Pawn currentTarget; // Текущая выбранная шашка
-
-        [BoxGroup("Debug")]
-        [SerializeField, ReadOnly]
-        private Camera mainCamera; // Ссылка на основную камеру
-
-        [BoxGroup("Debug")]
-        [SerializeField, ReadOnly]
-        private CameraOffset defaultCamOffset; // Начальная позиция камеры
-    
-        [BoxGroup("Debug")]
-        [SerializeField, Tooltip("максимальная дистанци от шашки до центра доски"), ReadOnly]
-        private float maxDistance;  
-    
-        [BoxGroup("Debug")]
-        [SerializeField, Tooltip("Позиция камеры в обзорном режиме"), ReadOnly]
-        private Vector3 overviewPosition;
-
-        [BoxGroup("Debug")]
-        [SerializeField, Tooltip("Поворот камеры в обзорном режиме"),ReadOnly]
-        private Quaternion overviewRotation;
-    
-        private Tweener moveTween;
-        private Tweener lookTween;
-        private Tweener rotateTween;
-        private Tweener moveCamTween;
-        private Tweener lookCamTween;
+        private Sequence moveSequence;
 
         private Board board;
 
         #endregion
-        
+
         #region Unity Methods
 
         /// <summary>
@@ -81,10 +65,8 @@ namespace Services
             Pawn.OnSelect -= SetTarget;
             Pawn.OnKickPawn -= ReturnToOverview;
             ServiceLocator.OnAllServicesRegistered -= OnAllServicesRegistered;
-            KillActiveTweens();
+            moveSequence.Kill();
         }
-
-      
 
         /// <summary>
         /// Вызывается при валидации в редакторе. Проверяет наличие камеры.
@@ -105,8 +87,7 @@ namespace Services
         private void SetTarget(Pawn pawn)
         {
             currentTarget = pawn;
-            KillActiveTweens();
-
+            
             if (currentTarget == null)
             {
                 ReturnToOverview();
@@ -125,7 +106,7 @@ namespace Services
             // позиция для родителя
             overviewPosition = transform.position;
             overviewRotation = transform.rotation;
-       
+
             // позиция для камеры стартовая
             defaultCamOffset.HeightY = mainCamera.transform.localPosition.y;
             defaultCamOffset.OffsetZ = mainCamera.transform.localPosition.z;
@@ -133,33 +114,24 @@ namespace Services
         }
 
         /// <summary>
-        /// Завершает все активные анимации (твины).
-        /// </summary>
-        private void KillActiveTweens()
-        {
-            moveTween?.Kill();
-            lookTween?.Kill();
-            rotateTween?.Kill();
-            moveCamTween?.Kill();
-            lookCamTween?.Kill();
-        }
-
-        /// <summary>
         /// Возвращает камеру в обзорную позицию.
         /// </summary>
         private void ReturnToOverview()
         {
-            moveTween = transform.DOMove(overviewPosition, backDuration)
-                .SetEase(moveEase);
-            
-            rotateTween = transform.DORotateQuaternion(overviewRotation, backDuration)
-                .SetEase(moveEase);
-            
-            moveCamTween = mainCamera.transform.DOLocalMove(defaultCamOffset.Position, backDuration)
-                .SetEase(moveEase);
-            
-            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(defaultCamOffset.Rotation, backDuration)
-                .SetEase(moveEase);
+            moveSequence?.Kill();
+            moveSequence = DOTween.Sequence();
+
+            // ------------ родителя возвращаем  -----------
+            moveSequence.Join(transform.DOMove(overviewPosition, backDurationMS/1000f)
+                .SetEase(moveBack));
+            moveSequence.Join(transform.DORotateQuaternion(overviewRotation, backDurationMS/1000f)
+                .SetEase(moveBack));
+            // ----------- камеру возвращаем -----------
+            moveSequence.Join(mainCamera.transform.DOLocalMove(defaultCamOffset.Position, backDurationMS/1000f)
+                .SetEase(moveBack));
+            moveSequence.Join(mainCamera.transform.DOLocalRotateQuaternion(defaultCamOffset.Rotation, backDurationMS/1000f)
+                .SetEase(moveBack));
+            moveSequence.Play();
         }
 
         /// <summary>
@@ -169,16 +141,20 @@ namespace Services
         private void MoveToTarget(Transform target)
         {
             if (target == null) return;
-
+            moveSequence.Kill();
+            moveSequence = DOTween.Sequence();
+            
             var targetPosition = target.position;
-            moveTween = transform.DOMove(targetPosition, moveDuration / 1000f)
-                .SetEase(Ease.InOutQuad);
+           
+            
+            moveSequence.Join(transform.DOMove(targetPosition, moveDurationMS / 1000f).SetEase(Ease.InOutQuad));
+           
 
             if (targetPosition != overviewPosition)
             {
                 var targetRotation = Quaternion.LookRotation(overviewPosition - targetPosition);
-                lookTween = transform.DORotateQuaternion(targetRotation, moveDuration / 1000f)
-                    .SetEase(Ease.InOutQuad);
+                moveSequence.Join(transform.DORotateQuaternion(targetRotation, moveDurationMS / 1000f)
+                    .SetEase(Ease.InOutQuad));
             }
 
             // Вычисление локальной позиции камеры с учётом расстояния до центра доски
@@ -187,17 +163,14 @@ namespace Services
             var targetZ = Mathf.Lerp(minCamPosition.OffsetZ, maxCamPosition.OffsetZ, factor);
             var targetY = Mathf.Lerp(minCamPosition.HeightY, maxCamPosition.HeightY, factor);
             var camLocalPosition = new Vector3(0, targetY, targetZ);
-        
-            moveCamTween = mainCamera.transform.DOLocalMove(camLocalPosition, moveDuration / 1000f)
-                .SetEase(Ease.InOutQuad);
 
+            moveSequence.Join(mainCamera.transform.DOLocalMove(camLocalPosition, moveDurationMS / 1000f).SetEase(Ease.InOutQuad));
             // Вычисление локального поворота камеры с учётом расстояния до центра доски
             var camRotation = Quaternion.Lerp(minCamPosition.Rotation, maxCamPosition.Rotation, factor);
-        
-            lookCamTween = mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDuration / 1000f).
-                SetEase(Ease.InOutQuad);
+            moveSequence.Join(mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDurationMS / 1000f).SetEase(Ease.InOutQuad));
+            
+            moveSequence.Play();
         }
-        
 
         #endregion
 
@@ -206,7 +179,7 @@ namespace Services
         /// <summary>
         /// Получает длительность перемещения камеры к цели.
         /// </summary>
-        public int MoveDuration => moveDuration;
+        public int MoveDurationMS => moveDurationMS;
 
         /// <summary>
         /// Получает основную камеру.
@@ -221,14 +194,9 @@ namespace Services
         private void OnAllServicesRegistered()
         {
             board = ServiceLocator.Get<IGameManager>().CurrentGame.Board;
-            if (board == null)
-            {
-                Debug.LogError("Board not found");
-            }
-            Debug.Log($"BoardSize: {board.BoardSize}");
             maxDistance = (board.BoardSize / 2f) * Mathf.Sqrt(2);
         }
-        
+
         #region IService
 
         /// <summary>
