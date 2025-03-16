@@ -17,7 +17,7 @@ namespace Core.GameState
         public override void Enter()
         {
             base.Enter();
-
+            ThisGame.SwitchPlayer();
             Pawn.OnKickPawn += OnKickPawn;
             ThisGame.OnStartTurn?.Invoke();
         }

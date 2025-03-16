@@ -233,6 +233,8 @@ namespace Core
 
         public void SwitchPlayer()
         {
+            if (CurrentState == FirstTurn || CurrentTurn == null) return;
+            
             CurrentTurn = GetOppositePlayer(CurrentTurn);
         }
        
