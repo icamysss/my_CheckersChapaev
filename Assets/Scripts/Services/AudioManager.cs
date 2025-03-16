@@ -20,7 +20,6 @@ namespace Services
             audioSource = GetComponent<AudioSource>();
             volume = 0.6f;
             pawnAudio.Initialize(this);
-            // todo загрузить громкость
             isInitialized = true;
         }
 
@@ -44,8 +43,6 @@ namespace Services
                 value = Mathf.Clamp(value, 0, 1);
                 audioSource.volume = volume;
                 volume = value;
-                
-                // todo сохранить громкость
             }
         }
         

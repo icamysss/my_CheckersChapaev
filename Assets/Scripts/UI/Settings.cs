@@ -41,7 +41,6 @@ namespace UI
             //  язык
             language = localizationService.Language;
             lang.sprite = language == "ru" ? rusSprite : engSprite; 
-            // todo смена спрайта в зависимости от языка
         }
 
         private void PressOk()

@@ -23,9 +23,10 @@ namespace AI
         private Board board;
         private ICameraController cameraController;
         private AISettings aiSettings;
-        private Vector3 finalShotDirection;
+        private Vector3 shotDirection;
+        private float shotPower;
         private Game game;
-        private Tween currenTween;
+        private Sequence currenSequence;
 
         #endregion
 
@@ -98,26 +99,28 @@ namespace AI
         /// </summary>
         private async UniTask AIMove(CancellationToken cancellationToken)
         {
-            // 1. Задержка для имитации "размышлений" ИИ
+            // 1. ========= Задержка для имитации "размышлений" ИИ =========
             var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
             await UniTask.Delay(decisionDelay, cancellationToken: cancellationToken);
 
-            // 2. Выбор оптимальной шашки и ее активация
+            // 2. ========= Выбор оптимальной шашки и ее активация =========
             aiSelectedPawn = SelectOptimalPawn();
             if (aiSelectedPawn == null)
                 throw new Exception("No valid pawn selected for AI move.");
             aiSelectedPawn.Select();
-
-            // 3. Ожидание завершения движения камеры
+            
+            shotDirection = CalculateOptimalDirection(aiSelectedPawn);
+            shotPower = CalculateForce(aiSelectedPawn);
+            
+            // 3. ========= Ожидание завершения движения камеры =========
             var cameraMoveDelay = cameraController.MoveDuration + aiSettings.TimeAfterCamSetPosition;
             await UniTask.Delay(cameraMoveDelay, cancellationToken: cancellationToken);
 
-            // 4. Имитация прицеливания
+            // 4. ========== Имитация прицеливания ================
             await AimSimulateAsync(cancellationToken);
 
-            // 5. Применение силы для выполнения хода
-            var force = CalculateForce(aiSelectedPawn);
-            aiSelectedPawn.ApplyForce(finalShotDirection * force);
+            // 5. ========== Применение силы для выполнения хода ============
+            aiSelectedPawn.ApplyForce(shotDirection * shotPower);
         }
 
         /// <summary>
@@ -152,77 +155,78 @@ namespace AI
         /// </summary>
         private async UniTask AimSimulateAsync(CancellationToken cancellationToken)
         {
-            // todo добавить колебания по силе удара
-            if (aiSelectedPawn == null || enemyPawns.Count == 0)
-            {
-                finalShotDirection = GetFallbackDirection(aiSelectedPawn?.transform);
-                return;
-            }
-            
-            if (cancellationToken.IsCancellationRequested) return;
-            
-            var optimalDirection = CalculateOptimalDirection(aiSelectedPawn);
-            var currentDirection = optimalDirection + Random.insideUnitSphere * 0.5f;
+            var currentDirection = shotDirection + Random.insideUnitSphere * 0.2f;
             currentDirection.y = 0;
             currentDirection.Normalize();
-
+            
             var oscillationCount = Random.Range(2, 6);
             var totalAimingTime = aiSettings.AimingTime / 1000f - 0.5f;
             var oscillationDuration = totalAimingTime / oscillationCount;
 
+            var currentForce = 0f;
             
-            // Этап 1: Колебания для имитации корректировки
+            // Этап 1: ===========    Колебания для имитации корректировки    ==============
             for (var i = 0; i < oscillationCount; i++)
             {
-                var targetDirection = optimalDirection + Random.insideUnitSphere * 0.2f;
+                if (cancellationToken.IsCancellationRequested) break;
+                
+                var targetDirection = shotDirection + Random.insideUnitSphere * 0.2f;
                 targetDirection.y = 0;
                 targetDirection.Normalize();
-
-                currenTween?.Kill();
-                currenTween = DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
+                
+                currenSequence?.Kill();
+                currenSequence = DOTween.Sequence();
+                currenSequence.Join(DOTween.To(
+                    getter: ()=> currentForce, 
+                    setter: x => currentForce = x, 
+                    endValue: shotPower, 
+                    duration: oscillationDuration
+                    ).SetEase(Ease.OutBounce));
+                
+                currenSequence.Join( DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
                     oscillationDuration)
                     .SetEase(Ease.InOutQuad)
                     .OnUpdate(() =>
                     {
-                        var force = CalculateForce(aiSelectedPawn);
-                        aiSelectedPawn.UpdateLineVisuals(force, currentDirection);
+                        aiSelectedPawn.UpdateLineVisuals(currentForce, currentDirection);
                     })
-                    .OnKill(() => currenTween = null);
+                    .OnKill(() => currenSequence = null));
 
                 try
                 {
-                    await currenTween.AsyncWaitForCompletion();
+                    await currenSequence.AsyncWaitForCompletion();
                 }
                 finally
                 {
-                    currenTween?.Kill(); // Остановка анимации при отмене
+                    currenSequence?.Kill(); // Остановка анимации при отмене
                 }
             }
-            if (cancellationToken.IsCancellationRequested) return;
-            // Этап 2: Финальная фиксация направления
-            currenTween = DOTween.To(() => currentDirection, x => currentDirection = x, optimalDirection, 0.5f)
+            if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
+            
+            // Этап 2:  =========   Финальная фиксация направления   ==============
+           currenSequence = DOTween.Sequence();
+            currenSequence.Join(DOTween.To(() => currentDirection, x => currentDirection = x, shotDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)
                 .OnUpdate(() =>
                 {
-                    var force = CalculateForce(aiSelectedPawn);
-                    aiSelectedPawn.UpdateLineVisuals(force, currentDirection);
+                    aiSelectedPawn.UpdateLineVisuals(shotPower, currentDirection);
                 })
                 .OnComplete(() =>
                 {
                     var finalForce = CalculateForce(aiSelectedPawn);
-                    aiSelectedPawn.UpdateLineVisuals(finalForce, optimalDirection);
-                    finalShotDirection = optimalDirection;
+                    aiSelectedPawn.UpdateLineVisuals(shotPower, shotDirection);
+                    shotDirection = shotDirection;
                 })
-                .OnKill(() => currenTween = null);
+                .OnKill(() => currenSequence = null));
 
             try
             {
                 if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
-                await currenTween.AsyncWaitForCompletion();
+                await currenSequence.AsyncWaitForCompletion();
             }
             finally
             {
-                currenTween?.Kill(); // Остановка анимации при отмене
+                currenSequence?.Kill(); // Остановка анимации при отмене
             }
         }
 
