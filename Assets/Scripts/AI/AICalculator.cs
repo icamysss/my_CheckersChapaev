@@ -49,12 +49,12 @@ namespace AI
         public float CalculateForce(Pawn pawn)
         {
             if (pawn == null) return 0f;
-            
+
             var distance = Vector3.Distance(pawn.transform.position, CalculatedTarget);
             var forceMultiplier = Mathf.Clamp01(distance / board.BoardSize);
-            var minForceMultiplier = maxHitCount > 2 ? pawn.maxForce : maxHitCount * 1.8f;
-            var force = Mathf.Lerp(pawn.minForce * minForceMultiplier , pawn.maxForce, forceMultiplier);
-            return force;
+            var force = Mathf.Lerp(pawn.minForce, pawn.maxForce, forceMultiplier);
+
+            return maxHitCount > 1 ? pawn.maxForce * Random.Range(0.75f, 1f) : force;
         }
 
         /// <summary>
