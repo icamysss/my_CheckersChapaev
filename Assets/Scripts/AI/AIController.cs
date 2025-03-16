@@ -1,198 +1,212 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
+using System.Linq;
+using System.Threading;
+using Core;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using Services;
+using Services.Interfaces;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-public class AIController : MonoBehaviour
+namespace AI
 {
-    [SerializeField] private float decisionDelay = 1.5f;
-    [SerializeField] private float edgeAvoidanceRadius = 0.1f;
-    [SerializeField] private float maxPredictionDistance = 3f;
-    [SerializeField] private float neighborRadius = 1.0f;
-    
-    public List<Checker> _aiCheckers = new();
-    public List<Checker> _enemyCheckers = new();
-    
-    private Checker targetChecker;
-   [ShowInInspector] private Checker aiChecker;
-    private ScoreCalculator _scoreCalculator;
-
-    void Start()
+    public class AIController
     {
-        _scoreCalculator = new ScoreCalculator(neighborRadius, maxPredictionDistance);
-    }
+        #region Private Variables
 
-    public void MakeMove()
-    {
-        StartCoroutine(AIMoveRoutine());
-    }
+        private List<Pawn> aiPawns = new();
+        private List<Pawn> enemyPawns = new();
+        private Pawn aiSelectedPawn;
+        private AICalculator aiCalculator;
+        private Board board;
+        private ICameraController cameraController;
+        private AISettings aiSettings;
+        private Vector3 shotDirection;
+        private float shotPower;
+        private Game game;
+        private Sequence currenSequence;
 
-    private IEnumerator AIMoveRoutine()
-    {
-        Debug.Log("AI Move routine");
-        yield return new WaitForSeconds(decisionDelay);
+        #endregion
+
+        #region Initialization
         
-        aiChecker = SelectBestChecker();
-        Debug.Log(aiChecker.name);
-        if (aiChecker == null) yield break;
-        
-        var direction = CalculateAimDirection(aiChecker);
-        Debug.Log(direction);
-        ApplyAIShot(aiChecker, direction);
-    }
 
-    private Checker SelectBestChecker()
-    {
-        Checker bestChecker = null;
-        float maxScore = float.MinValue;
-
-        foreach (var checker in _aiCheckers)
+        /// <summary>
+        /// Инициализация контроллера ИИ с объектом игры
+        /// </summary>
+        public void Initialize(Game newGame)
         {
-            if (checker == null) continue;
-            
-            float score = _scoreCalculator.Calculate(checker.transform.position, 
-                _aiCheckers, 
-                _enemyCheckers);
-            
-            if (score > maxScore)
+            board = newGame.Board;
+            game = newGame;
+            aiSettings = new AISettings();
+            cameraController ??= ServiceLocator.Get<ICameraController>();
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Запуск хода ИИ для указанного игрока с поддержкой отмены
+        /// </summary>
+        public async UniTask MakeMove(Player pl, CancellationToken cancellationToken)
+        {
+            if (pl.PawnColor == PawnColor.None)
             {
-                maxScore = score;
-                bestChecker = checker;
+                Debug.LogError($"Invalid pawn color: {pl.PawnColor}");
+                return;
+            }
+
+            aiSettings = pl.AISettings ?? new AISettings();
+            
+            RefreshPawnLists(pl.PawnColor);
+            aiCalculator = new AICalculator(pl, board, aiPawns, enemyPawns);
+
+            try
+            {
+                if (cancellationToken.IsCancellationRequested) return;
+                await AIMove(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("AI move was cancelled.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"AI Move failed: {ex}");
             }
         }
-        return bestChecker;
-    }
 
-    private Vector3 CalculateAimDirection(Checker selectedChecker)
-    {
-        if (_enemyCheckers.Count == 0)
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Обновление списков шашек ИИ и врагов
+        /// </summary>
+        private void RefreshPawnLists(PawnColor pawnColor)
         {
-            Debug.LogWarning("No enemies found!");
-            return Vector3.forward; // Направление по умолчанию
+            aiPawns = board.GetPawnsOnBoard(pawnColor).Where(p => p != null).ToList();
+            enemyPawns = board.GetPawnsOnBoard(
+                pawnColor == PawnColor.Black ? PawnColor.White : PawnColor.Black
+            ).Where(p => p != null).ToList();
         }
 
-        Vector3 targetPosition = _scoreCalculator.FindOptimalTarget(
-            selectedChecker.transform.position, 
-            _enemyCheckers);
-    
-        // Добавляем проверку на валидность цели
-        if (Vector3.Distance(targetPosition, selectedChecker.transform.position) < 0.1f)
+        /// <summary>
+        /// Основной метод хода ИИ с поддержкой отмены
+        /// </summary>
+        private async UniTask AIMove(CancellationToken cancellationToken)
         {
-            Debug.Log("Fallback target selection");
-            targetPosition = FindFallbackTarget(selectedChecker.transform.position);
-        }
+            // 1. ========= Задержка для имитации "размышлений" ИИ =========
+            var decisionDelay = Random.Range(aiSettings.MinDecisionDelayMS, aiSettings.MaxDecisionDelayMS);
+            await UniTask.Delay(decisionDelay, cancellationToken: cancellationToken);
 
-        Vector3 direction = (targetPosition - selectedChecker.transform.position).normalized;
-        Debug.DrawRay(selectedChecker.transform.position, direction * 2, Color.green, 2f);
-    
-        return direction;
-    }
-    private Vector3 FindFallbackTarget(Vector3 shooterPosition)
-    {
-        // Резервная логика: выбираем случайную цель
-        if (_enemyCheckers.Count == 0) return shooterPosition + Vector3.forward;
-    
-        int randomIndex = Random.Range(0, _enemyCheckers.Count);
-        return _enemyCheckers[randomIndex].transform.position;
-    }
-
-    private void ApplyAIShot(Checker checker, Vector3 direction)
-    {
-        float distance = Vector3.Distance(checker.transform.position, 
-            _scoreCalculator.LastCalculatedTarget);
-        float forceMultiplier = Mathf.Clamp01(distance / maxPredictionDistance);
-        float force = Mathf.Lerp(checker.minForce, checker.maxForce, forceMultiplier);
-        
-        checker.AIActivate();
-        checker.ApplyForce(direction * force);
-    }
-}
-
-public class ScoreCalculator
-{
-    private readonly float _neighborRadius;
-    private readonly float _maxPredictionDistance;
-    public Vector3 LastCalculatedTarget { get; private set; }
-
-    public ScoreCalculator(float neighborRadius, float maxPredictionDistance)
-    {
-        _neighborRadius = neighborRadius;
-        _maxPredictionDistance = maxPredictionDistance;
-    }
-
-    public float Calculate(Vector3 checkerPosition, List<Checker> aiCheckers, List<Checker> enemyCheckers)
-    {
-        float score = 0f;
-        
-        // Штраф за скученность своих шашек
-        int friendlyCount = Physics.OverlapSphereNonAlloc(checkerPosition, _neighborRadius, 
-            new Collider[10], LayerMask.GetMask("Friendly"));
-        score -= friendlyCount * 2f;
-
-        // Бонус за близость вражеских шашек
-        int enemyCount = Physics.OverlapSphereNonAlloc(checkerPosition, _neighborRadius, 
-            new Collider[10], LayerMask.GetMask("Enemy"));
-        score += enemyCount * 3f;
-
-        // Поиск лучшей цели
-        Vector3 target = FindOptimalTarget(checkerPosition, enemyCheckers);
-        float distance = Vector3.Distance(checkerPosition, target);
-        
-        // Бонус за близость к цели
-        score += 10f / (distance + 0.1f);
-
-        return score;
-    }
-
-    public Vector3 FindOptimalTarget(Vector3 shooterPosition, List<Checker> enemies)
-    {
-        Vector3 bestTarget = shooterPosition;
-        int maxHitCount = 0;
-
-        foreach (var enemy in enemies)
-        {
-            if (enemy == null) continue;
+            // 2. ========= Выбор оптимальной шашки и ее активация =========
+            aiSelectedPawn = aiCalculator.SelectOptimalPawn();
+            if (aiSelectedPawn == null)
+                throw new Exception("No valid pawn selected for AI move.");
+            aiSelectedPawn.Select();
             
-            Vector3 direction = (enemy.transform.position - shooterPosition).normalized;
-            int hits = PredictHits(shooterPosition, direction, enemies);
+            shotDirection = aiCalculator.CalculateOptimalDirection(aiSelectedPawn);
+            shotPower = aiCalculator.CalculateForce(aiSelectedPawn);
             
-            if (hits > maxHitCount)
-            {
-                maxHitCount = hits;
-                bestTarget = enemy.transform.position;
-                LastCalculatedTarget = bestTarget;
-            }
+            // 3. ========= Ожидание завершения движения камеры =========
+            var cameraMoveDelay = cameraController.MoveDurationMS + aiSettings.TimeAfterCamSetPositionMS;
+            await UniTask.Delay(cameraMoveDelay, cancellationToken: cancellationToken);
+
+            // 4. ========== Имитация прицеливания ================
+            await AimSimulateAsync(cancellationToken);
+
+            // 5. ========== Применение силы для выполнения хода ============
+            aiSelectedPawn.ApplyForce(shotDirection * shotPower);
         }
         
-        return bestTarget;
-    }
-
-    private int PredictHits(Vector3 origin, Vector3 direction, List<Checker> enemies)
-    {
-        int hitCount = 0;
-        RaycastHit[] hits = Physics.RaycastAll(
-            origin, 
-            direction, 
-            _maxPredictionDistance,
-            LayerMask.GetMask("Enemy", "Obstacle"));
-
-        Debug.DrawRay(origin, direction * _maxPredictionDistance, Color.yellow, 1f);
-
-        foreach (var hit in hits)
+        /// <summary>
+        /// Метод имитации прицеливания с поведением, похожим на человеческое
+        /// </summary>
+        private async UniTask AimSimulateAsync(CancellationToken cancellationToken)
         {
-            if (hit.collider == null) continue;
+            var currentDirection = shotDirection + Random.insideUnitSphere * 0.2f;
+            currentDirection.y = 0;
+            currentDirection.Normalize();
+            
+            var oscillationCount = Random.Range(2, 6);
+            var totalAimingTime = aiSettings.AimingTimeMS / 1000f - 0.5f;
+            var oscillationDuration = totalAimingTime / oscillationCount;
 
-            if (hit.collider.CompareTag("Enemy"))
+            var currentForce = 0f;
+            
+            // Этап 1: ===========    Колебания для имитации корректировки    ==============
+            for (var i = 0; i < oscillationCount; i++)
             {
-                hitCount++;
-                Debug.Log($"Hit enemy: {hit.collider.name}");
+                if (cancellationToken.IsCancellationRequested) break;
+                
+                var targetDirection = shotDirection + Random.insideUnitSphere * 0.2f;
+                targetDirection.y = 0;
+                targetDirection.Normalize();
+                
+                currenSequence?.Kill();
+                currenSequence = DOTween.Sequence();
+                currenSequence.Join(DOTween.To(
+                    getter: ()=> currentForce, 
+                    setter: x => currentForce = x, 
+                    endValue: shotPower, 
+                    duration: oscillationDuration
+                    ).SetEase(Ease.OutBounce));
+                
+                currenSequence.Join( DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
+                    oscillationDuration)
+                    .SetEase(Ease.InOutQuad)
+                    .OnUpdate(() =>
+                    {
+                        aiSelectedPawn.UpdateLineVisuals(currentForce, currentDirection);
+                    })
+                    .OnKill(() => currenSequence = null));
+
+                try
+                {
+                    await currenSequence.AsyncWaitForCompletion();
+                }
+                finally
+                {
+                    currenSequence?.Kill(); // Остановка анимации при отмене
+                }
             }
-            else if (hit.collider.CompareTag("Obstacle"))
+            if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
+            
+            // Этап 2:  =========   Финальная фиксация направления   ==============
+           currenSequence = DOTween.Sequence();
+            currenSequence.Join(DOTween.To(() => currentDirection, x => currentDirection = x, shotDirection, 0.5f)
+                .SetEase(Ease.InOutQuad)
+                .OnUpdate(() =>
+                {
+                    aiSelectedPawn.UpdateLineVisuals(shotPower, currentDirection);
+                })
+                .OnComplete(() =>
+                {
+                    aiSelectedPawn.UpdateLineVisuals(shotPower, shotDirection);
+                })
+                .OnKill(() => currenSequence = null));
+
+            try
             {
-                Debug.Log($"Hit obstacle: {hit.collider.name}");
-                break;
+                if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
+                await currenSequence.AsyncWaitForCompletion();
+            }
+            finally
+            {
+                currenSequence?.Kill(); // Остановка анимации при отмене
             }
         }
-        return hitCount;
+
+       
+
+       
+
+       
+
+        #endregion
     }
 }

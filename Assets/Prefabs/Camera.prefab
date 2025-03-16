@@ -28,13 +28,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4787811275327103336}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3535534, y: 0.61237246, z: -0.3535534, w: 0.61237246}
-  m_LocalPosition: {x: -5, y: 7, z: 0}
+  m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
+  m_LocalPosition: {x: 0, y: 6, z: -4.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1395147176346391614}
-  m_LocalEulerAnglesHint: {x: 60, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 60, y: 0, z: 0}
 --- !u!20 &4414416115565162224
 Camera:
   m_ObjectHideFlags: 0
@@ -179,14 +179,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9051514619641224775}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3085844615093999842}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &1804761031938782104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,9 +199,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d81064610124437284986bbe9a621153, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveDurationMS: 1500
+  backDurationMS: 1000
+  moveEase: 7
+  moveBack: 21
+  minCamPosition:
+    RotationX: 50
+    HeightY: 4
+    OffsetZ: -6
+  maxCamPosition:
+    RotationX: 30
+    HeightY: 4
+    OffsetZ: -2.3
+  mainCamera: {fileID: 4414416115565162224}
+  defaultCamOffset:
+    RotationX: 0
+    HeightY: 0
+    OffsetZ: 0
+  maxDistance: 0
   overviewPosition: {x: 0, y: 0, z: 0}
   overviewRotation: {x: 0, y: 0, z: 0, w: 1}
-  moveDuration: 1
-  _rotationSpeed: 0.5
-  _forceThreshold: 15
-  _maxYRotationAngle: 45

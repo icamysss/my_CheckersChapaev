@@ -1,0 +1,28 @@
+{
+    "entries": [
+        {
+            "key": "MOVING_PLAYER",
+            "value": "Ходит игрок"
+        },
+        {
+            "key": "END_GAME",
+            "value": "Игра закончена"
+        },
+        {
+            "key": "DRAW",
+            "value": "Ничья"
+        },
+        {
+            "key": "WIN_PLAYER",
+            "value": "Победил игрок"
+        },
+        {
+            "key": "COMPUTER",
+            "value": "Компьютер"
+        },
+        {
+            "key": "PLAYER",
+            "value": "Игрок"
+        }
+    ]
+}

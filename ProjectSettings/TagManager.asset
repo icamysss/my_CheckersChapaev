@@ -4,9 +4,10 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Checker
+  - Pawn
   - Friendly
   - Enemy
+  - Board
   layers:
   - Default
   - TransparentFX
@@ -14,9 +15,9 @@ TagManager:
   - 
   - Water
   - UI
-  - Enemy
-  - Friendly
-  - 
+  - Pawn
+  - Board
+  - Catcher
   - 
   - 
   - 
