@@ -201,7 +201,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDurationMS: 1500
   backDurationMS: 1000
-  moveEase: 8
+  moveEase: 7
   moveBack: 21
   minCamPosition:
     RotationX: 50

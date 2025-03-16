@@ -23,7 +23,7 @@ namespace Services
             backDurationMS = 500;
 
         [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Анимация передвижения ")] private Ease moveEase =
-            Ease.InCubic;
+            Ease.InOutQuad;
         [BoxGroup("Tracking Settings")] [SerializeField, Tooltip("Анимация возвращения ")] private Ease moveBack =
             Ease.InOutCubic;
 
@@ -147,14 +147,14 @@ namespace Services
             var targetPosition = target.position;
            
             
-            moveSequence.Join(transform.DOMove(targetPosition, moveDurationMS / 1000f).SetEase(Ease.InOutQuad));
+            moveSequence.Join(transform.DOMove(targetPosition, moveDurationMS / 1000f).SetEase(moveEase));
            
 
             if (targetPosition != overviewPosition)
             {
                 var targetRotation = Quaternion.LookRotation(overviewPosition - targetPosition);
                 moveSequence.Join(transform.DORotateQuaternion(targetRotation, moveDurationMS / 1000f)
-                    .SetEase(Ease.InOutQuad));
+                    .SetEase(moveEase));
             }
 
             // Вычисление локальной позиции камеры с учётом расстояния до центра доски
@@ -164,10 +164,10 @@ namespace Services
             var targetY = Mathf.Lerp(minCamPosition.HeightY, maxCamPosition.HeightY, factor);
             var camLocalPosition = new Vector3(0, targetY, targetZ);
 
-            moveSequence.Join(mainCamera.transform.DOLocalMove(camLocalPosition, moveDurationMS / 1000f).SetEase(Ease.InOutQuad));
+            moveSequence.Join(mainCamera.transform.DOLocalMove(camLocalPosition, moveDurationMS / 1000f).SetEase(moveEase));
             // Вычисление локального поворота камеры с учётом расстояния до центра доски
             var camRotation = Quaternion.Lerp(minCamPosition.Rotation, maxCamPosition.Rotation, factor);
-            moveSequence.Join(mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDurationMS / 1000f).SetEase(Ease.InOutQuad));
+            moveSequence.Join(mainCamera.transform.DOLocalRotateQuaternion(camRotation, moveDurationMS / 1000f).SetEase(moveEase));
             
             moveSequence.Play();
         }
