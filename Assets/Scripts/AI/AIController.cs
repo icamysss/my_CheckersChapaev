@@ -19,7 +19,7 @@ namespace AI
         private List<Pawn> aiPawns = new();
         private List<Pawn> enemyPawns = new();
         private Pawn aiSelectedPawn;
-        private ScoreCalculator scoreCalculator;
+        private AICalculator aiCalculator;
         private Board board;
         private ICameraController cameraController;
         private AISettings aiSettings;
@@ -60,9 +60,9 @@ namespace AI
             }
 
             aiSettings = pl.AISettings ?? new AISettings();
-            scoreCalculator = new ScoreCalculator(pl, board);
-
+            
             RefreshPawnLists(pl.PawnColor);
+            aiCalculator = new AICalculator(pl, board, aiPawns, enemyPawns);
 
             try
             {
@@ -100,20 +100,20 @@ namespace AI
         private async UniTask AIMove(CancellationToken cancellationToken)
         {
             // 1. ========= Задержка для имитации "размышлений" ИИ =========
-            var decisionDelay = Random.Range(aiSettings.MinDecisionDelay, aiSettings.MaxDecisionDelay);
+            var decisionDelay = Random.Range(aiSettings.MinDecisionDelayMS, aiSettings.MaxDecisionDelayMS);
             await UniTask.Delay(decisionDelay, cancellationToken: cancellationToken);
 
             // 2. ========= Выбор оптимальной шашки и ее активация =========
-            aiSelectedPawn = SelectOptimalPawn();
+            aiSelectedPawn = aiCalculator.SelectOptimalPawn();
             if (aiSelectedPawn == null)
                 throw new Exception("No valid pawn selected for AI move.");
             aiSelectedPawn.Select();
             
-            shotDirection = CalculateOptimalDirection(aiSelectedPawn);
-            shotPower = CalculateForce(aiSelectedPawn);
+            shotDirection = aiCalculator.CalculateOptimalDirection(aiSelectedPawn);
+            shotPower = aiCalculator.CalculateForce(aiSelectedPawn);
             
             // 3. ========= Ожидание завершения движения камеры =========
-            var cameraMoveDelay = cameraController.MoveDurationMS + aiSettings.TimeAfterCamSetPosition;
+            var cameraMoveDelay = cameraController.MoveDurationMS + aiSettings.TimeAfterCamSetPositionMS;
             await UniTask.Delay(cameraMoveDelay, cancellationToken: cancellationToken);
 
             // 4. ========== Имитация прицеливания ================
@@ -122,34 +122,7 @@ namespace AI
             // 5. ========== Применение силы для выполнения хода ============
             aiSelectedPawn.ApplyForce(shotDirection * shotPower);
         }
-
-        /// <summary>
-        /// Выбор оптимальной шашки на основе скоринга
-        /// </summary>
-        private Pawn SelectOptimalPawn()
-        {
-            Pawn bestPawn = null;
-            var maxScore = float.MinValue;
-
-            foreach (var pawn in aiPawns)
-            {
-                if (pawn == null) continue;
-
-                var score = scoreCalculator.Calculate(
-                    pawn.transform.position,
-                    aiPawns,
-                    enemyPawns
-                );
-
-                if (score > maxScore)
-                {
-                    maxScore = score;
-                    bestPawn = pawn;
-                }
-            }
-            return bestPawn;
-        }
-
+        
         /// <summary>
         /// Метод имитации прицеливания с поведением, похожим на человеческое
         /// </summary>
@@ -160,7 +133,7 @@ namespace AI
             currentDirection.Normalize();
             
             var oscillationCount = Random.Range(2, 6);
-            var totalAimingTime = aiSettings.AimingTime / 1000f - 0.5f;
+            var totalAimingTime = aiSettings.AimingTimeMS / 1000f - 0.5f;
             var oscillationDuration = totalAimingTime / oscillationCount;
 
             var currentForce = 0f;
@@ -213,9 +186,7 @@ namespace AI
                 })
                 .OnComplete(() =>
                 {
-                    var finalForce = CalculateForce(aiSelectedPawn);
                     aiSelectedPawn.UpdateLineVisuals(shotPower, shotDirection);
-                    shotDirection = shotDirection;
                 })
                 .OnKill(() => currenSequence = null));
 
@@ -230,72 +201,11 @@ namespace AI
             }
         }
 
-        /// <summary>
-        /// Расчет оптимального направления выстрела
-        /// </summary>
-        private Vector3 CalculateOptimalDirection(Pawn selectedPawn)
-        {
-            if (enemyPawns.Count == 0)
-            {
-                Debug.LogWarning("No enemies available for targeting");
-                return GetFallbackDirection(selectedPawn.transform);
-            }
+       
 
-            enemyPawns.RemoveAll(p => p == null);
-            var targetPosition = scoreCalculator.FindOptimalTarget(selectedPawn.transform.position, enemyPawns);
+       
 
-            if (Vector3.Distance(targetPosition, selectedPawn.transform.position) < 0.1f)
-            {
-                targetPosition = GetFallbackTarget(selectedPawn.transform.position);
-            }
-
-            Vector3 direction = (targetPosition - selectedPawn.transform.position).normalized;
-            Debug.DrawRay(selectedPawn.transform.position, direction * 2, Color.green, 2f);
-            return direction;
-        }
-
-        /// <summary>
-        /// Расчет силы выстрела на основе расстояния до цели
-        /// </summary>
-        private float CalculateForce(Pawn pawn)
-        {
-            try
-            {
-                var distance = Vector3.Distance(pawn.transform.position, scoreCalculator.CalculatedTarget);
-                var forceMultiplier = Mathf.Clamp01(distance / board.BoardSize);
-                var force = Mathf.Lerp(pawn.minForce, pawn.maxForce, forceMultiplier);
-                return force;
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"Force calculation failed: {e}, Returned force = 0");
-                return 0f;
-            }
-        }
-
-        /// <summary>
-        /// Получение запасного направления, если врагов нет
-        /// </summary>
-        private Vector3 GetFallbackDirection(Transform pawnTransform)
-        {
-            return pawnTransform.forward + new Vector3(
-                Random.Range(-0.3f, 0.3f),
-                0,
-                Random.Range(0.5f, 1f)
-            ).normalized;
-        }
-
-        /// <summary>
-        /// Получение запасной цели, если оптимальная цель слишком близко
-        /// </summary>
-        private Vector3 GetFallbackTarget(Vector3 currentPosition)
-        {
-            if (enemyPawns.Count > 0)
-            {
-                return enemyPawns[Random.Range(0, enemyPawns.Count)].transform.position;
-            }
-            return currentPosition + Vector3.forward * 2f;
-        }
+       
 
         #endregion
     }

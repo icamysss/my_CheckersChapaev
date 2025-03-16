@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace AI
 {
-    public class ScoreCalculator
+    public class AICalculator
     {
         #region Properties
 
@@ -18,6 +18,11 @@ namespace AI
         private readonly float MaxPredictionDistance;
         private readonly Board board;
 
+        private List<Pawn> friendlyPawns;
+        private List<Pawn> enemyPawns;
+
+        private int maxHitCount;
+
         #endregion
 
         #region Constructor
@@ -25,21 +30,88 @@ namespace AI
         /// <summary>
         /// Конструктор калькулятора очков
         /// </summary>
-        public ScoreCalculator(Player aiPlayer, Board board)
+        public AICalculator(Player aiPlayer, Board board, List<Pawn> friendlyPawns, List<Pawn> enemyPawns )
         {
             MaxPredictionDistance = board.BoardSize; // Устанавливаем равным размеру доски
             aiSettings = aiPlayer.AISettings;
             this.board = board;
+            this.friendlyPawns = friendlyPawns;
+            this.enemyPawns = enemyPawns;
         }
 
         #endregion
 
         #region Public Methods
+        
+        /// <summary>
+        /// Расчет силы выстрела на основе расстояния до цели
+        /// </summary>
+        public float CalculateForce(Pawn pawn)
+        {
+            if (pawn == null) return 0f;
+            
+            var distance = Vector3.Distance(pawn.transform.position, CalculatedTarget);
+            var forceMultiplier = Mathf.Clamp01(distance / board.BoardSize);
+            var minForceMultiplier = maxHitCount > 2 ? pawn.maxForce : maxHitCount * 1.8f;
+            var force = Mathf.Lerp(pawn.minForce * minForceMultiplier , pawn.maxForce, forceMultiplier);
+            return force;
+        }
 
         /// <summary>
+        /// Выбор оптимальной шашки на основе скоринга
+        /// </summary>
+        public Pawn SelectOptimalPawn()
+        {
+            Pawn bestPawn = null;
+            var maxScore = float.MinValue;
+
+            foreach (var pawn in friendlyPawns)
+            {
+                if (pawn == null) continue;
+
+                var score = CalculateScore(pawn.transform.position);
+
+                if (score > maxScore)
+                {
+                    maxScore = score;
+                    bestPawn = pawn;
+                }
+            }
+            return bestPawn;
+        }
+        
+        /// <summary>
+        /// Расчет оптимального направления выстрела
+        /// </summary>
+        public Vector3 CalculateOptimalDirection(Pawn selectedPawn)
+        {
+            if (enemyPawns.Count == 0)
+            {
+                Debug.LogWarning("No enemies available for targeting");
+                return GetFallbackDirection(selectedPawn.transform);
+            }
+
+            enemyPawns.RemoveAll(p => p == null);
+            var targetPosition = FindOptimalTarget(selectedPawn.transform.position);
+
+            if (Vector3.Distance(targetPosition, selectedPawn.transform.position) < 0.1f)
+            {
+                targetPosition = GetFallbackTarget(selectedPawn.transform.position);
+            }
+
+            var direction = (targetPosition - selectedPawn.transform.position).normalized;
+            Debug.DrawRay(selectedPawn.transform.position, direction * 2, Color.green, 2f);
+            return direction;
+        }
+
+        #endregion
+
+        #region Private Methods
+        
+          /// <summary>
         /// Расчет очков для позиции шашки
         /// </summary>
-        public float Calculate(Vector3 checkerPosition, List<Pawn> friendlyPawns, List<Pawn> enemyPawns)
+        private float CalculateScore(Vector3 checkerPosition)
         {
             
             var score = 0f;
@@ -98,12 +170,13 @@ namespace AI
 
             #region 3. Линия огня
 
-            var target = FindOptimalTarget(checkerPosition, enemyPawns);
+            var target = FindOptimalTarget(checkerPosition);
             var fireDirection = (target - checkerPosition).normalized;
-            var potentialHits = PredictHits(checkerPosition, fireDirection, enemyPawns);
+            var potentialHits = PredictHits(checkerPosition, fireDirection, out var friendlyInLine);
             
             score += potentialHits * aiSettings.LineOfFireWeight;
-
+            score -= friendlyInLine * aiSettings.LineOfFriendlyFireWeight;
+            
             #endregion
             
             #region 4. Позиционирование ближе к центру
@@ -123,43 +196,63 @@ namespace AI
             return score;
             
         }
+        
+        /// <summary>
+        /// Получение запасного направления, если врагов нет
+        /// </summary>
+        private Vector3 GetFallbackDirection(Transform pawnTransform)
+        {
+            return pawnTransform.forward + new Vector3(
+                Random.Range(-0.3f, 0.3f),
+                0,
+                Random.Range(0.5f, 1f)
+                ).normalized;
+        }
+
+        /// <summary>
+        /// Получение запасной цели, если оптимальная цель слишком близко
+        /// </summary>
+        private Vector3 GetFallbackTarget(Vector3 currentPosition)
+        {
+            if (enemyPawns.Count > 0)
+            {
+                return enemyPawns[Random.Range(0, enemyPawns.Count)].transform.position;
+            }
+            return currentPosition + Vector3.forward * 2f;
+        }
 
         /// <summary>
         /// Поиск оптимальной цели для выстрела
         /// </summary>
-        public Vector3 FindOptimalTarget(Vector3 shooterPosition, List<Pawn> enemies)
+        private Vector3 FindOptimalTarget(Vector3 shooterPosition)
         {
             var bestTarget = shooterPosition;
-            var maxHitCount = 0;
-
-            foreach (var enemy in enemies)
+            maxHitCount = 0;
+            
+            foreach (var enemy in enemyPawns)
             {
                 if (enemy == null) continue;
-
                 var direction = (enemy.transform.position - shooterPosition).normalized;
-                var hits = PredictHits(shooterPosition, direction, enemies);
-
+                var hits = PredictHits(shooterPosition, direction, out var friendlyCount);
+                if (friendlyCount > 2) hits -= friendlyCount;
                 if (hits <= maxHitCount && 
                     (hits != maxHitCount ||
-                     !(Vector3.Distance(shooterPosition, enemy.transform.position) <
+                     !(Vector3.Distance(shooterPosition, enemy.transform.position) >
                        Vector3.Distance(shooterPosition, bestTarget)))) continue;
                 maxHitCount = hits;
                 bestTarget = enemy.transform.position;
                 CalculatedTarget = bestTarget;
             }
-
+            
             return bestTarget;
         }
-
-        #endregion
-
-        #region Private Methods
-
+        
         /// <summary>
         /// Предсказание количества попаданий в заданном направлении
         /// </summary>
-        private int PredictHits(Vector3 origin, Vector3 direction, List<Pawn> enemies)
+        private int PredictHits(Vector3 origin, Vector3 direction, out int frendly)
         {
+            frendly = 0;
             var hitCount = 0;
             var hits = Physics.RaycastAll(
                 origin,
@@ -171,9 +264,13 @@ namespace AI
             foreach (RaycastHit hit in hits)
             {
                 var pawn = hit.collider.GetComponent<Pawn>();
-                if (pawn != null && enemies.Contains(pawn))
+                if (pawn != null && enemyPawns.Contains(pawn))
                 {
                     hitCount++;
+                }
+                else if (friendlyPawns.Contains(pawn))
+                {
+                    frendly++;
                 }
             }
 

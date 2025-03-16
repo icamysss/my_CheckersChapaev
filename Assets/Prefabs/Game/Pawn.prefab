@@ -297,7 +297,7 @@ MonoBehaviour:
   blackColor: {fileID: 2100000, guid: 1c1381333369f428ea284e9a420c2281, type: 2}
   whiteColor: {fileID: 2100000, guid: 38edb421c6592436b9caa5c536daa348, type: 2}
   pawnMeshRenderer: {fileID: 6310947253523388121}
-  minForce: 5
+  minForce: 20
   maxForce: 350
   maxDragDistance: 0.8
   lineRenderer: {fileID: 120133405640146930}
