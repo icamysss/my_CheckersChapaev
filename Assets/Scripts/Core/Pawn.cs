@@ -35,7 +35,7 @@ namespace Core
         [BoxGroup("Force Settings")] [SerializeField, SuffixLabel("meters", true)] private float maxDragDistance = 2f;
 
         [BoxGroup("Line Settings")] [SerializeField, Required] private LineRenderer lineRenderer;
-
+        
         [BoxGroup("Line Settings")] [SerializeField] private float maxLineLength = 3f;
 
         [BoxGroup("Line Settings")] [SerializeField, Tooltip("Высота на которой показывается линия удара")] private
@@ -120,8 +120,8 @@ namespace Core
 
             lineRenderer.SetPosition(0, transform.position + new Vector3(0f, yOffset, 0f));
             lineRenderer.SetPosition(1, endPosition + new Vector3(0f, yOffset, 0f));
-
-            // UpdateLineColor();TODO изменение цвета от в зависимости от силы 
+            
+            lineRenderer.material.color = GetColorByForce(force);
         }
 
         private void ResetSelection()
@@ -276,7 +276,7 @@ namespace Core
         #endregion
         
         #region Helper Methods
-
+        
         private void OnSelected(Pawn selectedPawn)
         {
             if (selectedPawn != this) ResetSelection();
@@ -309,6 +309,36 @@ namespace Core
             lineRenderer.enabled = enable;
         }
 
+        private Color GetColorByForce(float force)
+        {
+            // Нормализуем силу в диапазон 0-1
+            var t = Mathf.Clamp01(force / maxForce);
+        
+            // Создаем градиент с тремя контрольными точками
+            var colorGradient = new Gradient();
+        
+            // Настройка цветовых ключей:
+            // - Зеленый при 0.0
+            // - Желтый при 0.5
+            // - Красный при 1.0
+            colorGradient.SetKeys(
+                new []
+                {
+                    new GradientColorKey(Color.green, 0f),
+                    new GradientColorKey(Color.yellow, 0.5f),
+                    new GradientColorKey(Color.red, 1f)
+                },
+                new []
+                {
+                    new GradientAlphaKey(1f, 0f), // Полная непрозрачность
+                    new GradientAlphaKey(1f, 1f)
+                }
+                );
+
+            return colorGradient.Evaluate(t);
+        }
+
+        
         private Vector3 GetBoardIntersectionPoint(Vector2 screenPos)
         {
             var ray = _cameraController.MainCamera.ScreenPointToRay(screenPos);
