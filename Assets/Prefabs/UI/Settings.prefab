@@ -1166,6 +1166,7 @@ GameObject:
   - component: {fileID: 8423148062560408667}
   - component: {fileID: 3023072203277516980}
   - component: {fileID: 4200510048210707132}
+  - component: {fileID: 712522235223426928}
   m_Layer: 5
   m_Name: Header
   m_TagString: Untagged
@@ -1221,9 +1222,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: 24f52a8f823a19b4fb681e93eb6dee3d, type: 3}
     m_FontSize: 108
-    m_FontStyle: 0
+    m_FontStyle: 1
     m_BestFit: 1
     m_MinSize: 10
     m_MaxSize: 108
@@ -1233,7 +1234,22 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+  m_Text: 
+--- !u!114 &712522235223426928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8094308884906939640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba68dc127aa04024ae21b798a97f5eb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  key: SETTINGS
+  language: 
+  value: 
 --- !u!1 &8808741406345517336
 GameObject:
   m_ObjectHideFlags: 0

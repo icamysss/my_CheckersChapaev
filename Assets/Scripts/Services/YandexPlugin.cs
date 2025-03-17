@@ -43,18 +43,10 @@ namespace Services
 
         private void OnGameStateChanged(GameState state)
         {
-            switch (state)
+            if (state == gameManager.CurrentGame.GameOver)
             {
-                case EndGame endGame:
-                    break;
-                case AITurn aiTurn:
-                    break;
-                case FirstTurn firstTurn:
-                    break;
-                case HumanTurn humanTurn:
-                    break;
-                case Turn turn:
-                    break;
+                YG2.GameplayStop();
+                YG2.StickyAdActivity(true);
             }
         }
         

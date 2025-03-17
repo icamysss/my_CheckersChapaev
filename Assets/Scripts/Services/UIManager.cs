@@ -18,7 +18,8 @@ namespace Services
         public IAudioService AudioService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
 
-
+        public Action OnClickAnyUiElement { get; private set; }
+        
         private void OnDisable()
         {
             GameManager.OnGameStateChanged -= OnChangeApplicationState;

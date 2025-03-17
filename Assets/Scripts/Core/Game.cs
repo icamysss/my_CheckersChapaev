@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Services;
 using Services.Interfaces;
 using UnityEngine;
+using YG;
 using Random = UnityEngine.Random;
 
 namespace Core
@@ -204,7 +205,10 @@ namespace Core
         
         public void InitPlayerTypes()
         {
-            FirstPlayer = new Player($"{localizationService.GetLocalizedString("PLAYER")}_1");
+            FirstPlayer = new Player(YG2.player.name);
+            if (FirstPlayer.Name == string.Empty) 
+                FirstPlayer.Name = $"{localizationService.GetLocalizedString("PLAYER")}_1";
+          
             switch (GameType)
             {
                 case GameType.HumanVsHuman:

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Services.Interfaces;
 using UnityEngine;
+using YG;
 
 namespace Services
 {
@@ -64,7 +65,7 @@ namespace Services
         
         public void Initialize()
         {
-            Language = RUSSIAN;
+            Language = YG2.envir.language;
             Debug.Log("Localization Service initialized");
             IsInitialized = true;
         }

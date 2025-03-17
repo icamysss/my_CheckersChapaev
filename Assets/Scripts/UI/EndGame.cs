@@ -62,11 +62,69 @@ namespace UI
         private void RestartGame()
         {
             game.StartGame(game.GameType);
+            uiManager.OnClickAnyUiElement?.Invoke();
         }
 
         private void UpdateUI()
         {
             if (game.CurrentState != game.GameOver) return;
+
+            switch (game.GameType)
+            {
+                case GameType.HumanVsHuman:
+                    HumanVsHumanResult();
+                    break;
+                case GameType.HumanVsAi:
+                    HumanVsAiResult();
+                    break;
+                
+                case GameType.AiVsAi:
+                case GameType.OnWeb:
+                default:
+                    DefaultResult();
+                    break;
+            }
+        }
+
+        private void HumanVsHumanResult()
+        {
+            if (game.Winner == null)
+            {   
+                // заголовок
+                var res = localizationService.GetLocalizedString("DRAW");
+                header.text = res;
+            }
+            else
+            {   // есть победитель
+                var res = localizationService.GetLocalizedString("END_GAME");
+                header.text = res;
+                var winPlayer = localizationService.GetLocalizedString("WIN_PLAYER"); // = Победил игрок
+                mainText.text = $"{winPlayer} : {game.Winner.Name}";
+            }
+        }
+
+        private void HumanVsAiResult()
+        {
+            if (game.Winner == null)
+            {   
+                // заголовок
+                var draw = localizationService.GetLocalizedString("DRAW");
+                header.text = draw;
+            }
+            else
+            {  // есть победитель
+                var res = 
+                    localizationService.GetLocalizedString(game.Winner == game.FirstPlayer ? "WIN" : "LOOSE");
+                
+                header.text = res;
+                
+                var winPlayer = localizationService.GetLocalizedString("WIN_PLAYER"); // = Победил игрок
+                mainText.text = $"{winPlayer} : {game.Winner.Name}";
+            }
+        }
+
+        private void DefaultResult()
+        {
             // заголовок
             header.text = localizationService.GetLocalizedString("END_GAME");
             if (game.Winner == null)

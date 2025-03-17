@@ -23,6 +23,26 @@
         {
             "key": "PLAYER",
             "value": "Игрок"
+        },
+        {
+            "key": "SETTINGS",
+            "value": "Настройки"
+        },
+        {
+            "key": "SINGLE_GAME",
+            "value": "Одиночная игра "
+        },
+        {
+            "key": "TWO_PLAYER",
+            "value": "Два игрока"
+        },
+        {
+            "key": "WIN",
+            "value": "Победа"
+        },
+        {
+            "key": "LOOSE",
+            "value": "Поражение"
         }
     ]
 }
