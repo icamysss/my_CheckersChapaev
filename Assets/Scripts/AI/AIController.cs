@@ -137,32 +137,30 @@ namespace AI
             var oscillationDuration = totalAimingTime / oscillationCount;
 
             var currentForce = 0f;
-            
-            // Этап 1: ===========    Колебания для имитации корректировки    ==============
+
+            #region 1. Колебания для имитации корректировки 
+
             for (var i = 0; i < oscillationCount; i++)
             {
                 if (cancellationToken.IsCancellationRequested) break;
-                
+
                 var targetDirection = shotDirection + Random.insideUnitSphere * 0.2f;
                 targetDirection.y = 0;
                 targetDirection.Normalize();
-                
+
                 currenSequence?.Kill();
                 currenSequence = DOTween.Sequence();
                 currenSequence.Join(DOTween.To(
-                    getter: ()=> currentForce, 
-                    setter: x => currentForce = x, 
-                    endValue: shotPower, 
+                    getter: () => currentForce,
+                    setter: x => currentForce = x,
+                    endValue: shotPower,
                     duration: oscillationDuration
                     ).SetEase(Ease.OutBounce));
-                
-                currenSequence.Join( DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
+
+                currenSequence.Join(DOTween.To(() => currentDirection, x => currentDirection = x, targetDirection,
                     oscillationDuration)
                     .SetEase(Ease.InOutQuad)
-                    .OnUpdate(() =>
-                    {
-                        aiSelectedPawn.UpdateLineVisuals(currentForce, currentDirection);
-                    })
+                    .OnUpdate(() => { aiSelectedPawn.UpdateLineVisuals(currentForce, currentDirection); })
                     .OnKill(() => currenSequence = null));
 
                 try
@@ -175,19 +173,16 @@ namespace AI
                 }
             }
             if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
-            
-            // Этап 2:  =========   Финальная фиксация направления   ==============
-           currenSequence = DOTween.Sequence();
+
+            #endregion
+
+            #region 2. Финальная фиксация направления 
+
+            currenSequence = DOTween.Sequence();
             currenSequence.Join(DOTween.To(() => currentDirection, x => currentDirection = x, shotDirection, 0.5f)
                 .SetEase(Ease.InOutQuad)
-                .OnUpdate(() =>
-                {
-                    aiSelectedPawn.UpdateLineVisuals(shotPower, currentDirection);
-                })
-                .OnComplete(() =>
-                {
-                    aiSelectedPawn.UpdateLineVisuals(shotPower, shotDirection);
-                })
+                .OnUpdate(() => { aiSelectedPawn.UpdateLineVisuals(shotPower, currentDirection); })
+                .OnComplete(() => { aiSelectedPawn.UpdateLineVisuals(shotPower, shotDirection); })
                 .OnKill(() => currenSequence = null));
 
             try
@@ -199,14 +194,9 @@ namespace AI
             {
                 currenSequence?.Kill(); // Остановка анимации при отмене
             }
+            #endregion
         }
-
-       
-
-       
-
-       
-
+          
         #endregion
     }
 }
