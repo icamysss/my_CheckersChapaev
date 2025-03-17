@@ -1,9 +1,12 @@
 using System;
+using System.Diagnostics;
 using AI;
 using Core;
 using Services.Interfaces;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using YG;
+using Debug = UnityEngine.Debug;
 
 namespace Services
 {
@@ -36,6 +39,8 @@ namespace Services
             applicationState = newState;
             OnGameStateChanged?.Invoke(newState);
         }
+
+        
         
         # region Game Events
 
@@ -85,7 +90,7 @@ namespace Services
             var pawnCatcher = Instantiate(pawnCatcherPrefab);
             
             Debug.Log("Game Manager initialized");
-            isInitialized = true;
+            IsInitialized = true;
         }
 
         public void Shutdown()
@@ -93,7 +98,7 @@ namespace Services
             Debug.Log("Shutting down Game Manager");
         }
         
-        public bool isInitialized { get; private set; }
+        public bool IsInitialized { get; private set; }
 
         #endregion 
     }

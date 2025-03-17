@@ -20,7 +20,7 @@ namespace Services
             audioSource = GetComponent<AudioSource>();
             volume = 0.6f;
             pawnAudio.Initialize(this);
-            isInitialized = true;
+            IsInitialized = true;
         }
 
         public void Shutdown()
@@ -28,7 +28,7 @@ namespace Services
             Debug.Log("Shutting down Audio Manager");
         }
 
-        public bool isInitialized { get; private set; }
+        public bool IsInitialized { get; private set; }
         
         #endregion
 

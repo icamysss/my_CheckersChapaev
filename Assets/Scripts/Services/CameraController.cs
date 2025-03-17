@@ -213,7 +213,7 @@ namespace Services
             Pawn.OnKickPawn += ReturnToOverview;
             ServiceLocator.OnAllServicesRegistered += OnAllServicesRegistered;
 
-            isInitialized = true;
+            IsInitialized = true;
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Services
         /// <summary>
         /// Указывает, инициализирован ли сервис.
         /// </summary>
-        public bool isInitialized { get; private set; }
+        public bool IsInitialized { get; private set; }
 
         #endregion
     }

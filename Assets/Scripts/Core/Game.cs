@@ -32,6 +32,8 @@ namespace Core
         public Player CurrentTurn { get; private set; } // Текущий ход ( игрока)
         public Player FirstPlayer { get; private set; }
         public Player SecondPlayer { get; private set; }
+        
+        public bool IsPaused { get; private set; }
 
         public GameState.GameState CurrentState
         {
@@ -73,6 +75,7 @@ namespace Core
         #region GameEvents
 
         public Action OnStart;
+        public Action OnPause;
         public Action OnEndTurn;
         public Action OnStartTurn;
         public Action OnEndGame;
@@ -91,10 +94,17 @@ namespace Core
             ChangeState(FirstTurn);
         }
 
+        public void PauseGame(bool pause = true)
+        {
+            IsPaused = pause;
+            UpdateAllPawnsInteractivity(!pause);
+            OnPause?.Invoke();
+        }
+
         /// <summary>
         /// Проверяет, закончилась ли игра, и определяет победителя.
         /// </summary>
-        public bool IsGameOver()
+        private bool IsGameOver()
         {
             if (CurrentState == FirstTurn 
                 || CurrentState == GameOver 
@@ -124,6 +134,13 @@ namespace Core
             // Игра продолжается
             Winner = null;
             return false;
+        }
+        
+        public void SwitchPlayer()
+        {
+            if (CurrentState == FirstTurn || CurrentTurn == null) return;
+            
+            CurrentTurn = GetOppositePlayer(CurrentTurn);
         }
         
         #endregion
@@ -231,12 +248,7 @@ namespace Core
             FirstTurn = new FirstTurn(this, AIController);
         }
 
-        public void SwitchPlayer()
-        {
-            if (CurrentState == FirstTurn || CurrentTurn == null) return;
-            
-            CurrentTurn = GetOppositePlayer(CurrentTurn);
-        }
+       
        
         
     }

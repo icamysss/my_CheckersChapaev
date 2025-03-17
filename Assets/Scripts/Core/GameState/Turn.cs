@@ -43,6 +43,7 @@ namespace Core.GameState
         {
             try
             {
+                ThisGame.UpdatePawnsInteractivity(ThisGame.CurrentTurn, false);
                 await UniTask.Delay(TURN_DELAY_MS, cancellationToken: ct.Token);
                 if (cts.IsCancellationRequested) return;
                 

@@ -43,6 +43,11 @@ namespace Services
             var localizationService = new LocalizationService();
             ServiceLocator.Register<ILocalizationService>(localizationService);
             // --------------------------------------------------
+            //              YANDEXPLUGIN  - для работы с яндекс плагином
+            // --------------------------------------------------
+            var yandexPlugin = new YandexPlugin();
+            ServiceLocator.Register<YandexPlugin>(yandexPlugin);
+            // --------------------------------------------------
             
             // все сервисы отправлены в локатор
             ServiceLocator.AllServicesRegistered = true;

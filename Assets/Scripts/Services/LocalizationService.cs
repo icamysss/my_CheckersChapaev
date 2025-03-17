@@ -65,8 +65,8 @@ namespace Services
         public void Initialize()
         {
             Language = RUSSIAN;
-            Debug.Log("Initializing Localization Service");
-            isInitialized = true;
+            Debug.Log("Localization Service initialized");
+            IsInitialized = true;
         }
 
         public void Shutdown()
@@ -74,7 +74,7 @@ namespace Services
             Debug.Log("Shutting down Localization Service");
         }
 
-        public bool isInitialized { get; private set; }
+        public bool IsInitialized { get; private set; }
     }
     
     // Вспомогательные классы для десериализации JSON

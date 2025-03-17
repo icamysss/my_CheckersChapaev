@@ -59,6 +59,8 @@ namespace AI
                 return;
             }
 
+            
+            
             aiSettings = pl.AISettings ?? new AISettings();
             
             RefreshPawnLists(pl.PawnColor);

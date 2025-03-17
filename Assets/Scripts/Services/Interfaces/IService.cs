@@ -4,6 +4,6 @@ namespace Services
     {
         void Initialize();
         void Shutdown();
-        bool isInitialized { get; }
+        bool IsInitialized { get; }
     }
 }

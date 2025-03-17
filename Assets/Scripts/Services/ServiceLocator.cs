@@ -30,7 +30,7 @@ namespace Services
             if (!_services.TryGetValue(typeof(T), out var service))
                 throw new InvalidOperationException($"Service {typeof(T)} not registered.");
 
-            if (!((IService)service).isInitialized)
+            if (!((IService)service).IsInitialized)
                 throw new InvalidOperationException($"Service {typeof(T)} not initialized.");
 
             return (T)_services[typeof(T)];
@@ -47,7 +47,7 @@ namespace Services
 
         public static bool AllServicesRegistered
         {
-            get => _isAllSent && _services.Values.OfType<IService>().All(s => s.isInitialized);
+            get => _isAllSent && _services.Values.OfType<IService>().All(s => s.IsInitialized);
             set
             {
                 _isAllSent = value;

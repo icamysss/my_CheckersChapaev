@@ -90,12 +90,12 @@ namespace Services
 
         public void Initialize()
         {
-            if (isInitialized) return;
+            if (IsInitialized) return;
             uiRoot = transform;
             ServiceLocator.OnAllServicesRegistered += OnServicesReady;
             Debug.Log("UIManager initialized");
             
-            isInitialized = true;
+            IsInitialized = true;
         }
         
         public void Shutdown()
@@ -103,7 +103,7 @@ namespace Services
             Debug.Log("UIManager shutting down");
         }
 
-        public bool isInitialized { get; private set; }
+        public bool IsInitialized { get; private set; }
 
         #endregion
 
