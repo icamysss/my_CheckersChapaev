@@ -17,14 +17,10 @@ namespace Services
         public IGameManager GameManager { get; private set; }
         public IAudioService AudioService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
-
-        public Action OnClickAnyUiElement { get; private set; }
         
         private void OnDisable()
         {
             GameManager.OnGameStateChanged -= OnChangeApplicationState;
-            GameManager.CurrentGame.OnEndGame -= OnGameEnd;
-            GameManager.CurrentGame.OnStart -= () => { };
         }
 
         private void InitializeMenus()
@@ -55,15 +51,15 @@ namespace Services
                     CloseAllMenus();
                     ShowMenu("InGame");
                     break;
-                case ApplicationState.ShowAD:
+                case ApplicationState.ShowingAD:
+                    break;
+                case ApplicationState.EndGame:
+                    CloseAllMenus();
+                    ShowMenu("EndGame");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
-        }
-        private void OnGameEnd()
-        {
-            ShowMenu("EndGame");
         }
         
         private void OnServicesReady()
@@ -77,14 +73,6 @@ namespace Services
             // ---- меню ----
             InitializeMenus();
             ShowMenu("MainMenu");
-            
-            GameManager.CurrentGame.OnStart += () =>
-            {
-                CloseAllMenus();
-                ShowMenu("InGame");
-            };
-            
-            GameManager.CurrentGame.OnEndGame += OnGameEnd;
         }
         
         #region IService

@@ -62,9 +62,10 @@ namespace UI
         private void RestartGame()
         {
             game.StartGame(game.GameType);
-            uiManager.OnClickAnyUiElement?.Invoke();
         }
 
+        
+        
         private void UpdateUI()
         {
             if (game.CurrentState != game.GameOver) return;

@@ -16,15 +16,16 @@ namespace Services
         [SerializeField] private Board boardPrefab;
         [BoxGroup("References")]
         [SerializeField] private PawnCatcher pawnCatcherPrefab;
-        
-       
         [BoxGroup("Options")]
         [SerializeField] private ApplicationState applicationState = ApplicationState.MainMenu;
-        
         public event Action<ApplicationState> OnGameStateChanged;
+        
+      
         
         private Board board;
         private Game game;
+        
+     
         
         private void OnDisable()
         {
@@ -34,8 +35,8 @@ namespace Services
 
         private void SetApplicationState(ApplicationState newState)
         {
-           // Debug.Log($"Game state changed to {newState}, old {applicationState}");
-            if (applicationState == newState) return;
+            // Debug.Log($"Game state changed to {newState}, old {applicationState}");
+            //if (applicationState == newState) return;
             applicationState = newState;
             OnGameStateChanged?.Invoke(newState);
         }
@@ -49,8 +50,9 @@ namespace Services
 
         private void OnEndGame()
         {
-            
+            SetApplicationState(ApplicationState.EndGame);
         }
+        
         
         
         #endregion
@@ -88,6 +90,7 @@ namespace Services
             var pawnCatcher = Instantiate(pawnCatcherPrefab);
             
             Debug.Log("Game Manager initialized");
+            SetApplicationState(ApplicationState.MainMenu);
             IsInitialized = true;
         }
 

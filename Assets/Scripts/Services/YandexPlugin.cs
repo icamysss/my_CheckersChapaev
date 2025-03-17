@@ -29,11 +29,16 @@ namespace Services
                     
                     break;
                 
-                case ApplicationState.ShowAD:
+                case ApplicationState.ShowingAD:
                     YG2.InterstitialAdvShow();
                     YG2.GameplayStop();
                     YG2.StickyAdActivity(true);
                     
+                    break;
+
+                case ApplicationState.EndGame:
+                    YG2.GameplayStop();
+                    YG2.StickyAdActivity(true);
                     break;
                 
                 default:
