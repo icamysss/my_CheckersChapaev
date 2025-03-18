@@ -111,6 +111,8 @@ namespace UI
                 // заголовок
                 var draw = localizationService.GetLocalizedString("DRAW");
                 header.text = draw;
+                var res = localizationService.GetLocalizedString("FRIENDSHIP_HAS_WON"); // = Победил игрок
+                mainText.text = $"{res} !!! ";
             }
             else
             {  // есть победитель
