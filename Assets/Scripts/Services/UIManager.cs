@@ -17,6 +17,7 @@ namespace Services
         public IGameManager GameManager { get; private set; }
         public IAudioService AudioService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
+        public YandexPlugin YandexPlugin { get; private set; }
         
         private void OnDisable()
         {
@@ -52,6 +53,7 @@ namespace Services
                     ShowMenu("InGame");
                     break;
                 case ApplicationState.ShowingAD:
+                    CloseAllMenus();
                     break;
                 case ApplicationState.EndGame:
                     CloseAllMenus();
@@ -68,6 +70,7 @@ namespace Services
             GameManager = ServiceLocator.Get<IGameManager>();
             AudioService = ServiceLocator.Get<IAudioService>();
             LocalizationService = ServiceLocator.Get<ILocalizationService>();
+            YandexPlugin = ServiceLocator.Get<YandexPlugin>();
             GameManager.OnGameStateChanged += OnChangeApplicationState;
             ServiceLocator.OnAllServicesRegistered -= OnServicesReady;
             // ---- меню ----
