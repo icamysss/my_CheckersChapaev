@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "key": "MOVING_PLAYER",
+      "value": "Player turn"
+    },
+    {
+      "key": "END_GAME",
+      "value": "Game Over"
+    },
+    {
+      "key": "DRAW",
+      "value": "Draw"
+    },
+    {
+      "key": "WIN_PLAYER",
+      "value": "Win player"
+    },
+    {
+      "key": "COMPUTER",
+      "value": "Computer"
+    },
+    {
+      "key": "PLAYER",
+      "value": "Player"
+    },
+    {
+      "key": "SETTINGS",
+      "value": "Settings"
+    },
+    {
+      "key": "SINGLE_GAME",
+      "value": "Single game"
+    },
+    {
+      "key": "TWO_PLAYER",
+      "value": "Two players"
+    },
+    {
+      "key": "WIN",
+      "value": "Victory"
+    },
+    {
+      "key": "LOOSE",
+      "value": "Defeat"
+    },
+    {
+      "key": "FRIENDSHIP_HAS_WON",
+      "value": "Friendship has won"
+    }
+  ]
+}
