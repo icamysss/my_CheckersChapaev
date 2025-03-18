@@ -43,6 +43,10 @@
         {
             "key": "LOOSE",
             "value": "Поражение"
+        },
+        {
+            "key": "FRIENDSHIP_HAS_WON",
+            "value": "Победила дружба"
         }
     ]
 }
