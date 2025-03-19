@@ -5,7 +5,5 @@ namespace Core
         MainMenu,     
         Gameplay, 
         EndGame,
-        ShowingAD
-        
     }
 }
