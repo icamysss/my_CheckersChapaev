@@ -38,6 +38,7 @@ namespace Services
             // Debug.Log($"Game state changed to {newState}, old {applicationState}");
             //if (applicationState == newState) return;
             applicationState = newState;
+            if (newState == ApplicationState.MainMenu) YG2.InterstitialAdvShow(); // BUG:  исправить вызов рекламы
             OnGameStateChanged?.Invoke(newState);
         }
         

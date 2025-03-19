@@ -45,8 +45,8 @@ namespace Services
             // --------------------------------------------------
             //              YANDEXPLUGIN  - для работы с яндекс плагином
             // --------------------------------------------------
-            var yandexPlugin = new YandexPlugin();
-            ServiceLocator.Register<YandexPlugin>(yandexPlugin);
+            var yandexPlugin = new YandexGame();
+            ServiceLocator.Register<YandexGame>(yandexPlugin);
             // --------------------------------------------------
             
             // все сервисы отправлены в локатор

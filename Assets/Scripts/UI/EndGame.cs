@@ -19,6 +19,7 @@ namespace UI
         private Game game;
         private IGameManager gameManager;
         private ILocalizationService localizationService;
+        private YandexGame yandexGame;
 
         public override void Show()
         {
@@ -42,6 +43,7 @@ namespace UI
             game = uiManager.GameManager.CurrentGame;
             gameManager = uiManager.GameManager;
             localizationService = uiManager.LocalizationService;
+            yandexGame = uiManager.YandexGame;
             
             header.text = string.Empty;
             mainText.text = string.Empty;
@@ -49,6 +51,12 @@ namespace UI
             cancelButton.onClick.AddListener(ToMainMenu);
             mainMenuButton.onClick.AddListener(ToMainMenu);
             restartButton.onClick.AddListener(RestartGame);
+            
+            
+            // BUG:  исправить вызов рекламы
+            cancelButton.onClick.AddListener(yandexGame.ShowInterAd);
+            mainMenuButton.onClick.AddListener(yandexGame.ShowInterAd);
+            restartButton.onClick.AddListener(yandexGame.ShowInterAd);
 
 
             UpdateUI();
