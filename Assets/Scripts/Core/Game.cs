@@ -1,8 +1,6 @@
 using System;
-using System.Threading;
 using AI;
 using Core.GameState;
-using Cysharp.Threading.Tasks;
 using Services;
 using Services.Interfaces;
 using UnityEngine;
@@ -206,7 +204,7 @@ namespace Core
         public void InitPlayerTypes()
         {
             FirstPlayer = new Player(YG2.player.name);
-            if (FirstPlayer.Name == string.Empty) 
+            if (FirstPlayer.Name is "" or "unauthorized") 
                 FirstPlayer.Name = $"{localizationService.GetLocalizedString("PLAYER")}_1";
           
             switch (GameType)

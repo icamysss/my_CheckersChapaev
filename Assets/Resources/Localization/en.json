@@ -2,7 +2,7 @@
   "entries": [
     {
       "key": "MOVING_PLAYER",
-      "value": "Player turn"
+      "value": "Player's move"
     },
     {
       "key": "END_GAME",
