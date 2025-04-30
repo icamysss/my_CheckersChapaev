@@ -36,9 +36,15 @@
 
 ⚠️ **Можно использовать в любых целях**, но **если увижу на яи в исходном виде без доработок, кину жалобу!** 
 
-## Скриншоты
+## Геймплей 
+https://github.com/user-attachments/assets/fbe07ae8-e445-4a8c-bb8c-7fe1350979a4
+
 ![Снимок экрана 2025-04-30 в 10 19 15 PM](https://github.com/user-attachments/assets/89ec43c2-6af1-4679-a237-a8b42e0ecd1f)
 ![Снимок экрана 2025-04-30 в 10 19 36 PM](https://github.com/user-attachments/assets/b05c872e-92de-4f44-a6c7-7961397aa33b)
+
+
+
+
 
 
 
